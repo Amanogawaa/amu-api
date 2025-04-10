@@ -14,7 +14,7 @@ load_dotenv()
 # DATABASE_URL = "sqlite:///./todosapp.db"
 
 """ Or hard code PostgreSQL here """
-DATABASE_URL="postgresql://postgres:postgres@db:5432/cleanfastapi"
+DATABASE_URL="postgresql://postgres:hades2801@localhost:5432/miria"
 
 engine = create_engine(DATABASE_URL)
 
