@@ -10,3 +10,4 @@ app = FastAPI()
 Base.metadata.create_all(bind=engine)
 
 register_routes(app)
+
