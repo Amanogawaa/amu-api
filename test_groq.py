@@ -16,7 +16,7 @@ llm = ChatGroq(
 # Create a simple prompt
 prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a helpful assistant."),
-    ("human", "Say hello in Bulgarian.")
+    ("human", "write me a python recursion.")
 ])
 
 # Invoke the chain

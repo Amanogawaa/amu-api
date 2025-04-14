@@ -4,15 +4,16 @@ import os
 import json
 import re
 from typing import List, Dict
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 
 class StudyAidGenerator:
     def __init__(self):
         self.llm = ChatGroq(
             api_key=os.getenv("GROQ_API_KEY"),
-            model="llama-3.3-70b-versatile",
-            temperature=0.0,
-            max_tokens=3120,
-            max_retries=2,
+            model="gemma2-9b-it",
+            temperature=1,
+            max_tokens=1000, 
         )
         self.summary_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an expert at summarizing academic content concisely and accurately. 
@@ -46,14 +47,32 @@ class StudyAidGenerator:
             response = '[' + response + ']'
         return response
 
+    def chunk_text(self, text: str, chunk_size: int = 3000) -> List[str]:
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=200,
+            length_function=len
+        )
+        return text_splitter.split_text(text)
+
     def generate_summary(self, text: str) -> str:
         try:
-            response = self.llm.invoke(self.summary_prompt.format(text=text))
-            summary = response.content.strip()
-            # Ensure Markdown formatting
-            if not summary.startswith('#'):
-                summary = f"### Summary\n{summary}"
-            return summary
+            if len(text) > 3000:
+                chunks = self.chunk_text(text)
+                summaries = []
+                
+                for chunk in chunks:
+                    response = self.llm.invoke(self.summary_prompt.format(text=chunk))
+                    summaries.append(response.content.strip())
+                
+                # Combine and summarize again if needed
+                combined_summary = "\n\n".join(summaries)
+                if len(combined_summary) > 3000:
+                    return self.generate_summary(combined_summary)
+                return combined_summary
+            else:
+                response = self.llm.invoke(self.summary_prompt.format(text=text))
+                return response.content.strip()
         except Exception as e:
             print(f"Error generating summary: {e}")
             return ""

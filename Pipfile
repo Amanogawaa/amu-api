@@ -30,6 +30,8 @@ langchainhub = "*"
 beautifulsoup4 = "*"
 duckduckgo-search = "*"
 langchain-groq = "*"
+streamlit = "*"
+langchain-huggingface = "*"
 
 [dev-packages]
 ipykernel = "*"

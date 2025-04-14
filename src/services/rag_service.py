@@ -1,5 +1,5 @@
 import chromadb
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
@@ -19,9 +19,9 @@ class RAGService:
         )
         self.llm = ChatGroq(
             api_key=os.getenv("GROQ_API_KEY"),
-            model="llama-3.3-70b-versatile",
-            temperature=2,
-            max_tokens=3120,
+            model="gemma2-9b-it",
+            temperature=1,
+            max_tokens=1000, 
         )
         try:
             self.collection = self.client.get_collection(self.collection_name)
@@ -111,13 +111,64 @@ class RAGService:
         results = self.search(question)
         context = self.format_docs(results)
 
-        if self.check_context_relevance(context, question):
-            response = self.llm.invoke(self.answer_prompt.format(context=context, question=question))
-            return response.content
+        # Chunk the context if it's too large
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=3000,  # Smaller than token limit
+            chunk_overlap=200,
+            length_function=len
+        )
+        
+        if len(context) > 3000:  # Approximate threshold
+            context_chunks = text_splitter.split_text(context)
+            all_responses = []
+            
+            for chunk in context_chunks:
+                if self.check_context_relevance(chunk, question):
+                    response = self.llm.invoke(self.answer_prompt.format(
+                        context=chunk, 
+                        question=question
+                    ))
+                    all_responses.append(response.content)
+            
+            return "\n\n".join(all_responses) if all_responses else self.fallback_to_online_search(question)
         else:
-            online_context = self.search_online(question)
-            if online_context:
-                response = self.llm.invoke(self.answer_prompt.format(context=online_context, question=question))
+            # Original logic for smaller contexts
+            if self.check_context_relevance(context, question):
+                response = self.llm.invoke(self.answer_prompt.format(
+                    context=context, 
+                    question=question
+                ))
                 return response.content
             else:
-                return "I don't know"
+                return self.fallback_to_online_search(question)
+
+    def fallback_to_online_search(self, question: str) -> str:
+        online_context = self.search_online(question)
+        if not online_context:
+            return "I don't know"
+            
+        # Chunk online context if needed
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=3000,
+            chunk_overlap=200,
+            length_function=len
+        )
+        
+        if len(online_context) > 3000:
+            context_chunks = text_splitter.split_text(online_context)
+            all_responses = []
+            
+            for chunk in context_chunks:
+                response = self.llm.invoke(self.answer_prompt.format(
+                    context=chunk,
+                    question=question
+                ))
+                all_responses.append(response.content)
+            
+            return "\n\n".join(all_responses)
+        else:
+            response = self.llm.invoke(self.answer_prompt.format(
+                context=online_context,
+                question=question
+            ))
+            return response.content
