@@ -32,6 +32,7 @@ duckduckgo-search = "*"
 langchain-groq = "*"
 streamlit = "*"
 langchain-huggingface = "*"
+pypdf = "*"
 
 [dev-packages]
 ipykernel = "*"
