@@ -1,11 +1,11 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Enum, JSON, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
+from src.config import Base
 from sqlalchemy.sql import func
 import uuid
 import enum
 
-Base = declarative_base()
 
 class Difficulty(enum.Enum):
     beginner = "beginner"

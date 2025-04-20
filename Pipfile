@@ -18,6 +18,7 @@ alembic = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
 asyncpg = "*"
+python-jose = "*"
 
 [dev-packages]
 
