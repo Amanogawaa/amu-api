@@ -5,7 +5,7 @@ from uuid import UUID
 from .models import Difficulty, QuestionType, ProgressStatus
 from enum import Enum
 
-# Enums for Pydantic (mirroring SQLAlchemy models)
+# Enums for Pydantic
 class Difficulty(str, Enum):
     beginner = "beginner"
     intermediate = "intermediate"
@@ -42,6 +42,7 @@ class SpaceBase(BaseModel):
     difficulty: Difficulty
 
 class SpaceCreate(SpaceBase):
+    user_id: UUID
     pass
 
 class Space(SpaceBase):

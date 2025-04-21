@@ -1,12 +1,11 @@
-import json
 from uuid import UUID
 from sqlalchemy.orm import Session
-from src import models
 from fastapi import HTTPException
 from typing import Union, Optional
 
 # modules
 from src.schema import UserCreate, User, Token
+from src import models
 from src.utils import *
 
 def register_user(db: Session, user: UserCreate):

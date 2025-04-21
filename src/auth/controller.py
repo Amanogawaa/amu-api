@@ -33,10 +33,10 @@ async def create_user(data: UserCreate, db: Session = Depends(con_db)):
 async def token(data: UserCreate, db: Session = Depends(con_db)):
     return login_user(db, data)
 
-@router.get("/auth/")
+@router.get("/")
 async def get_users(db: Session = Depends(con_db)):
     return get_all_users(db)
 
-@router.get("/auth/{user_id}/")
+@router.get("/{user_id}/")
 async def get_user(db: Session = Depends(con_db), user_id: UUID | None = None):
     return get_all_users(db, user_id)
