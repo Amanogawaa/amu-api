@@ -1,73 +1,20 @@
 from groq import Groq
 
-client = Groq()
+client = Groq(api_key='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')
 
-topic = "Rush Programming"
-difficulty = "Advanced"
-grade_level = "College"
-learning_style = "Visual"
-special_requirements = "None"
-
-prompt = f"""
-    Generate a structured course for the topic '{topic}' at '{difficulty}' level (basic, intermediate, or advanced), tailored for {grade_level} students. The course should be designed for a {learning_style} learning style, with accommodations for {special_requirements} if specified (e.g., simpler language for ESL, hands-on activities for kinesthetic learners). The course should include:
-
-    - A course title and a detailed description (150-200 words) outlining the course's purpose, target audience, and what they will learn.
-    - 5 chapters, each with:
-      - A title, detailed content (300-400 words in markdown) explaining the chapter's main focus, and order number (1-5).
-      - Key concepts and definitions (at least 3 per chapter) with highlighted important terms (e.g., **term**: definition).
-      - Main learning objectives (at least 2 per chapter) describing what students will achieve.
-      - Relevant formulas, theories, or examples (at least 1 per chapter) with explanations.
-      - 5-7 subchapters, each with:
-        - A title, detailed content (minimum of 700 words in markdown) explaining the subchapter topic in depth, and order number (1-7).
-        - External resources (e.g., YouTube links, articles) for further learning.
-        - Practice problems or review questions (at least 3 per chapter) with answers, tailored to the difficulty level.
-        - A summary of key points (100-150 words) recapping the chapter's main ideas.
-    
-    Return the response in JSON format with the structure:
-    {{
-        "title": str,
-        "description": str,
-        "chapters": [
-            {{
-                "title": str,
-                "content": str,
-                "order_number": int,
-                "key_concepts": [
-                    {{"term": str, "definition": str}},
-                    ...
-                ],
-                "learning_objectives": [str, ...],
-                "examples": [
-                    {{"title": str, "content": str}},
-                    ...
-                ],
-              
-                "subchapters": [
-                    {{
-                        "title": str,
-                        "content": str,
-                        "order_number": int,
-                        "resources": [str, ...]
-                    }},
-                    ...
-                ],
-                "practice_problems": [
-                    {{"question": str, "answer": str}},
-                    ...
-                ],
-                "summary": str
-            }},
-            ...
-        ]
-    }}
-    """
-completion = client.chat.completions.create(
-     model="llama-3.3-70b-versatile",
+chat_completion = client.chat.completions.create(
     messages=[
-        {"role": "system", "content": "You are an expert educator creating structured courses."},
-        {"role": "user", "content": prompt}
+        {
+            "role": "user",
+            "content": "Generate A Course Tutorial on Following Detail With field as Course Name, Description, Along with Chapter \nName ,about, Duration: Category: 'Programming',\nTopic: Python, Level:Basic, Duration: 1 hours,\nNoOf Chapters:5, in JSON format",
+        },
+
+        {
+            "role": "system",
+            "content": '```json\n{\n  "course": {\n    "name": "Python Programming for Beginners",\n    "description": "Learn the fundamentals of Python programming, from basic syntax to core concepts like variables, data types, loops, and functions. This course is designed for absolute beginners with no prior programming experience.",\n    "chapters": [\n      {\n        "name": "Introduction to Python",\n        "about": "This chapter covers the history of Python, its features, and why it\'s a popular choice for beginners. We\'ll also set up your development environment and write your first Python program.",\n        "duration": "15 minutes"\n      },\n      {\n        "name": "Variables and Data Types",\n        "about": "Learn about different data types in Python, such as integers, floats, strings, and booleans. We\'ll explore how to assign values to variables and perform basic operations on them.",\n        "duration": "20 minutes"\n      },\n      {\n        "name": "Control Flow and Loops",\n        "about": "Discover how to control the flow of your Python programs using conditional statements (if, elif, else). You\'ll learn about loops (for, while) and how to iterate over collections of data.",\n        "duration": "25 minutes"\n      },\n      {\n        "name": "Functions and Modules",\n        "about": "This chapter teaches you how to create and use your own functions to organize code and improve reusability. We\'ll also explore how to import and use modules to extend your Python capabilities.",\n        "duration": "20 minutes"\n      },\n      {\n        "name": "Lists, Tuples, and Dictionaries",\n        "about": "Learn about different data structures in Python, including lists (ordered collections), tuples (immutable sequences), and dictionaries (key-value pairs). You\'ll explore common operations and methods associated with each structure.",\n        "duration": "20 minutes"\n      }\n    ],\n    "duration": "1 hour",\n    "category": "Programming",\n    "topic": "Python",\n    "level": "Basic",\n    "noOfChapters": 5\n  }\n}\n```\n'
+        }
     ],
-    temperature=0.7,
+    model="llama-3.3-70b-versatile",
 )
 
-print(completion.choices[0].message.content)
+print(chat_completion.choices[0].message.content)

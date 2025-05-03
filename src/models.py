@@ -1,11 +1,11 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Enum, JSON, CheckConstraint
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Enum, JSON, Boolean
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
-from src.config import Base
 from sqlalchemy.sql import func
 import uuid
 import enum
 
+Base = declarative_base()
 
 class Difficulty(enum.Enum):
     beginner = "beginner"
@@ -30,32 +30,26 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-class Space(Base):
-    __tablename__ = "spaces"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    name = Column(String, nullable=False)
-    topic = Column(String, nullable=False)
-    difficulty = Column(Enum(Difficulty), nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
 class Course(Base):
     __tablename__ = "courses"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    space_id = Column(UUID(as_uuid=True), ForeignKey("spaces.id", ondelete="CASCADE"), nullable=False)
-    title = Column(String, nullable=False)
-    description = Column(String)
+    course_id = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=False)
+    category = Column(String, nullable=False)  
+    level = Column(Enum(Difficulty), nullable=False)
+    include_video = Column(Boolean, nullable=False, default=True)  
+    course_output = Column(JSONB, nullable=False)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)  
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Chapter(Base):
     __tablename__ = "chapters"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
-    order_number = Column(Integer, nullable=False)
+    chapter_id = Column(Integer, nullable=False)  
+    content = Column(JSONB, nullable=False)  
+    video_id = Column(String, nullable=False)  
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    __table_args__ = (CheckConstraint("order_number > 0", name="positive_order"),)
 
 class Exercise(Base):
     __tablename__ = "exercises"
@@ -77,4 +71,3 @@ class UserProgress(Base):
     score = Column(Integer)
     completed_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
