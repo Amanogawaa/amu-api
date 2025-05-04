@@ -11,6 +11,7 @@ python-dotenv = "*"
 python-multipart = "*"
 bcrypt = "*"
 supabase = "*"
+slowapi = "*"
 
 [dev-packages]
 
