@@ -12,6 +12,8 @@ python-multipart = "*"
 bcrypt = "*"
 supabase = "*"
 slowapi = "*"
+groq = "*"
+google-genai = "*"
 
 [dev-packages]
 
