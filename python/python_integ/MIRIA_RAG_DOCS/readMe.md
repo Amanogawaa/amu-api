@@ -1,2 +1,0 @@
-dunno if docker is working wahahaha, im just trying things.
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.wBgvFtCQ7ZHWy46a6McP2SHvQEIliXkBp7aue1qnJRI
