@@ -1,8 +1,22 @@
-import app from "./app";
-import { config } from "./config/environment";
-import { logger } from "./core/utils/loggers";
+import app from './app';
+import { config } from './config/environment';
+import { logger } from './core/utils/loggers';
 
-app.start(config.port).catch((err) => {
-  logger.error("Failed to start application:", err);
-  process.exit(1);
+async function startServer() {
+  try {
+    await app.start(config.port);
+  } catch (err) {
+    logger.error(`Failed to start application on port ${config.port}:`, err);
+    process.exit(1);
+  }
+}
+
+process.on('SIGTERM', () => {
+  logger.info('Received SIGTERM. Shutting down gracefully...');
+  app.server.close(() => {
+    logger.info('Server closed.');
+    process.exit(0);
+  });
 });
+
+startServer();

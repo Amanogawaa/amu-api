@@ -61,3 +61,70 @@
 {"level":"info","time":"2025-08-24T06:46:26.478Z","pid":45037,"hostname":"peace","msg":"Server running on http://localhost:8080"}
 {"level":"info","time":"2025-08-24T06:46:34.224Z","pid":45220,"hostname":"peace","msg":"Server running on http://localhost:8080"}
 {"level":"info","time":"2025-08-24T06:46:40.750Z","pid":45220,"hostname":"peace","method":"GET","url":"/api/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T12:17:13.434Z","pid":69405,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:18:28.902Z","pid":69712,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:19:04.492Z","pid":69950,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:19:09.938Z","pid":70038,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:20:08.279Z","pid":70398,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:22:49.925Z","pid":71141,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:22:57.001Z","pid":71248,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:26:01.263Z","pid":72013,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:26:32.789Z","pid":72136,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:26:35.984Z","pid":72206,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:26:56.858Z","pid":72418,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:27:09.687Z","pid":72540,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:27:35.571Z","pid":72690,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T12:28:19.374Z","pid":72690,"hostname":"peace","method":"GET","url":"/api/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T12:29:37.322Z","pid":72690,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"warn","time":"2025-08-24T12:29:37.323Z","pid":72690,"hostname":"peace","msg":"Missing query parameters: topic or difficulty"}
+{"level":"info","time":"2025-08-24T13:47:31.854Z","pid":82468,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T13:47:38.854Z","pid":82468,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-24T13:47:39.049Z","pid":82468,"hostname":"peace","message":"TypeError: fetch failed","details":"TypeError: fetch failed\n    at node:internal/deps/undici/undici:13510:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async CourseRepository.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/repository.ts:17:31)\n    at async CourseService.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/service.ts:11:12)\n    at async CourseController.getCourses (/home/serenity/dev/projects/amu_server/src/modules/course/controller.ts:18:23)","hint":"","code":"","msg":"Error fetching courses from Supabase:"}
+{"level":"error","time":"2025-08-24T13:47:39.049Z","pid":82468,"hostname":"peace","msg":"Unexpected error in CourseRepository:"}
+{"level":"error","time":"2025-08-24T13:47:39.050Z","pid":82468,"hostname":"peace","msg":"Error in CourseController:"}
+{"level":"info","time":"2025-08-24T13:48:03.277Z","pid":82700,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:12:40.388Z","pid":88584,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:12:55.273Z","pid":88700,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:14:29.778Z","pid":89153,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:14:34.077Z","pid":89238,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:17:34.900Z","pid":89775,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:17:42.050Z","pid":89869,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:17:57.482Z","pid":89947,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:18:00.436Z","pid":90012,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:21:49.295Z","pid":90856,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:21:53.984Z","pid":90918,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:22:01.760Z","pid":91002,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:23:31.429Z","pid":91636,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:26:34.131Z","pid":92190,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:26:59.079Z","pid":92331,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:27:01.548Z","pid":92397,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:27:08.176Z","pid":92473,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:27:22.217Z","pid":92750,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:27:51.602Z","pid":92837,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:28:29.583Z","pid":93204,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:28:40.408Z","pid":93204,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-24T14:28:40.537Z","pid":93204,"hostname":"peace","message":"TypeError: fetch failed","details":"TypeError: fetch failed\n    at node:internal/deps/undici/undici:13510:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async CourseRepository.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/repository.ts:35:38)\n    at async CourseService.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/service.ts:13:22)\n    at async CourseController.getCourses (/home/serenity/dev/projects/amu_server/src/modules/course/controller.ts:29:23)","hint":"","code":"","msg":"Error fetching courses:"}
+{"level":"error","time":"2025-08-24T14:28:40.537Z","pid":93204,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService:"}
+{"level":"error","time":"2025-08-24T14:28:40.537Z","pid":93204,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController:"}
+{"level":"info","time":"2025-08-24T14:29:45.591Z","pid":93491,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:31:31.707Z","pid":93491,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-24T14:31:31.811Z","pid":93491,"hostname":"peace","message":"TypeError: fetch failed","details":"TypeError: fetch failed\n    at node:internal/deps/undici/undici:13510:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async CourseRepository.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/repository.ts:35:38)\n    at async CourseService.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/service.ts:13:22)\n    at async CourseController.getCourses (/home/serenity/dev/projects/amu_server/src/modules/course/controller.ts:29:23)","hint":"","code":"","msg":"Error fetching courses:"}
+{"level":"error","time":"2025-08-24T14:31:31.811Z","pid":93491,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService:"}
+{"level":"error","time":"2025-08-24T14:31:31.811Z","pid":93491,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController:"}
+{"level":"info","time":"2025-08-24T14:32:04.430Z","pid":93491,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-24T14:32:04.463Z","pid":93491,"hostname":"peace","message":"TypeError: fetch failed","details":"TypeError: fetch failed\n    at node:internal/deps/undici/undici:13510:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async CourseRepository.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/repository.ts:35:38)\n    at async CourseService.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/service.ts:13:22)\n    at async CourseController.getCourses (/home/serenity/dev/projects/amu_server/src/modules/course/controller.ts:29:23)","hint":"","code":"","msg":"Error fetching courses:"}
+{"level":"error","time":"2025-08-24T14:32:04.464Z","pid":93491,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService:"}
+{"level":"error","time":"2025-08-24T14:32:04.464Z","pid":93491,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController:"}
+{"level":"info","time":"2025-08-24T14:34:20.191Z","pid":93491,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-24T14:34:20.336Z","pid":93491,"hostname":"peace","message":"TypeError: fetch failed","details":"TypeError: fetch failed\n    at node:internal/deps/undici/undici:13510:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async CourseRepository.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/repository.ts:35:38)\n    at async CourseService.getCourse (/home/serenity/dev/projects/amu_server/src/modules/course/service.ts:13:22)\n    at async CourseController.getCourses (/home/serenity/dev/projects/amu_server/src/modules/course/controller.ts:29:23)","hint":"","code":"","msg":"Error fetching courses:"}
+{"level":"error","time":"2025-08-24T14:34:20.336Z","pid":93491,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService:"}
+{"level":"error","time":"2025-08-24T14:34:20.336Z","pid":93491,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController:"}
+{"level":"info","time":"2025-08-24T14:34:46.736Z","pid":94716,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:34:48.281Z","pid":94716,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-24T14:34:49.440Z","pid":94716,"hostname":"peace","code":"42P01","details":null,"hint":null,"message":"relation \"public.course\" does not exist","msg":"Error fetching courses:"}
+{"level":"error","time":"2025-08-24T14:34:49.441Z","pid":94716,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService:"}
+{"level":"error","time":"2025-08-24T14:34:49.441Z","pid":94716,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController:"}
+{"level":"info","time":"2025-08-24T14:35:40.869Z","pid":95157,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:35:48.708Z","pid":95287,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:35:51.612Z","pid":95349,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T14:35:52.449Z","pid":95349,"hostname":"peace","method":"GET","url":"/api/courses/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
