@@ -1,5 +1,5 @@
-import { Router } from "express";
-import type { CourseController } from "./controller";
+import { Router, type Request, type Response } from 'express';
+import type { CourseController } from './controller';
 
 export class CourseRoute {
   public router: Router;
@@ -13,7 +13,7 @@ export class CourseRoute {
 
   private initializeRoutes(): void {
     this.router.get(
-      "/courses",
+      '/courses',
       this.controller.getCourses.bind(this.controller)
     );
   }
