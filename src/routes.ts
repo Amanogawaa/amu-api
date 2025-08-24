@@ -17,7 +17,7 @@ export class AppRoutes {
   }
 
   private initializeRoutes(): void {
-    this.router.use('/courses', this.courseContainer.getRouter());
+    this.router.use('/amu', this.courseContainer.getRouter());
     this.router.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {
         res.status(500).json({ error: err.message });
