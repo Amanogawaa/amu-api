@@ -19,4 +19,9 @@ process.on('SIGTERM', () => {
   });
 });
 
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  process.exit(0);
+});
+
 startServer();

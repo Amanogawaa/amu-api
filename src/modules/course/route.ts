@@ -16,6 +16,11 @@ export class CourseRoute {
       '/courses',
       this.controller.getCourses.bind(this.controller)
     );
+
+    this.router.post(
+      '/courses',
+      this.controller.generateCourse.bind(this.controller)
+    );
   }
 
   public getRouter(): Router {
