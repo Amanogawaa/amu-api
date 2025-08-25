@@ -144,3 +144,142 @@
 {"level":"info","time":"2025-08-25T07:10:12.759Z","pid":106575,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
 {"level":"info","time":"2025-08-25T07:10:14.230Z","pid":106575,"hostname":"peace","msg":"Course stored with ID: 20c96a2d-7edb-4273-8bb1-64fbc14cb8d1"}
 {"level":"info","time":"2025-08-25T07:55:54.361Z","pid":112750,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:09.040Z","pid":113652,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:16.049Z","pid":113696,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:20.445Z","pid":113752,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:23.334Z","pid":113815,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:29.723Z","pid":113858,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:33.851Z","pid":113912,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:42.056Z","pid":113957,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:01:48.617Z","pid":114014,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:55:13.567Z","pid":120623,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:55:17.282Z","pid":120658,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T08:56:40.740Z","pid":120803,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:07:22.105Z","pid":121757,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:07:31.546Z","pid":121797,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:08:38.305Z","pid":121987,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:09:56.738Z","pid":122180,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:10:04.268Z","pid":122221,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:16:56.517Z","pid":123033,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:17:00.150Z","pid":123125,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:17:08.174Z","pid":123176,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:19:20.815Z","pid":123382,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:19:26.035Z","pid":123449,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:20:38.316Z","pid":123626,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:21:15.929Z","pid":123736,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:21:30.587Z","pid":123782,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:21:38.342Z","pid":123817,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:30:28.290Z","pid":125044,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:33:19.231Z","pid":125466,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:33:30.087Z","pid":125512,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:38:19.468Z","pid":126001,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:38:22.235Z","pid":126035,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:38:30.301Z","pid":126070,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T09:40:07.717Z","pid":126274,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:02:16.598Z","pid":128413,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:02:34.883Z","pid":128458,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:11:54.027Z","pid":129353,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:13:14.060Z","pid":129493,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:13:20.752Z","pid":129533,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:13:34.315Z","pid":129572,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:16:01.516Z","pid":130219,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:16:04.868Z","pid":130253,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:29:32.490Z","pid":131436,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:33:05.005Z","pid":131815,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:33:09.116Z","pid":131853,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:33:14.702Z","pid":131888,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:33:25.218Z","pid":131928,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:34:45.607Z","pid":132072,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:34:49.966Z","pid":132107,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:36:09.240Z","pid":132350,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:36:33.759Z","pid":132407,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:37:58.214Z","pid":132609,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:38:55.112Z","pid":132802,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:39:03.630Z","pid":132839,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:41:03.855Z","pid":133096,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:41:11.413Z","pid":133138,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:41:45.936Z","pid":133178,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:42:27.609Z","pid":133305,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:44:07.295Z","pid":133652,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:44:10.507Z","pid":133717,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:44:22.854Z","pid":133772,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:48:16.126Z","pid":134343,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:48:21.772Z","pid":134373,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:48:26.782Z","pid":134444,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:48:28.414Z","pid":134475,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:51:27.187Z","pid":135586,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:51:30.153Z","pid":135649,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:51:43.355Z","pid":135686,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:59:38.514Z","pid":137461,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:59:50.483Z","pid":137541,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T10:59:53.830Z","pid":137541,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T11:32:03.441Z","pid":137541,"hostname":"peace","method":"GET","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T11:32:54.448Z","pid":137541,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T11:35:08.903Z","pid":137541,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T11:40:52.503Z","pid":137541,"hostname":"peace","method":"POST","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T11:46:23.929Z","pid":137541,"hostname":"peace","method":"POST","url":"/api/amu/chapters/generate","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T11:46:23.931Z","pid":137541,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in ChapterController generateChapters:"}
+{"level":"info","time":"2025-08-25T11:46:42.965Z","pid":137541,"hostname":"peace","method":"POST","url":"/api/amu/chapters/generate","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T11:46:42.966Z","pid":137541,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in ChapterController generateChapters:"}
+{"level":"info","time":"2025-08-25T11:47:01.591Z","pid":137541,"hostname":"peace","method":"POST","url":"/api/amu/chapters/generate","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T11:47:01.591Z","pid":137541,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in ChapterController generateChapters:"}
+{"level":"info","time":"2025-08-25T11:47:54.576Z","pid":137541,"hostname":"peace","method":"POST","url":"/api/amu/chapters/generate","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T11:47:57.282Z","pid":137541,"hostname":"peace","msg":"Generated and stored 5 chapters for course: 99f9bd9e-8083-4c5b-9ee8-7f3193573830"}
+{"level":"info","time":"2025-08-25T11:56:55.011Z","pid":145398,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:43:28.677Z","pid":152386,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:43:30.487Z","pid":152435,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:43:34.802Z","pid":152482,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:43:47.877Z","pid":152543,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:43:51.048Z","pid":152605,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:43:56.612Z","pid":152684,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:44:03.636Z","pid":152731,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:44:12.392Z","pid":152788,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:44:15.701Z","pid":152822,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:44:27.597Z","pid":152876,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:45:09.397Z","pid":152999,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:48:06.579Z","pid":153459,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:48:35.318Z","pid":153514,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:48:51.853Z","pid":153630,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T12:50:07.340Z","pid":153630,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T14:18:31.031Z","pid":4920,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:21:11.786Z","pid":7005,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:21:21.433Z","pid":7074,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:21:25.051Z","pid":7117,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:21:29.538Z","pid":7152,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:22:10.011Z","pid":7330,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:22:19.935Z","pid":7398,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:22:24.757Z","pid":7433,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:35:32.538Z","pid":7433,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T14:37:30.451Z","pid":11489,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:43:20.750Z","pid":13085,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:44:40.871Z","pid":13411,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:45:19.267Z","pid":13687,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:45:36.989Z","pid":13753,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:45:52.440Z","pid":13832,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:45:56.326Z","pid":13868,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:50:56.591Z","pid":14667,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:51:01.480Z","pid":14733,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:51:11.156Z","pid":14840,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:51:16.361Z","pid":14874,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:52:33.919Z","pid":15052,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:53:00.652Z","pid":15131,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:53:03.488Z","pid":15165,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:53:10.881Z","pid":15269,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:53:23.360Z","pid":15311,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:53:30.095Z","pid":15349,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T14:53:39.640Z","pid":15414,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:01:28.290Z","pid":17309,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:02:03.098Z","pid":17309,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:05:11.295Z","pid":17309,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:06:14.652Z","pid":17309,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:10:05.615Z","pid":17309,"hostname":"peace","method":"GET","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:11:04.039Z","pid":17309,"hostname":"peace","method":"POST","url":"/api/amu/lessons/generate","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:11:06.766Z","pid":17309,"hostname":"peace","msg":"Successfully generated 3 lessons for chapter: Introduction to Python Programming"}
+{"level":"info","time":"2025-08-25T15:12:55.209Z","pid":17309,"hostname":"peace","method":"GET","url":"/api/amu/lessons/chapter/0f835d00-3342-4337-b1ba-89d7e51c4a20","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:13:40.802Z","pid":18974,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:13:44.706Z","pid":18974,"hostname":"peace","method":"GET","url":"/api/amu/lessons/chapter/0f835d00-3342-4337-b1ba-89d7e51c4a20","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:13:51.209Z","pid":18974,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:14:18.752Z","pid":19107,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:14:20.356Z","pid":19107,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:14:29.678Z","pid":19175,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:14:31.478Z","pid":19175,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
