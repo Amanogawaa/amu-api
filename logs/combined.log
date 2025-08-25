@@ -1,0 +1,146 @@
+{"level":"info","time":"2025-08-24T19:11:43.456Z","pid":14318,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T19:12:17.649Z","pid":14318,"hostname":"peace","method":"GET","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T19:12:43.812Z","pid":14318,"hostname":"peace","method":"GET","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T19:12:57.734Z","pid":14318,"hostname":"peace","method":"GET","url":"/api/amu/courses?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T19:30:37.049Z","pid":17517,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T19:30:45.092Z","pid":17638,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T19:30:56.030Z","pid":17718,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T19:31:51.736Z","pid":17718,"hostname":"peace","method":"GET","url":"/api/amu/courses?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T19:32:42.553Z","pid":18105,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T19:32:44.789Z","pid":18105,"hostname":"peace","method":"GET","url":"/api/amu/courses?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T19:34:43.083Z","pid":18105,"hostname":"peace","method":"GET","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-24T19:53:03.808Z","pid":21131,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T19:53:21.154Z","pid":21305,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T19:53:26.999Z","pid":21367,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T20:15:51.888Z","pid":24718,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T20:16:00.425Z","pid":24831,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-24T20:21:16.161Z","pid":24831,"hostname":"peace","method":"GET","url":"/api/amu/courses?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T06:16:35.356Z","pid":92353,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:16:50.216Z","pid":92454,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:17:26.959Z","pid":92714,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:17:34.200Z","pid":92818,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:17:37.470Z","pid":92870,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:17:42.754Z","pid":92957,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:18:08.292Z","pid":93202,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:18:11.546Z","pid":93260,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:18:48.424Z","pid":93392,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:18:52.856Z","pid":93549,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:22:55.948Z","pid":95105,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:23:14.412Z","pid":95507,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:23:33.215Z","pid":95634,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:23:38.759Z","pid":95678,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:23:46.606Z","pid":95728,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:26:13.437Z","pid":96303,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:27:26.900Z","pid":96643,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:27:52.653Z","pid":96784,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:27:57.223Z","pid":96838,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:28:00.224Z","pid":96882,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:28:04.590Z","pid":96923,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:29:00.687Z","pid":97059,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:32:09.979Z","pid":97727,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:33:30.408Z","pid":97937,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:34:46.605Z","pid":97937,"hostname":"peace","method":"GET","url":"/api/amu/courses?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T06:35:46.119Z","pid":97937,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:35:56.528Z","pid":97937,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
+{"level":"error","time":"2025-08-25T06:35:56.528Z","pid":97937,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:35:56.528Z","pid":97937,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:36:52.878Z","pid":98737,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:36:56.563Z","pid":98737,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:36:58.077Z","pid":98737,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'bannerUrl' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T06:36:58.078Z","pid":98737,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:36:58.078Z","pid":98737,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:42:43.967Z","pid":100000,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:42:54.453Z","pid":100111,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:43:02.442Z","pid":100149,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:43:09.583Z","pid":100185,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:45:31.273Z","pid":100185,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:45:33.054Z","pid":100185,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'bannerUrl' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T06:45:33.054Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:45:33.054Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:46:44.382Z","pid":100185,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:46:45.724Z","pid":100185,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'bannerUrl' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T06:46:45.724Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:46:45.724Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:48:55.418Z","pid":100185,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:48:56.822Z","pid":100185,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'bannerUrl' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T06:48:56.822Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:48:56.822Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:49:42.932Z","pid":100185,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:49:53.315Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
+{"level":"error","time":"2025-08-25T06:49:53.315Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:49:53.315Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:52:26.653Z","pid":100185,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:52:28.641Z","pid":100185,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'bannerUrl' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T06:52:28.641Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:52:28.641Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:53:29.400Z","pid":100185,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:53:39.841Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
+{"level":"error","time":"2025-08-25T06:53:39.841Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:53:39.841Z","pid":100185,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:53:41.097Z","pid":100185,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T06:53:45.823Z","pid":102663,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:53:49.857Z","pid":102663,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:53:57.167Z","pid":102663,"hostname":"peace","name":"ZodError","message":"[\n  {\n    \"expected\": \"array\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"course\",\n      \"learning_outcomes\"\n    ],\n    \"message\": \"Invalid input: expected array, received undefined\"\n  },\n  {\n    \"expected\": \"number\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"course\",\n      \"no_of_chapters\"\n    ],\n    \"message\": \"Invalid input: expected number, received undefined\"\n  }\n]","msg":"Error parsing AI response:"}
+{"level":"error","time":"2025-08-25T06:53:57.167Z","pid":102663,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:53:57.167Z","pid":102663,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T06:58:51.176Z","pid":103446,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:58:57.333Z","pid":103555,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T06:59:01.143Z","pid":103555,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T06:59:11.521Z","pid":103555,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
+{"level":"error","time":"2025-08-25T06:59:11.521Z","pid":103555,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T06:59:11.521Z","pid":103555,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:00:15.218Z","pid":103784,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:00:18.209Z","pid":103784,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T07:00:20.523Z","pid":103784,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'includeCertificate' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T07:00:20.524Z","pid":103784,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T07:00:20.524Z","pid":103784,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:00:46.639Z","pid":103909,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:00:53.511Z","pid":104016,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:00:56.590Z","pid":104066,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:01:08.609Z","pid":104119,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:01:28.312Z","pid":104119,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T07:01:38.056Z","pid":104119,"hostname":"peace","name":"ZodError","message":"[\n  {\n    \"expected\": \"boolean\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"course\",\n      \"include_certificate\"\n    ],\n    \"message\": \"Invalid input: expected boolean, received undefined\"\n  }\n]","msg":"Error parsing AI response:"}
+{"level":"error","time":"2025-08-25T07:01:38.057Z","pid":104119,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T07:01:38.057Z","pid":104119,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:01:55.953Z","pid":104119,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T07:02:35.420Z","pid":104510,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:02:39.214Z","pid":104510,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T07:02:49.684Z","pid":104510,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
+{"level":"error","time":"2025-08-25T07:02:49.684Z","pid":104510,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T07:02:49.684Z","pid":104510,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:03:07.105Z","pid":104625,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:03:44.306Z","pid":104733,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:03:47.038Z","pid":104796,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:03:51.896Z","pid":104945,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:03:56.377Z","pid":104945,"hostname":"peace","method":"GET","url":"/api/amu/courses?id=99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T07:04:01.496Z","pid":104945,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T07:04:11.839Z","pid":104945,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
+{"level":"error","time":"2025-08-25T07:04:11.839Z","pid":104945,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T07:04:11.839Z","pid":104945,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:04:37.398Z","pid":105051,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:04:40.090Z","pid":105109,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:04:41.677Z","pid":105109,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T07:04:43.969Z","pid":105161,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:04:58.078Z","pid":105161,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T07:05:09.490Z","pid":105161,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'learningOutcomes' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T07:05:09.490Z","pid":105161,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T07:05:09.490Z","pid":105161,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:05:14.303Z","pid":105321,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:05:18.214Z","pid":105321,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T07:05:26.606Z","pid":105453,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:05:28.592Z","pid":105453,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T07:05:29.885Z","pid":105453,"hostname":"peace","code":"PGRST204","details":null,"hint":null,"message":"Could not find the 'learningOutcomes' column of 'courses' in the schema cache","msg":"Error creating course:"}
+{"level":"error","time":"2025-08-25T07:05:29.886Z","pid":105453,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T07:05:29.886Z","pid":105453,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:07:00.010Z","pid":105738,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:07:01.892Z","pid":105738,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T07:07:07.089Z","pid":105790,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:07:10.209Z","pid":105790,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T07:07:20.565Z","pid":105790,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
+{"level":"error","time":"2025-08-25T07:07:20.565Z","pid":105790,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
+{"level":"error","time":"2025-08-25T07:07:20.565Z","pid":105790,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T07:09:16.965Z","pid":106215,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:10:08.226Z","pid":106575,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T07:10:12.759Z","pid":106575,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T07:10:14.230Z","pid":106575,"hostname":"peace","msg":"Course stored with ID: 20c96a2d-7edb-4273-8bb1-64fbc14cb8d1"}
+{"level":"info","time":"2025-08-25T07:55:54.361Z","pid":112750,"hostname":"peace","msg":"Server running on http://localhost:8080"}
