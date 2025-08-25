@@ -9,6 +9,8 @@ import cors from 'cors';
 import { logger } from './core/utils/loggers';
 import { AppRoutes } from './routes';
 import { CourseContainer } from './modules/course/container';
+import { ChapterContainer } from './modules/chapter/container';
+import { LessonContainer } from './modules/lesson/container';
 
 class App {
   public app: Application;
@@ -16,12 +18,19 @@ class App {
 
   private appRoutes: AppRoutes;
   private courseContainer: CourseContainer;
+  private chapterContainer: ChapterContainer;
+  private lessonContainer: LessonContainer;
 
-  constructor(courseContainer: CourseContainer = new CourseContainer()) {
+  constructor(
+    courseContainer: CourseContainer = new CourseContainer(),
+    chapterContainer: ChapterContainer = new ChapterContainer(),
+    lessonContainer: LessonContainer = new LessonContainer()
+  ) {
     this.app = express();
     this.server = http.createServer(this.app);
     this.courseContainer = courseContainer;
-
+    this.chapterContainer = chapterContainer;
+    this.lessonContainer = lessonContainer;
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(
@@ -35,7 +44,11 @@ class App {
   }
 
   private initializeRouter(): void {
-    this.appRoutes = new AppRoutes(this.courseContainer);
+    this.appRoutes = new AppRoutes(
+      this.courseContainer,
+      this.chapterContainer,
+      this.lessonContainer
+    );
     this.app.use('/api', this.appRoutes.getRouter());
   }
 

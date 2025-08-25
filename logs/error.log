@@ -49,3 +49,6 @@
 {"level":"error","time":"2025-08-25T07:07:20.565Z","pid":105790,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error calling Groq API:"}
 {"level":"error","time":"2025-08-25T07:07:20.565Z","pid":105790,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseService generateAndCreateCourse:"}
 {"level":"error","time":"2025-08-25T07:07:20.565Z","pid":105790,"hostname":"peace","statusCode":500,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"error","time":"2025-08-25T11:46:23.931Z","pid":137541,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in ChapterController generateChapters:"}
+{"level":"error","time":"2025-08-25T11:46:42.966Z","pid":137541,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in ChapterController generateChapters:"}
+{"level":"error","time":"2025-08-25T11:47:01.591Z","pid":137541,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in ChapterController generateChapters:"}
