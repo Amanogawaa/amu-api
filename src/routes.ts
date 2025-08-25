@@ -7,22 +7,26 @@ import {
 import type { CourseContainer } from './modules/course/container';
 import { ChapterContainer } from './modules/chapter/container';
 import { LessonContainer } from './modules/lesson/container';
+import { AuthContainer } from './modules/auth/container';
 
 export class AppRoutes {
   private router: Router;
   private courseContainer: CourseContainer;
   private chapterContainer: ChapterContainer;
   private lessonContainer: LessonContainer;
+  private authContainer: AuthContainer;
 
   constructor(
     courseContainer: CourseContainer,
     chapterContainer: ChapterContainer,
-    lessonContainer: LessonContainer
+    lessonContainer: LessonContainer,
+    authContainer: AuthContainer
   ) {
     this.router = Router();
     this.courseContainer = courseContainer;
     this.chapterContainer = chapterContainer;
     this.lessonContainer = lessonContainer;
+    this.authContainer = authContainer;
     this.initializeRoutes();
   }
 
@@ -30,6 +34,7 @@ export class AppRoutes {
     this.router.use('/amu', this.courseContainer.getRouter());
     this.router.use('/amu', this.chapterContainer.getRouter());
     this.router.use('/amu', this.lessonContainer.getRouter());
+    this.router.use('/amu', this.authContainer.getRouter());
 
     this.router.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {

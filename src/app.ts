@@ -11,6 +11,10 @@ import { AppRoutes } from './routes';
 import { CourseContainer } from './modules/course/container';
 import { ChapterContainer } from './modules/chapter/container';
 import { LessonContainer } from './modules/lesson/container';
+import { swaggerSpec } from './config/swagger';
+import swaggerUi from 'swagger-ui-express';
+import cookieParser from 'cookie-parser';
+import { AuthContainer } from './modules/auth/container';
 
 class App {
   public app: Application;
@@ -20,19 +24,25 @@ class App {
   private courseContainer: CourseContainer;
   private chapterContainer: ChapterContainer;
   private lessonContainer: LessonContainer;
+  private authContainer: AuthContainer;
 
   constructor(
     courseContainer: CourseContainer = new CourseContainer(),
     chapterContainer: ChapterContainer = new ChapterContainer(),
-    lessonContainer: LessonContainer = new LessonContainer()
+    lessonContainer: LessonContainer = new LessonContainer(),
+    authContainer: AuthContainer = new AuthContainer()
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
     this.courseContainer = courseContainer;
     this.chapterContainer = chapterContainer;
     this.lessonContainer = lessonContainer;
+    this.authContainer = authContainer;
+
+    // middlewares
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cookieParser());
     this.app.use(
       cors({
         origin: process.env.NEXTJS_FRONTEND_URL || 'http://localhost:3000',
@@ -47,8 +57,12 @@ class App {
     this.appRoutes = new AppRoutes(
       this.courseContainer,
       this.chapterContainer,
-      this.lessonContainer
+      this.lessonContainer,
+      this.authContainer
     );
+
+    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
     this.app.use('/api', this.appRoutes.getRouter());
   }
 

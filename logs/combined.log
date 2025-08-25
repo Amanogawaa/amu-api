@@ -283,3 +283,179 @@
 {"level":"info","time":"2025-08-25T15:14:20.356Z","pid":19107,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
 {"level":"info","time":"2025-08-25T15:14:29.678Z","pid":19175,"hostname":"peace","msg":"Server running on http://localhost:8080"}
 {"level":"info","time":"2025-08-25T15:14:31.478Z","pid":19175,"hostname":"peace","method":"GET","url":"/api/amu/chapters/course/99f9bd9e-8083-4c5b-9ee8-7f3193573830","ip":"::1","userAgent":"PostmanRuntime/7.45.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:16:23.689Z","pid":19724,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:16:38.804Z","pid":19780,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:17:37.408Z","pid":19913,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:17:51.974Z","pid":19952,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:17:56.307Z","pid":19986,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:18:02.801Z","pid":20023,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:18:04.761Z","pid":20058,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:19:20.463Z","pid":20306,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:19:44.103Z","pid":20368,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:19:59.354Z","pid":20419,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:20:05.243Z","pid":20461,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:20:12.434Z","pid":20580,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:20:27.975Z","pid":20635,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:20:38.566Z","pid":20687,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:20:41.652Z","pid":20728,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:21:17.183Z","pid":20728,"hostname":"peace","method":"GET","url":"/api/docs","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:21:17.206Z","pid":20728,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:21:17.316Z","pid":20728,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:21:17.324Z","pid":20728,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:21:17.329Z","pid":20728,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:21:17.332Z","pid":20728,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:21:17.693Z","pid":20728,"hostname":"peace","method":"GET","url":"/api/docs/favicon-16x16.png","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:21:35.962Z","pid":20932,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:21:53.213Z","pid":20973,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:22:00.319Z","pid":21021,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:22:19.493Z","pid":21147,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:22:20.614Z","pid":21147,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:22:20.678Z","pid":21147,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:22:20.682Z","pid":21147,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:22:20.685Z","pid":21147,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:22:20.688Z","pid":21147,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:23:39.336Z","pid":21338,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:24:03.665Z","pid":21385,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:24:06.249Z","pid":21450,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:24:08.955Z","pid":21551,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:24:35.455Z","pid":21551,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:24:35.551Z","pid":21551,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:24:35.555Z","pid":21551,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:24:35.558Z","pid":21551,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:24:35.562Z","pid":21551,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:24:35.855Z","pid":21551,"hostname":"peace","method":"GET","url":"/api/docs/favicon-16x16.png","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:26:08.544Z","pid":21775,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:26:12.489Z","pid":21865,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:26:22.425Z","pid":21865,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:26:22.512Z","pid":21865,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:26:22.517Z","pid":21865,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:26:22.520Z","pid":21865,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:26:22.522Z","pid":21865,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:27:36.309Z","pid":22112,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:27:39.778Z","pid":22192,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:27:50.316Z","pid":22288,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:27:56.889Z","pid":22336,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:27:58.781Z","pid":22374,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:28:00.864Z","pid":22441,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:28:05.504Z","pid":22441,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:28:05.601Z","pid":22441,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:28:05.605Z","pid":22441,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:28:05.608Z","pid":22441,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:28:05.611Z","pid":22441,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T15:30:03.207Z","pid":22948,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:30:26.426Z","pid":23068,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:30:32.116Z","pid":23110,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:40:34.144Z","pid":24670,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:41:19.915Z","pid":24797,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:41:37.868Z","pid":24848,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:41:46.971Z","pid":24887,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:42:19.458Z","pid":25000,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:43:02.248Z","pid":25044,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:43:34.036Z","pid":25164,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:43:37.162Z","pid":25198,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:43:42.899Z","pid":25236,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:43:49.764Z","pid":25273,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:44:38.646Z","pid":25396,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:45:16.649Z","pid":25512,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:45:38.144Z","pid":25556,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:46:07.851Z","pid":25664,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:46:28.132Z","pid":25715,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:46:34.271Z","pid":25754,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:46:45.831Z","pid":25791,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:46:52.302Z","pid":25829,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:47:46.655Z","pid":25944,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:48:06.829Z","pid":26012,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:48:13.529Z","pid":26092,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:48:18.674Z","pid":26130,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:48:24.264Z","pid":26168,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:48:50.399Z","pid":26414,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:49:08.393Z","pid":26536,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:49:25.675Z","pid":26602,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:49:54.862Z","pid":26681,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T15:50:00.331Z","pid":26716,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:20:00.883Z","pid":30945,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:20:08.316Z","pid":31052,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:20:11.227Z","pid":31083,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:20:28.786Z","pid":31138,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:21:11.368Z","pid":31251,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:21:13.146Z","pid":31297,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:22:35.641Z","pid":31428,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:22:49.755Z","pid":31470,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:22:52.891Z","pid":31504,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:22:56.171Z","pid":31538,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:23:10.359Z","pid":31652,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:23:21.368Z","pid":31694,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:24:20.831Z","pid":31848,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:24:24.860Z","pid":31884,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:24:41.275Z","pid":31927,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:25:10.649Z","pid":32056,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:25:15.536Z","pid":32092,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:25:19.276Z","pid":32129,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:25:23.118Z","pid":32167,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:25:56.127Z","pid":32219,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:26:25.481Z","pid":32362,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:26:54.551Z","pid":32417,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:27:00.468Z","pid":32469,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:27:41.120Z","pid":32607,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:28:02.278Z","pid":32668,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:28:12.572Z","pid":32771,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:28:21.823Z","pid":32818,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:28:26.790Z","pid":32857,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:28:30.858Z","pid":32905,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:29:20.573Z","pid":33042,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:29:28.763Z","pid":33107,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:29:43.903Z","pid":33191,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:29:47.692Z","pid":33238,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:29:56.010Z","pid":33278,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:30:00.565Z","pid":33319,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:30:07.925Z","pid":33423,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:30:28.769Z","pid":33485,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:31:33.461Z","pid":33635,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:50:10.605Z","pid":35949,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:56:40.192Z","pid":36520,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:57:04.748Z","pid":36565,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T16:57:17.682Z","pid":36674,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:00:10.801Z","pid":37014,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:01:25.633Z","pid":37175,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:01:43.781Z","pid":37240,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:01:47.056Z","pid":37286,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:04:19.029Z","pid":38150,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:04:29.866Z","pid":38150,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:04:30.019Z","pid":38150,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:04:30.025Z","pid":38150,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:04:30.032Z","pid":38150,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:04:30.039Z","pid":38150,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:04:30.258Z","pid":38150,"hostname":"peace","method":"GET","url":"/api/docs/favicon-16x16.png","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:06:00.180Z","pid":38150,"hostname":"peace","method":"POST","url":"/api/amu/auth/signup","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:06:26.915Z","pid":38150,"hostname":"peace","method":"POST","url":"/api/amu/auth/signin","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:08:29.293Z","pid":38768,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:08:38.303Z","pid":38768,"hostname":"peace","method":"GET","url":"/api/amu/auth/profile","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T17:08:39.057Z","pid":38768,"hostname":"peace","code":"42P01","details":null,"hint":null,"message":"relation \"public.profiles\" does not exist","msg":"Repository: Get user profile error:"}
+{"level":"error","time":"2025-08-25T17:08:39.057Z","pid":38768,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in AuthRepository getUserById:"}
+{"level":"error","time":"2025-08-25T17:08:39.057Z","pid":38768,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in AuthService getUserProfile:"}
+{"level":"error","time":"2025-08-25T17:08:39.057Z","pid":38768,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in AuthController getProfile:"}
+{"level":"info","time":"2025-08-25T17:10:04.122Z","pid":39075,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:10:12.065Z","pid":39075,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:10:12.148Z","pid":39075,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:10:12.154Z","pid":39075,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:10:12.158Z","pid":39075,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:10:12.160Z","pid":39075,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:10:12.329Z","pid":39075,"hostname":"peace","method":"GET","url":"/api/docs/favicon-16x16.png","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:10:18.629Z","pid":39075,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T17:10:18.906Z","pid":39075,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
+{"level":"info","time":"2025-08-25T17:10:25.820Z","pid":39075,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:10:27.133Z","pid":39075,"hostname":"peace","msg":"Course stored with ID: f680e482-c9c0-484d-b342-a22e9e2ef775"}
+{"level":"info","time":"2025-08-25T17:11:13.332Z","pid":39075,"hostname":"peace","msg":"SIGINT received, shutting down gracefully"}
+{"level":"info","time":"2025-08-25T17:11:17.175Z","pid":39308,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:11:41.809Z","pid":39361,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:12:12.688Z","pid":39361,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css.map","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:12:23.203Z","pid":39361,"hostname":"peace","method":"GET","url":"/api/docs/","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:12:23.346Z","pid":39361,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui.css","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:12:23.349Z","pid":39361,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-bundle.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:12:23.351Z","pid":39361,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-standalone-preset.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:12:23.354Z","pid":39361,"hostname":"peace","method":"GET","url":"/api/docs/swagger-ui-init.js","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:12:23.622Z","pid":39361,"hostname":"peace","method":"GET","url":"/api/docs/favicon-16x16.png","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"info","time":"2025-08-25T17:12:33.684Z","pid":39361,"hostname":"peace","method":"POST","url":"/api/amu/courses","ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0","msg":"Incoming request"}
+{"level":"error","time":"2025-08-25T17:12:33.686Z","pid":39361,"hostname":"peace","statusCode":401,"isOperational":true,"msg":"Auth middleware error:"}
+{"level":"info","time":"2025-08-25T17:12:54.634Z","pid":39531,"hostname":"peace","msg":"Server running on http://localhost:8080"}
+{"level":"info","time":"2025-08-25T17:12:58.116Z","pid":39563,"hostname":"peace","msg":"Server running on http://localhost:8080"}
