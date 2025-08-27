@@ -61,6 +61,30 @@ export class LessonService {
 
         const insertedLesson = await this.repository.createLesson(lessonData);
 
+        if (
+          lesson.type === 'quiz' &&
+          lesson.questions &&
+          lesson.questions.length > 0
+        ) {
+          const quiz = await this.repository.createQuiz(insertedLesson.id!);
+
+          for (const q of lesson.questions) {
+            const question = await this.repository.createQuestion(
+              quiz.id,
+              q.question,
+              q.type,
+              q.correctAnswer,
+              q.explanation
+            );
+
+            if (q.options && q.options.length > 0) {
+              for (const opt of q.options) {
+                await this.repository.createOption(question.id, opt);
+              }
+            }
+          }
+        }
+
         if (lesson.resources && lesson.resources.length > 0) {
           await this.repository.createLessonResources(
             insertedLesson.id!,
@@ -85,6 +109,41 @@ export class LessonService {
       };
     } catch (error) {
       logger.error('Error in LessonService generateAndCreateLessons:', error);
+      throw error;
+    }
+  }
+
+  async submitQuiz(
+    userId: string,
+    lessonId: string,
+    answers: Record<string, string>
+  ): Promise<{ score: number; correct: number; total: number }> {
+    try {
+      const lesson = await this.getLessonById(lessonId);
+
+      if (lesson.type !== 'quiz') {
+        throw new AppError('This lesson is not a quiz', 400);
+      }
+
+      if (!lesson.quiz || lesson.quiz.questions.length === 0) {
+        throw new AppError('No quiz questions found for this lesson', 404);
+      }
+
+      let correct = 0;
+      const questions = lesson.quiz.questions;
+
+      for (const q of questions) {
+        if (q.id && answers[q.id] === q.correctAnswer) {
+          correct++;
+        }
+      }
+
+      const total = questions.length;
+      const score = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+      return { score, correct, total };
+    } catch (error) {
+      logger.error('Error in LessonService submitQuiz:', error);
       throw error;
     }
   }

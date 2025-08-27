@@ -9,6 +9,8 @@ export interface Lesson {
   content?: string;
   order: number;
   resources?: LessonResource[];
+  questions?: Question[];
+  quiz?: Quiz;
 }
 
 export interface LessonResource {
@@ -54,4 +56,18 @@ export interface GenerateLessonsResponse {
   message: string;
   lessons: any[];
   storedLessons: Lesson[];
+}
+
+export interface Question {
+  id?: string;
+  question: string;
+  type: string;
+  options?: string[];
+  correctAnswer: string;
+  explanation?: string;
+}
+
+export interface Quiz {
+  id: string;
+  questions: Question[];
 }

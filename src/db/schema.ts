@@ -246,6 +246,64 @@ export const userCourses = pgTable(
   ]
 );
 
+export const userLessonProgress = pgTable(
+  'user_lesson_progress',
+  {
+    userId: uuid('user_id').notNull(),
+    lessonId: uuid('lesson_id').notNull(),
+    completedAt: timestamp('completed_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
+    score: integer(),
+  },
+  (table) => [
+    unique('user_lesson_progress_pkey').on(table.userId, table.lessonId),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: 'user_lesson_progress_user_id_users_id_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.lessonId],
+      foreignColumns: [lessons.id],
+      name: 'user_lesson_progress_lesson_id_lessons_id_fk',
+    }).onDelete('cascade'),
+    pgPolicy('Users can view their own progress', {
+      as: 'permissive',
+      for: 'select',
+      to: ['public'],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy('Users can insert their own progress', {
+      as: 'permissive',
+      for: 'insert',
+      to: ['public'],
+      withCheck: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy('Users can update their own progress', {
+      as: 'permissive',
+      for: 'update',
+      to: ['public'],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+  ]
+);
+
+export const userLessonProgressRelations = relations(
+  userLessonProgress,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userLessonProgress.userId],
+      references: [users.id],
+    }),
+    lesson: one(lessons, {
+      fields: [userLessonProgress.lessonId],
+      references: [lessons.id],
+    }),
+  })
+);
+
 // relations
 
 export const userCoursesRelations = relations(userCourses, ({ one }) => ({
@@ -269,6 +327,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     relationName: 'users_id_users_id',
   }),
   userCourses: many(userCourses),
+  userLessonProgress: many(userLessonProgress),
 }));
 
 export const coursesRelations = relations(courses, ({ many }) => ({
@@ -323,6 +382,7 @@ export const lessonsRelations = relations(lessons, ({ one, many }) => ({
     fields: [lessons.chapterId],
     references: [chapters.id],
   }),
+  userLessonProgress: many(userLessonProgress),
 }));
 
 export const quizzesRelations = relations(quizzes, ({ one, many }) => ({

@@ -127,7 +127,14 @@ export class LessonRepository {
         .select(
           `
           *,
-          lesson_resources (*)
+          lesson_resources (*),
+          quizzes (
+            *,
+            quiz_questions (
+              *,
+              quiz_options (id, option_text)
+            )
+          )
         `
         )
         .eq('chapter_id', chapterId)
@@ -138,7 +145,6 @@ export class LessonRepository {
         throw new AppError(`Failed to fetch lessons: ${error.message}`, 500);
       }
 
-      // Convert snake_case to camelCase and structure resources
       const processedData = (data || []).map((lesson) => ({
         ...lesson,
         chapterId: lesson.chapter_id,
@@ -148,6 +154,16 @@ export class LessonRepository {
             ...resource,
             lessonId: resource.lesson_id,
           })) || [],
+        quiz:
+          lesson.quizzes?.length > 0
+            ? {
+                id: lesson.quizzes[0].id,
+                questions: lesson.quizzes[0].quiz_questions.map((q: any) => ({
+                  ...q,
+                  options: q.quiz_options.map((o: any) => o.option_text),
+                })),
+              }
+            : undefined,
       }));
 
       return processedData;
@@ -167,7 +183,14 @@ export class LessonRepository {
         .select(
           `
           *,
-          lesson_resources (*)
+          lesson_resources (*),
+          quizzes (
+            *,
+            quiz_questions (
+              *,
+              quiz_options (id, option_text)
+            )
+          )
         `
         )
         .eq('id', id)
@@ -182,7 +205,6 @@ export class LessonRepository {
         throw new AppError('Lesson not found', 404);
       }
 
-      // Convert snake_case to camelCase and structure resources
       return {
         ...data,
         chapterId: data.chapter_id,
@@ -192,6 +214,16 @@ export class LessonRepository {
             ...resource,
             lessonId: resource.lesson_id,
           })) || [],
+        quiz:
+          data.quizzes?.length > 0
+            ? {
+                id: data.quizzes[0].id,
+                questions: data.quizzes[0].quiz_questions.map((q: any) => ({
+                  ...q,
+                  options: q.quiz_options.map((o: any) => o.option_text),
+                })),
+              }
+            : undefined,
       };
     } catch (error) {
       if (error instanceof AppError) {
@@ -229,6 +261,81 @@ export class LessonRepository {
         throw error;
       }
       logger.error('Unexpected error in getLessonResources:', error);
+      throw new AppError(`Unexpected error: ${(error as Error).message}`, 500);
+    }
+  }
+
+  async createQuiz(lessonId: string): Promise<{ id: string }> {
+    try {
+      const { data, error } = await this.supabase
+        .from('quizzes')
+        .insert({ lesson_id: lessonId })
+        .select('id')
+        .single();
+
+      if (error) {
+        logger.error('Error creating quiz:', error);
+        throw new AppError(`Failed to create quiz: ${error.message}`, 500);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      logger.error('Unexpected error in LessonRepository createQuiz:', error);
+      throw new AppError(`Unexpected error: ${(error as Error).message}`, 500);
+    }
+  }
+
+  async createQuestion(
+    quizId: string,
+    question: string,
+    type: string,
+    correctAnswer: string,
+    explanation?: string
+  ): Promise<{ id: string }> {
+    try {
+      const { data, error } = await this.supabase
+        .from('quiz_questions')
+        .insert({
+          quiz_id: quizId,
+          question,
+          type,
+          correct_answer: correctAnswer,
+          explanation,
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        logger.error('Error creating quiz question:', error);
+        throw new AppError(`Failed to create question: ${error.message}`, 500);
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      logger.error(
+        'Unexpected error in LessonRepository createQuestion:',
+        error
+      );
+      throw new AppError(`Unexpected error: ${(error as Error).message}`, 500);
+    }
+  }
+
+  async createOption(questionId: string, optionText: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.from('quiz_options').insert({
+        question_id: questionId,
+        option_text: optionText,
+      });
+
+      if (error) {
+        logger.error('Error creating quiz option:', error);
+        throw new AppError(`Failed to create option: ${error.message}`, 500);
+      }
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      logger.error('Unexpected error in LessonRepository createOption:', error);
       throw new AppError(`Unexpected error: ${(error as Error).message}`, 500);
     }
   }

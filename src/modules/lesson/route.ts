@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import type { LessonController } from './controller';
 import swaggerJSDoc from 'swagger-jsdoc';
+import { authMiddleware } from '../../core/middlewares/auth';
 
 export class LessonRoute {
   public router: Router;
@@ -97,6 +98,39 @@ export class LessonRoute {
     this.router.get(
       '/lessons/:id/resources',
       this.controller.getLessonResources.bind(this.controller)
+    );
+
+    /**
+     * @openapi
+     * /lessons/{lessonId}/submit:
+     *   post:
+     *     tags: [Lessons]
+     *     summary: Submit quiz answers for a lesson
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: lessonId
+     *         required: true
+     *         schema: { type: string }
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               answers:
+     *                 type: object
+     *                 additionalProperties: { type: string }
+     *     responses:
+     *       200:
+     *         description: Quiz submitted with score
+     */
+    this.router.post(
+      '/lessons/:lessonId/submit',
+      authMiddleware,
+      this.controller.submitQuiz.bind(this.controller)
     );
   }
 

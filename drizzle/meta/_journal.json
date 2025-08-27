@@ -15,6 +15,13 @@
       "when": 1756133634410,
       "tag": "0001_wild_sebastian_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756145395951,
+      "tag": "0002_aromatic_omega_red",
+      "breakpoints": true
     }
   ]
 }

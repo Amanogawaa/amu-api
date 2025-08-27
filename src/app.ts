@@ -15,6 +15,13 @@ import { swaggerSpec } from './config/swagger';
 import swaggerUi from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
 import { AuthContainer } from './modules/auth/container';
+import { UserCourseContainer } from './modules/user-course/container';
+
+const corsOption = {
+  origin: ['http://localhost:3000', '*'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+};
 
 class App {
   public app: Application;
@@ -25,12 +32,14 @@ class App {
   private chapterContainer: ChapterContainer;
   private lessonContainer: LessonContainer;
   private authContainer: AuthContainer;
+  private userCourseContainer: UserCourseContainer;
 
   constructor(
     courseContainer: CourseContainer = new CourseContainer(),
     chapterContainer: ChapterContainer = new ChapterContainer(),
     lessonContainer: LessonContainer = new LessonContainer(),
-    authContainer: AuthContainer = new AuthContainer()
+    authContainer: AuthContainer = new AuthContainer(),
+    userCourseContainer: UserCourseContainer = new UserCourseContainer(),
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -38,15 +47,17 @@ class App {
     this.chapterContainer = chapterContainer;
     this.lessonContainer = lessonContainer;
     this.authContainer = authContainer;
+    this.userCourseContainer = userCourseContainer;
 
     // middlewares
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cors(corsOption));
     this.app.use(cookieParser());
     this.app.use(
       cors({
         origin: process.env.NEXTJS_FRONTEND_URL || 'http://localhost:3000',
-      })
+      }),
     );
 
     this.initializeMiddleware();
@@ -58,7 +69,8 @@ class App {
       this.courseContainer,
       this.chapterContainer,
       this.lessonContainer,
-      this.authContainer
+      this.authContainer,
+      this.userCourseContainer,
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -19,6 +19,17 @@ export const LESSONSCHEMA = z.object({
           })
         )
         .optional(),
+      questions: z
+        .array(
+          z.object({
+            question: z.string(),
+            type: z.string(),
+            options: z.array(z.string()).optional(),
+            correctAnswer: z.string(),
+            explanation: z.string().optional(),
+          })
+        )
+        .optional(),
     })
   ),
 });
