@@ -43,33 +43,6 @@ export const users = pgTable(
   ]
 );
 
-export const courseInstructors = pgTable(
-  'course_instructors',
-  {
-    courseId: uuid('course_id').notNull(),
-    instructorId: uuid('instructor_id').notNull(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.courseId],
-      foreignColumns: [courses.id],
-      name: 'course_instructors_course_id_courses_id_fk',
-    }),
-    foreignKey({
-      columns: [table.instructorId],
-      foreignColumns: [instructors.id],
-      name: 'course_instructors_instructor_id_instructors_id_fk',
-    }),
-  ]
-);
-
-export const instructors = pgTable('instructors', {
-  id: uuid().defaultRandom().primaryKey().notNull(),
-  name: varchar({ length: 255 }).notNull(),
-  bio: text().notNull(),
-  avatarUrl: text('avatar_url'),
-});
-
 export const lessonResources = pgTable(
   'lesson_resources',
   {
@@ -119,7 +92,6 @@ export const courses = pgTable('courses', {
   duration: varchar({ length: 50 }),
   noOfChapters: integer('no_of_chapters').default(0),
   publish: boolean().default(false),
-  includeCertificate: boolean('include_certificate').default(false),
   lastUpdated: timestamp('last_updated', { mode: 'string' }).defaultNow(),
 });
 
@@ -331,7 +303,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 }));
 
 export const coursesRelations = relations(courses, ({ many }) => ({
-  courseInstructors: many(courseInstructors),
   chapters: many(chapters),
   userCourses: many(userCourses),
 }));
@@ -346,24 +317,6 @@ export const coursesRelations = relations(courses, ({ many }) => ({
 //     relationName: 'users_id_users_id',
 //   }),
 // }));
-
-export const courseInstructorsRelations = relations(
-  courseInstructors,
-  ({ one }) => ({
-    course: one(courses, {
-      fields: [courseInstructors.courseId],
-      references: [courses.id],
-    }),
-    instructor: one(instructors, {
-      fields: [courseInstructors.instructorId],
-      references: [instructors.id],
-    }),
-  })
-);
-
-export const instructorsRelations = relations(instructors, ({ many }) => ({
-  courseInstructors: many(courseInstructors),
-}));
 
 export const lessonResourcesRelations = relations(
   lessonResources,
