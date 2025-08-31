@@ -37,7 +37,7 @@ export class CourseService {
         level: request.level,
         language: request.language,
         prerequisites: parsedCourse.course.prerequisites || [],
-        learning_outcomes: parsedCourse.course.learningOutcomes || [],
+        learning_outcomes: parsedCourse.course.learning_outcomes || [],
         duration: request.duration,
         no_of_chapters: request.noOfChapters,
         publish: parsedCourse.course.publish ?? false,

@@ -58,3 +58,9 @@
 {"level":"error","time":"2025-08-25T17:08:39.057Z","pid":38768,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in AuthController getProfile:"}
 {"level":"error","time":"2025-08-25T17:10:18.906Z","pid":39075,"hostname":"peace","statusCode":400,"isOperational":true,"msg":"Error in CourseController generateCourse:"}
 {"level":"error","time":"2025-08-25T17:12:33.686Z","pid":39361,"hostname":"peace","statusCode":401,"isOperational":true,"msg":"Auth middleware error:"}
+{"level":"error","time":"2025-08-25T19:06:08.370Z","pid":57123,"hostname":"peace","statusCode":401,"isOperational":true,"msg":"Auth middleware error:"}
+{"level":"error","time":"2025-08-25T19:08:33.584Z","pid":57123,"hostname":"peace","statusCode":401,"isOperational":true,"msg":"Auth middleware error:"}
+{"level":"error","time":"2025-08-25T19:09:02.783Z","pid":57123,"hostname":"peace","statusCode":401,"isOperational":true,"msg":"Auth middleware error:"}
+{"level":"error","time":"2025-08-25T20:51:00.185Z","pid":61528,"hostname":"peace","code":"22P02","details":null,"hint":null,"message":"invalid input syntax for type uuid: \"generate\"","msg":"Error fetching lesson with ID generate:"}
+{"level":"error","time":"2025-08-25T20:51:00.186Z","pid":61528,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in LessonService getLessonById:"}
+{"level":"error","time":"2025-08-25T20:51:00.186Z","pid":61528,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in LessonController getLessonById:"}

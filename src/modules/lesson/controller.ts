@@ -4,6 +4,7 @@ import { logger } from '../../core/utils/loggers';
 import { LessonService } from './service';
 import { GenerateLessonsRequest } from './types';
 import { type Request, type Response } from 'express';
+import { AuthenticatedRequest } from '../../core/middlewares/auth';
 
 export class LessonController {
   private service: LessonService;
@@ -127,6 +128,44 @@ export class LessonController {
       res
         .status(status)
         .json({ error: (error as Error).message, status: 'error' });
+    }
+  }
+
+  async submitQuiz(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const { lessonId } = req.params;
+      const { answers } = req.body;
+
+      if (!lessonId || lessonId.trim() === '') {
+        throw new AppError('Valid lessonId is required', 400);
+      }
+
+      if (
+        !answers ||
+        typeof answers !== 'object' ||
+        Object.keys(answers).length === 0
+      ) {
+        throw new AppError('Answers must be a non-empty object', 400);
+      }
+
+      const result = await this.service.submitQuiz(
+        userId,
+        lessonId.trim(),
+        answers
+      );
+
+      res.json({
+        data: result,
+        status: 'success',
+      });
+    } catch (error) {
+      logger.error('Error in LessonController submitQuiz:', error);
+      const status = error instanceof AppError ? error.statusCode : 500;
+      res.status(status).json({
+        error: (error as Error).message,
+        status: 'error',
+      });
     }
   }
 }
