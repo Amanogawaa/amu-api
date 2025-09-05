@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ChapterController } from './controller';
+import { authMiddleware } from '../../core/middlewares/auth';
 
 export class ChapterRoute {
   public router: Router;
@@ -30,6 +31,7 @@ export class ChapterRoute {
      */
     this.router.post(
       '/chapters/generate',
+      authMiddleware,
       this.controller.generateChapters.bind(this.controller)
     );
 
