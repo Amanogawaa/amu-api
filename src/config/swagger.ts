@@ -52,15 +52,16 @@ const options: swaggerJSDoc.Options = {
             'language',
           ],
           properties: {
-            category: { type: 'string' },
-            topic: { type: 'string' },
+            category: { type: 'string', default: 'programming' },
+            topic: { type: 'string', default: 'javascript' },
             level: {
               type: 'string',
               enum: ['beginner', 'intermediate', 'advanced'],
+              default: 'beginner',
             },
-            duration: { type: 'string' },
-            noOfChapters: { type: 'integer' },
-            language: { type: 'string' },
+            duration: { type: 'string', default: '6 hours' },
+            noOfChapters: { type: 'integer', default: 6 },
+            language: { type: 'string', default: 'en' },
           },
         },
         Course: {

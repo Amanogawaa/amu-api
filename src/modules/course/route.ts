@@ -1,6 +1,6 @@
-import { Router, type Request, type Response } from 'express';
-import type { CourseController } from './controller';
+import { Router } from 'express';
 import { authMiddleware } from '../../core/middlewares/auth';
+import type { CourseController } from './controller';
 
 export class CourseRoute {
   public router: Router;

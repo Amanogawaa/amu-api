@@ -64,3 +64,4 @@
 {"level":"error","time":"2025-08-25T20:51:00.185Z","pid":61528,"hostname":"peace","code":"22P02","details":null,"hint":null,"message":"invalid input syntax for type uuid: \"generate\"","msg":"Error fetching lesson with ID generate:"}
 {"level":"error","time":"2025-08-25T20:51:00.186Z","pid":61528,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in LessonService getLessonById:"}
 {"level":"error","time":"2025-08-25T20:51:00.186Z","pid":61528,"hostname":"peace","statusCode":404,"isOperational":true,"msg":"Error in LessonController getLessonById:"}
+{"level":"error","time":"2025-09-05T11:30:42.768Z","pid":36950,"hostname":"peace","statusCode":401,"isOperational":true,"msg":"Auth middleware error:"}
