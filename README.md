@@ -1,4 +1,4 @@
-# express
+# amu-api
 
 To install dependencies:
 

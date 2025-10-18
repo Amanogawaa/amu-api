@@ -20,21 +20,13 @@ export const config = {
   env: process.env.NODE_ENV!,
   port: Number(process.env.PORT) || 3000,
 
-  database_url: process.env.DATABASE_URL!,
-
-  groq_api_key: process.env.GROQ_API_KEY!,
-
-  // Supabase configuration
-  supabase: {
-    url: process.env.SUPABASE_URL!, // Required, no fallback
-    key: process.env.SUPABASE_KEY!, // Required, no fallback
-    anonKey: process.env.SUPABASE_ANON_KEY!, // Required for public access
-    maxRetries: Number(process.env.SUPABASE_MAX_RETRIES) || 3,
-    timeout: Number(process.env.SUPABASE_TIMEOUT) || 10000, // 10 seconds
+  // Firebase configuration
+  firebase: {
+    serviceAccount: JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!), 
   },
 
   // Authentication configuration
-  cookie: process.env.COOKIE_NAME || 'SUPABASE_COOKIE_JWT',
+  cookie: process.env.COOKIE_NAME || 'FIREBASE_COOKIE_JWT',
   jwt: {
     secret: process.env.JWT_SECRET!, // Required, no fallback
   },
@@ -44,7 +36,8 @@ export const config = {
     rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 900000, // 15 minutes
     rateLimitMaxRequests: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000,
     corsOrigins: process.env.CORS_ORIGINS?.split(',') || [
-      'http://localhost:5173', 'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:3000',
     ],
     maxApiConnections: Number(process.env.MAX_API_CONNECTIONS) || 500,
   },

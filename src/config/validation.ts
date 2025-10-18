@@ -19,10 +19,7 @@ export function validateEnvironment(): ValidationError[] {
   const requiredVars = [
     { name: "NODE_ENV", value: process.env.NODE_ENV },
     { name: "JWT_SECRET", value: process.env.JWT_SECRET },
-    { name: "SUPABASE_URL", value: process.env.SUPABASE_URL },
-    { name: "SUPABASE_KEY", value: process.env.SUPABASE_KEY },
-    { name: "SUPABASE_ANON_KEY", value: process.env.SUPABASE_ANON_KEY },
-    { name: "DATABASE_URL", value: process.env.DATABASE_URL },
+    { name: "FIREBASE_SERVICE_ACCOUNT", value: process.env.FIREBASE_SERVICE_ACCOUNT },
   ];
 
   // Check for missing or empty variables
@@ -36,24 +33,57 @@ export function validateEnvironment(): ValidationError[] {
   }
 
   // Validate JWT secret strength
-  if (process.env.JWT_SECRET) {
-    if (process.env.JWT_SECRET.length < 32) {
-      errors.push({
-        variable: "JWT_SECRET",
-        message: "JWT_SECRET must be at least 32 characters long for security",
-      });
-    }
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+    errors.push({
+      variable: "JWT_SECRET",
+      message: "JWT_SECRET must be at least 32 characters long for security",
+    });
   }
 
-  // Validate Supabase URL format
-  if (
-    process.env.SUPABASE_URL &&
-    !process.env.SUPABASE_URL.startsWith("https://")
-  ) {
-    errors.push({
-      variable: "SUPABASE_URL",
-      message: "SUPABASE_URL must be a valid HTTPS URL",
-    });
+  // Validate FIREBASE_SERVICE_ACCOUNT is valid JSON
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      // Check required fields in service account JSON
+      const requiredFields = [
+        "type",
+        "project_id",
+        "private_key",
+        "client_email",
+        "client_id",
+        "auth_uri",
+        "token_uri",
+        "auth_provider_x509_cert_url",
+        "client_x509_cert_url",
+        "universe_domain",
+      ];
+      for (const field of requiredFields) {
+        if (!serviceAccount[field]) {
+          errors.push({
+            variable: "FIREBASE_SERVICE_ACCOUNT",
+            message: `FIREBASE_SERVICE_ACCOUNT is missing required field: ${field}`,
+          });
+        }
+      }
+      // Additional validation for specific fields
+      if (serviceAccount.type !== "service_account") {
+        errors.push({
+          variable: "FIREBASE_SERVICE_ACCOUNT",
+          message: "FIREBASE_SERVICE_ACCOUNT 'type' must be 'service_account'",
+        });
+      }
+      if (!serviceAccount.private_key.includes("-----BEGIN PRIVATE KEY-----")) {
+        errors.push({
+          variable: "FIREBASE_SERVICE_ACCOUNT",
+          message: "FIREBASE_SERVICE_ACCOUNT 'private_key' is invalid",
+        });
+      }
+    } catch (error) {
+      errors.push({
+        variable: "FIREBASE_SERVICE_ACCOUNT",
+        message: "FIREBASE_SERVICE_ACCOUNT is not valid JSON",
+      });
+    }
   }
 
   // Validate port
