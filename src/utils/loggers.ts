@@ -3,7 +3,7 @@
  * Provides multiple output streams (file, console) with level-based filtering
  */
 import pino from "pino";
-import { config } from "../../config/environment";
+import { config } from "../config/environment"
 import fs from "fs";
 import path from "path";
 

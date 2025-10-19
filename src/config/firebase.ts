@@ -1,12 +1,14 @@
-import * as admin from "firebase-admin"
-import { config } from "./environment"
+import admin from "firebase-admin";
+import type { ServiceAccount } from "firebase-admin";
+import { config } from "./environment";
 
-admin.initializeApp(
-    {
-        credential: admin.credential.cert(config.firebase.serviceAccount)
-    }
-)
+admin.initializeApp({
+  credential: admin.credential.cert(
+    config.firebase.serviceAccount as ServiceAccount
+  ),
+});
 
-const db = admin.firestore()
+export const firebaseAuth = admin.auth();
+export const firebaseFirestore = admin.firestore();
 
-export default db
+export { admin };

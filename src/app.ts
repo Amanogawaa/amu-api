@@ -1,27 +1,88 @@
 // packages
-import type { Request, Response, Application, NextFunction } from "express"
-import http from "http"
-import express from "express"
-import cors from "cors"
-import cookieParser from "cookie-parser"
-import { server } from "typescript"
+import type { Request, Response, Application, NextFunction } from 'express';
+import http from 'http';
+import express from 'express';
+import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import cookieParser from 'cookie-parser';
+import { logger } from './utils/loggers';
+import { swaggerSpec } from './config/swagger';
+import helmet from 'helmet';
 
-// modules
+// mods
+import { AppRoutes } from './routes';
+import { AuthContainer } from './features/auth/container';
+import { errorHandler } from './middlewares/error.middleware';
 
 const CORSOPTIONS = {
-    origin: ["http://localhost:3000", "*"],
-    methods: "GET,POST,PATCH,PUT,DELETE",
-    credentials: true
-}
+  origin: ['http://localhost:3000', '*'],
+  methods: 'GET,POST,PATCH,PUT,DELETE',
+  credentials: true,
+};
 
 class App {
-    public app: Application
-    public server: http.Server
+  public app: Application;
+  public server: http.Server;
 
-    constructor() {
-        this.app = express()
-        this.server = http.createServer(this.app)
-    }
+  private appRoutes!: AppRoutes;
+  private authContainer: AuthContainer;
 
+  constructor(authContainer: AuthContainer = new AuthContainer()) {
+    this.app = express();
+    this.server = http.createServer(this.app);
 
+    this.authContainer = authContainer;
+
+    this.app.use(express.json());
+    this.app.use(helmet());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(cors(CORSOPTIONS));
+    this.app.use(cookieParser());
+
+    this.app.use(
+      cors({
+        origin: process.env.NEXTJS_FRONTEND_URL || 'http://localhost:3000',
+      })
+    );
+
+    this.initializeMiddleware();
+    this.initializeRouter();
+
+    this.app.use(errorHandler);
+  }
+
+  private initializeRouter(): void {
+    this.appRoutes = new AppRoutes(this.authContainer);
+
+    this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+    this.app.use('/api', this.appRoutes.getRouter());
+  }
+
+  private initializeMiddleware(): void {
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      logger.info('Incoming request', {
+        method: req.method,
+        url: req.url,
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+      next();
+    });
+  }
+
+  public async start(port: number = 8080): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.server.listen(port, () => {
+        logger.info(`Server running on http://localhost:${port}`);
+        resolve();
+      });
+      this.server.on('error', (error) => {
+        logger.error('Server failed to start:', error);
+        reject(error);
+      });
+    });
+  }
 }
+
+export default new App();
