@@ -3,27 +3,25 @@ import {
   type Request,
   type Response,
   type NextFunction,
-} from "express";
-import type { AuthContainer } from "./features/auth/container";
+} from 'express';
+import { AuthContainer } from './features/auth/container';
+import { CourseContainer } from './features/course/container';
 
 export class AppRoutes {
   private router: Router;
   private authContainer: AuthContainer;
+  private courseContainer: CourseContainer;
 
-  constructor(authContainer: AuthContainer) {
+  constructor(authContainer: AuthContainer, courseContainer: CourseContainer) {
     this.router = Router();
+    this.courseContainer = courseContainer;
     this.authContainer = authContainer;
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
-    this.router.use("/amu", this.authContainer.getRouter());
-
-    this.router.use(
-      (err: Error, req: Request, res: Response, next: NextFunction) => {
-        res.status(500).json({ error: err.message });
-      }
-    );
+    this.router.use('/', this.authContainer.getRouter());
+    this.router.use('/', this.courseContainer.getRouter());
   }
 
   public getRouter(): Router {

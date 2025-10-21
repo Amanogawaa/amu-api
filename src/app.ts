@@ -10,9 +10,10 @@ import { swaggerSpec } from './config/swagger';
 import helmet from 'helmet';
 
 // mods
+import { errorHandler } from './middlewares/error.middleware';
 import { AppRoutes } from './routes';
 import { AuthContainer } from './features/auth/container';
-import { errorHandler } from './middlewares/error.middleware';
+import { CourseContainer } from './features/course/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -26,12 +27,17 @@ class App {
 
   private appRoutes!: AppRoutes;
   private authContainer: AuthContainer;
+  private courseContainer: CourseContainer;
 
-  constructor(authContainer: AuthContainer = new AuthContainer()) {
+  constructor(
+    authContainer: AuthContainer = new AuthContainer(),
+    courseContainer: CourseContainer = new CourseContainer()
+  ) {
     this.app = express();
     this.server = http.createServer(this.app);
 
     this.authContainer = authContainer;
+    this.courseContainer = courseContainer;
 
     this.app.use(express.json());
     this.app.use(helmet());
@@ -52,7 +58,7 @@ class App {
   }
 
   private initializeRouter(): void {
-    this.appRoutes = new AppRoutes(this.authContainer);
+    this.appRoutes = new AppRoutes(this.authContainer, this.courseContainer);
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

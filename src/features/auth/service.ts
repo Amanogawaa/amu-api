@@ -2,7 +2,7 @@ import { firebaseFirestore } from '../../config/firebase';
 import { AppError, ConflictError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
 import type { AuthRepository } from './repository';
-import type { CreateUser } from './types';
+import type { CreateUser, LoginUser } from './types';
 
 export class AuthService {
   private authRepository: AuthRepository;
@@ -11,7 +11,7 @@ export class AuthService {
     this.authRepository = authRepository;
   }
 
-  async signUp(userData: CreateUser) {
+  public async signUp(userData: CreateUser) {
     try {
       const userExists = await this.isExistingUser(userData.email);
 
@@ -25,7 +25,7 @@ export class AuthService {
       this.validateSignUpData(userData);
       await this.authRepository.createUser(userData);
 
-      logger.info(`User signed up with email: ${userData.email}`);
+      logger.info(`Use  r signed up with email: ${userData.email}`);
 
       return { message: 'User created successfully' };
     } catch (error) {

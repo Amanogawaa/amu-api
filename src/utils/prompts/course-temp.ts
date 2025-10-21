@@ -46,10 +46,11 @@ export const generateCoursePrompt = (args: {
   - Write a comprehensive description (200-300 words) covering what students will learn
   - List 5-8 specific learning outcomes (what students will be able to do after completion)
   - Include prerequisites as a string (e.g., "Basic understanding of programming concepts" or "None" for beginners)
-  - Set publish to true for intermediate/advanced courses, false for beginner courses
-  - Set includeCertificate to true for courses longer than 4 hours
+  - Set publish to false for intermediate/advanced courses, false for beginner courses
+  - Set includeCertificate to fallse for courses longer than 4 hours
   - Ensure all content is appropriate for the specified level and topic
-  
+  - Set all boolean fields to false by default unless specified otherwise
+
   **Level Guidelines**:
   - beginner: Assumes no prior knowledge, focuses on fundamentals
   - intermediate: Assumes basic knowledge, builds practical skills
