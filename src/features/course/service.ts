@@ -1,8 +1,15 @@
 import { GoogleGenAI, MediaResolution } from '@google/genai';
 import { logger } from '../../utils/loggers';
 import { generateCoursePrompt } from '../../utils/prompts/course-temp';
-import type { CourseRepository } from './repository';
-import type { Course, CourseQueryParams, GenerateCourseRequest } from './types';
+import { CourseRepository } from './repository';
+
+import { geminiCall } from '../../utils/geminiCall';
+import {
+  type CourseQueryParams,
+  type Course,
+  type GenerateCourseRequest,
+  courseSchema,
+} from './types';
 
 export class CourseService {
   private courseRepository: CourseRepository;
@@ -42,7 +49,7 @@ export class CourseService {
         language: request.language,
       });
 
-      const result = await this.geminiCall(prompt);
+      const result = await geminiCall(prompt, courseSchema);
       const courseData = JSON.parse(result!);
 
       logger.info('Course generated successfully');

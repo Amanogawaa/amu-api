@@ -1,7 +1,7 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import { admin, firebaseFirestore } from '../../config/firebase';
 import { logger } from '../../utils/loggers';
-import type { Course, CourseQueryParams, GenerateCourseRequest } from './types';
+import type { Course, CourseQueryParams } from './types';
 import { AppError } from '../../utils/errors';
 
 export class CourseRepository {
@@ -87,7 +87,7 @@ export class CourseRepository {
     } as Course;
   }
 
-  async createCourse(request: Omit<Course, 'id'>): Promise<any> {
+  async createCourse(request: Omit<Course, 'id'>): Promise<Course> {
     try {
       const data = {
         ...request,
@@ -99,7 +99,9 @@ export class CourseRepository {
       };
 
       console.log('Data from repository:', data);
-      const res = await this.firebaseStore.collection('courses').add(data);
+      const res = await this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .add(data);
 
       logger.info(`Course created with ID: ${res.id}`);
 

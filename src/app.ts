@@ -1,19 +1,20 @@
 // packages
-import type { Request, Response, Application, NextFunction } from 'express';
-import http from 'http';
-import express from 'express';
-import cors from 'cors';
-import swaggerUi from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
-import { logger } from './utils/loggers';
-import { swaggerSpec } from './config/swagger';
+import cors from 'cors';
+import type { Application, NextFunction, Request, Response } from 'express';
+import express from 'express';
 import helmet from 'helmet';
+import http from 'http';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
+import { logger } from './utils/loggers';
 
 // mods
+import { AuthContainer } from './features/auth/container';
+import { ChapterContainer } from './features/chapter/container';
+import { CourseContainer } from './features/course/container';
 import { errorHandler } from './middlewares/error.middleware';
 import { AppRoutes } from './routes';
-import { AuthContainer } from './features/auth/container';
-import { CourseContainer } from './features/course/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -28,16 +29,19 @@ class App {
   private appRoutes!: AppRoutes;
   private authContainer: AuthContainer;
   private courseContainer: CourseContainer;
+  private chapterContainer: ChapterContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
-    courseContainer: CourseContainer = new CourseContainer()
+    courseContainer: CourseContainer = new CourseContainer(),
+    chapterContainer: ChapterContainer = new ChapterContainer()
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
 
     this.authContainer = authContainer;
     this.courseContainer = courseContainer;
+    this.chapterContainer = chapterContainer;
 
     this.app.use(express.json());
     this.app.use(helmet());
@@ -58,7 +62,11 @@ class App {
   }
 
   private initializeRouter(): void {
-    this.appRoutes = new AppRoutes(this.authContainer, this.courseContainer);
+    this.appRoutes = new AppRoutes(
+      this.authContainer,
+      this.courseContainer,
+      this.chapterContainer
+    );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
