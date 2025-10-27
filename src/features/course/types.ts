@@ -1,17 +1,19 @@
 export interface Course {
   id: string;
-  name: string;
+  skillsGained: string[];
+  targetAudience: string;
+  topic: string;
   subtitle?: string;
+  publish: boolean;
+  prerequisites: string;
+  noOfChapters: number;
+  name: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  learning_outcomes: string[];
+  language: string;
+  duration: string;
   description: string;
   category: string;
-  topic: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
-  language: string;
-  prerequisites: string;
-  learning_outcomes: string[];
-  duration: string;
-  no_of_chapters: number;
-  publish: boolean;
   include_certificate: boolean;
   banner_url: string;
   createdAt?: Date;
@@ -41,42 +43,71 @@ export interface CourseResponse {
   total?: number;
 }
 
+// export const courseSchema = {
+//   type: 'OBJECT',
+//   properties: {
+//     course: {
+//       type: 'OBJECT',
+//       properties: {
+//         name: { type: 'STRING' },
+//         subtitle: { type: 'STRING' },
+//         description: { type: 'STRING' },
+//         category: { type: 'STRING' },
+//         topic: { type: 'STRING' },
+//         level: { type: 'STRING' },
+//         language: { type: 'STRING' },
+//         prerequisites: { type: 'STRING' },
+//         learning_outcomes: {
+//           type: 'ARRAY',
+//           items: { type: 'STRING' },
+//         },
+//         duration: { type: 'STRING' },
+//         no_of_chapters: { type: 'INTEGER' },
+//         publish: { type: 'BOOLEAN' },
+//         include_certificate: { type: 'BOOLEAN' },
+//         banner_url: { type: 'STRING' },
+//       },
+//       required: [
+//         'name',
+//         'description',
+//         'category',
+//         'topic',
+//         'level',
+//         'language',
+//         'prerequisites',
+//         'learning_outcomes',
+//         'duration',
+//         'no_of_chapters',
+//       ],
+//     },
+//   },
+// };
+
 export const courseSchema = {
-  type: 'OBJECT',
+  type: 'object',
   properties: {
-    course: {
-      type: 'OBJECT',
-      properties: {
-        name: { type: 'STRING' },
-        subtitle: { type: 'STRING' },
-        description: { type: 'STRING' },
-        category: { type: 'STRING' },
-        topic: { type: 'STRING' },
-        level: { type: 'STRING' },
-        language: { type: 'STRING' },
-        prerequisites: { type: 'STRING' },
-        learning_outcomes: {
-          type: 'ARRAY',
-          items: { type: 'STRING' },
-        },
-        duration: { type: 'STRING' },
-        no_of_chapters: { type: 'INTEGER' },
-        publish: { type: 'BOOLEAN' },
-        include_certificate: { type: 'BOOLEAN' },
-        banner_url: { type: 'STRING' },
-      },
-      required: [
-        'name',
-        'description',
-        'category',
-        'topic',
-        'level',
-        'language',
-        'prerequisites',
-        'learning_outcomes',
-        'duration',
-        'no_of_chapters',
-      ],
+    name: { type: 'string' },
+    subtitle: { type: 'string' },
+    description: { type: 'string' },
+    category: { type: 'string' },
+    topic: { type: 'string' },
+    level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
+    language: { type: 'string' },
+    prerequisites: { type: 'string' },
+    learning_outcomes: {
+      type: 'array',
+      items: { type: 'string' },
+      minItems: 5,
+      maxItems: 8,
     },
+    duration: { type: 'string' },
+    noOfChapters: { type: 'integer' },
+    targetAudience: { type: 'string' },
+    skillsGained: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    bannerUrl: { type: 'string' },
   },
+  required: ['name', 'description', 'learning_outcomes', 'prerequisites'],
 };

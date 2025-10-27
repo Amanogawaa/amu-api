@@ -25,28 +25,32 @@ export class ChapterService {
     try {
       const prompt = generateChaptersPrompt({
         courseId: request.courseId,
-        title: request.title,
+        courseName: request.courseName,
         description: request.description,
         noOfChapters: request.noOfChapters,
         duration: request.duration,
         level: request.level,
         language: request.language,
         learningOutcomes: request.learningOutcomes,
+        prerequisites: request.prerequisites || 'None',
       });
 
-      const result = await geminiCall(prompt, chapterSchema);
-      const chapterData = JSON.parse(result!);
+      const result = await geminiCall(prompt, {
+        responseSchema: chapterSchema,
+        temperature: 0.7,
+        maxRetries: 3,
+      });
 
       logger.info('Raw Gemini response:', result);
-      logger.info('Parsed chapter data:', JSON.stringify(chapterData, null, 2));
 
-      if (!chapterData.chapters || !Array.isArray(chapterData.chapters)) {
+      if (!result.chapters || !Array.isArray(result.chapters)) {
         throw new Error('Invalid response from Gemini: missing chapters array');
       }
 
       const createdChapters = await this.chapterRepository.createChapters(
         request.courseId,
-        chapterData.chapters
+        request.courseName,
+        result.chapters
       );
 
       logger.info(`Successfully created ${createdChapters} chapters`);

@@ -16,6 +16,14 @@ export class ChapterController {
   ): Promise<void> {
     try {
       const { courseId } = request.params;
+
+      if (!courseId) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
       const chapters = await this.service.getChapters(courseId!);
 
       response.status(200).json({

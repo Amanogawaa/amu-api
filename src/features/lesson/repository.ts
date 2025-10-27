@@ -1,21 +1,22 @@
-import { Firestore } from 'firebase-admin/firestore';
+import type { Firestore } from 'firebase-admin/firestore';
 import { firebaseFirestore } from '../../config/firebase';
 import { logger } from '../../utils/loggers';
-import type { Chapter } from './types';
+import type { Lesson } from './types';
 
-export class ChapterRepository {
+export class LessonRepository {
   private firebaseStore: Firestore;
-  private readonly COLLECTION_NAME = 'chapters';
+  private readonly COLLECTION_NAME = 'lessons';
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
   }
 
-  async getChapters(courseId: string) {
+  async getLessons(chapterId: string) {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where('courseId', '==', courseId)
+        .where('chapterId', '==', chapterId)
+        .orderBy('order', 'asc')
         .get();
 
       if (querySnapshot.empty) {
@@ -26,54 +27,47 @@ export class ChapterRepository {
       return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      })) as Chapter[];
+      })) as Lesson[];
     } catch (error) {
       logger.error('Error in ChapterRepository.getChapter:', error);
       throw error;
     }
   }
 
-  async createChapters(
-    courseId: string,
-    courseName: string,
-    chapters: Array<
-      Omit<
-        Chapter,
-        'id' | 'courseId' | 'courseName' | 'createdAt' | 'updatedAt'
-      >
-    >
-  ): Promise<Chapter[]> {
+  async createLessons(
+    chapterId: string,
+    lessons: Array<Omit<Lesson, 'id' | 'chapterId' | 'createdAt' | 'updatedAt'>>
+  ): Promise<Lesson[]> {
     try {
       const batch = this.firebaseStore.batch();
-      const createdChapters: Chapter[] = [];
+      const createdLesson: Lesson[] = [];
 
-      for (const chapter of chapters) {
+      for (const lesson of lessons) {
         const docRef = this.firebaseStore
           .collection(this.COLLECTION_NAME)
           .doc();
         const data = {
-          ...chapter,
-          courseId,
-          courseName,
+          ...lesson,
+          chapterId,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
 
         batch.set(docRef, data);
-        createdChapters.push({
+        createdLesson.push({
           id: docRef.id,
           ...data,
-        } as Chapter);
+        } as Lesson);
       }
 
       await batch.commit();
       logger.info(
-        `Created ${createdChapters.length} chapters for course ${courseId}`
+        `Created ${createdLesson.length} lesson for chapter ${chapterId}`
       );
 
-      return createdChapters;
+      return createdLesson;
     } catch (error) {
-      logger.error('Error in ChapterRepository.createChapters:', error);
+      logger.error('Error in LessonRepository.createLessons:', error);
       throw error;
     }
   }

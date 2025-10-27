@@ -52,8 +52,16 @@ export class CourseController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { slug } = request.params;
-      const course = await this.service.getCourseById(slug!);
+      const { id } = request.params;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      const course = await this.service.getCourseById(id!);
 
       response.status(200).json({
         data: course,
@@ -91,10 +99,18 @@ export class CourseController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const { slug } = request.params;
-      await this.service.deleteCourse(slug!);
+      const { id } = request.params;
 
-      response.status(204).send;
+      if (!id) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      await this.service.deleteCourse(id!);
+
+      response.status(204).send();
     } catch (error) {
       logger.error('Error in CoursesController.deleteCourse:', error);
       next(error);

@@ -49,14 +49,15 @@ export class CourseService {
         language: request.language,
       });
 
-      const result = await geminiCall(prompt, courseSchema);
-      const courseData = JSON.parse(result!);
+      const result = await geminiCall(prompt, {
+        responseSchema: courseSchema,
+        temperature: 0.7,
+        maxRetries: 3,
+      });
 
-      logger.info('Course generated successfully');
+      logger.info('Course generated successfully', result);
 
-      const createdCourse = await this.courseRepository.createCourse(
-        courseData.course
-      );
+      const createdCourse = await this.courseRepository.createCourse(result);
 
       return createdCourse;
     } catch (error) {
@@ -70,81 +71,6 @@ export class CourseService {
       await this.courseRepository.deleteCourse(slug);
     } catch (error) {
       logger.error('Error in CoursesService.deleteCourse:', error);
-      throw error;
-    }
-  }
-
-  private async geminiCall(prompt: string) {
-    try {
-      const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY as string,
-      });
-      const model = 'gemini-2.5-pro';
-      const contents = [
-        {
-          role: 'user',
-          parts: [
-            {
-              text: prompt,
-            },
-          ],
-        },
-      ];
-
-      const response = await ai.models.generateContent({
-        model,
-        config: {
-          thinkingConfig: {
-            thinkingBudget: -1,
-          },
-          mediaResolution: MediaResolution.MEDIA_RESOLUTION_MEDIUM,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'object',
-            properties: {
-              course: {
-                type: 'object',
-                properties: {
-                  name: { type: 'string' },
-                  subtitle: { type: 'string' },
-                  description: { type: 'string' },
-                  category: { type: 'string' },
-                  topic: { type: 'string' },
-                  level: { type: 'string' },
-                  language: { type: 'string' },
-                  prerequisites: { type: 'string' },
-                  learning_outcomes: {
-                    type: 'array',
-                    items: { type: 'string' },
-                  },
-                  duration: { type: 'string' },
-                  no_of_chapters: { type: 'integer' },
-                  publish: { type: 'boolean' },
-                  include_certificate: { type: 'boolean' },
-                  banner_url: { type: 'string' },
-                },
-                required: [
-                  'name',
-                  'description',
-                  'category',
-                  'topic',
-                  'level',
-                  'language',
-                  'prerequisites',
-                  'learning_outcomes',
-                  'duration',
-                  'no_of_chapters',
-                ],
-              },
-            },
-          },
-        },
-        contents,
-      });
-
-      return response.text;
-    } catch (error) {
-      logger.error('Error in CoursesService.geminiCall:', error);
       throw error;
     }
   }
