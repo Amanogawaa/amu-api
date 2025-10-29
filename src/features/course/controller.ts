@@ -35,10 +35,15 @@ export class CourseController {
 
       const courses = await this.service.getCourses(queryParams);
 
-      response.status(200).json({
-        data: courses,
-        message: 'Courses retrieved successfully',
-        total: courses.length,
+      const total = courses.length;
+      const limit = queryParams.limit || 10;
+      const offset = queryParams.offset || 0;
+
+      response.status(200).send({
+        results: courses,
+        count: total,
+        next: offset + limit < total ? offset + limit : null,
+        previous: offset > 0 ? Math.max(0, offset - limit) : null,
       });
     } catch (error) {
       logger.error('Error in CourseController.getCourses:', error);
@@ -63,10 +68,7 @@ export class CourseController {
 
       const course = await this.service.getCourseById(id!);
 
-      response.status(200).json({
-        data: course,
-        message: 'Course retrieved successfully',
-      });
+      response.status(200).send(course);
     } catch (error) {
       logger.error('Error in CourseController.getCourseById:', error);
       next(error);
