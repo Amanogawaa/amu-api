@@ -2,7 +2,7 @@ import { geminiCall } from '../../utils/geminiCall';
 import { logger } from '../../utils/loggers';
 import { generateChaptersPrompt } from '../../utils/prompts/chapter-temp';
 import { ChapterRepository } from './repository';
-import { type GenerateChaptersRequest, chapterSchema } from './types';
+import { type GenerateChaptersRequest, chaptersSchema } from './types';
 
 export class ChapterService {
   private chapterRepository: ChapterRepository;
@@ -24,19 +24,21 @@ export class ChapterService {
   public async generateChapters(request: GenerateChaptersRequest) {
     try {
       const prompt = generateChaptersPrompt({
-        courseId: request.courseId,
+        moduleId: request.moduleId,
+        moduleName: request.moduleName,
+        moduleDescription: request.moduleDescription,
+        moduleLearningObjectives: request.moduleLearningObjectives,
+        moduleKeySkills: request.moduleKeySkills,
         courseName: request.courseName,
-        description: request.description,
-        noOfChapters: request.noOfChapters,
-        duration: request.duration,
+        moduleOrder: request.moduleOrder,
+        estimatedChapterCount: request.estimatedChapterCount,
+        estimatedDuration: request.estimatedDuration,
         level: request.level,
         language: request.language,
-        learningOutcomes: request.learningOutcomes,
-        prerequisites: request.prerequisites || 'None',
       });
 
       const result = await geminiCall(prompt, {
-        responseSchema: chapterSchema,
+        responseSchema: chaptersSchema,
         temperature: 0.7,
         maxRetries: 3,
       });
@@ -48,7 +50,7 @@ export class ChapterService {
       }
 
       const createdChapters = await this.chapterRepository.createChapters(
-        request.courseId,
+        request.moduleId,
         request.courseName,
         result.chapters
       );

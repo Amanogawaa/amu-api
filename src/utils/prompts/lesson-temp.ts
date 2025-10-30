@@ -7,13 +7,15 @@ export const generateLessonsPrompt = (args: {
   keyTopics: string[];
   estimatedDuration: string;
   estimatedLessonCount: number;
+  moduleName: string;
   courseName: string;
   level: string;
   language: string;
-}) => `You are a course design expert. Create a structured set of lessons for this chapter.
+}) => `You are a course design expert. Create structured lessons for this chapter.
 
 **Course Context**:
 - Course: ${args.courseName}
+- Module: ${args.moduleName}
 - Level: ${args.level}
 - Language: ${args.language}
 
@@ -33,20 +35,21 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
     {
       "lessonOrder": 1,
       "title": "Clear, action-oriented lesson title",
-      "type": "video | article | quiz",
+      "type": "video | article | quiz | exercise",
       "duration": "Xm format (e.g., 15m, 30m)",
-      "description": "2-3 sentence overview: what is covered, why it matters, what students will learn",
-      "content": "For article type: comprehensive markdown content. For video type: detailed video script outline. For quiz type: null",
-      "videoSearchQuery": "For video type: specific YouTube search query. For others: null",
+      "description": "2-3 sentences: what is covered, why it matters, what students will learn",
+      "content": "For article: comprehensive markdown. For video: detailed script outline. For quiz/exercise: null",
+      "videoSearchQuery": "For video: specific YouTube search query. For others: null",
       "resources": [
         {
           "title": "Resource title",
           "url": "https://example.com or placeholder",
-          "type": "documentation | article | tool | github | reference",
-          "description": "Why this resource is helpful"
+          "type": "documentation | article | tool | github | video | interactive",
+          "description": "Why this resource is helpful (1 sentence)"
         }
       ],
-      "prerequisiteKnowledge": ["concept1", "concept2"]
+      "learningOutcome": "What students will be able to do after this lesson",
+      "prerequisites": ["concept1", "concept2"]
     }
   ]
 }
@@ -54,72 +57,152 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
 **Lesson Design Rules**:
 
 1. **Lesson Types Distribution**:
-   - 40-50% video lessons (concepts, demonstrations, explanations)
-   - 30-40% article lessons (deep dives, reference material, written guides)
-   - 10-20% quiz lessons (after every 2-4 content lessons)
-   - Include at least ONE quiz for knowledge validation
+   - 35-45% video lessons (concepts, demonstrations, explanations)
+   - 30-40% article lessons (deep dives, reference material, tutorials)
+   - 10-15% quiz lessons (knowledge checks after 2-3 content lessons)
+   - 10-15% exercise lessons (hands-on practice, coding challenges)
+   - MUST include at least ONE quiz or exercise per chapter
 
-2. **Lesson Ordering**:
-   - Start with foundational concepts (video or article)
-   - Progress to application/practice
-   - End with quiz to validate learning
-   - Example flow: Video → Article → Video → Quiz
+2. **Lesson Ordering Patterns**:
+   - **Pattern 1**: Video → Article → Exercise → Quiz
+   - **Pattern 2**: Article → Video → Exercise → Quiz
+   - **Pattern 3**: Video → Video → Article → Exercise → Quiz
+   - Start with foundational content, end with assessment
 
 3. **Duration Guidelines**:
-   - Video lessons: 10-20 minutes each
-   - Article lessons: 15-30 minutes (reading + practice)
-   - Quiz lessons: 5-15 minutes
-   - Total must equal ${args.estimatedDuration} (±5 minutes acceptable)
+   - Video lessons: 8-15 minutes each (never exceed 20m)
+   - Article lessons: 15-25 minutes (reading + practice time)
+   - Quiz lessons: 5-10 minutes (3-7 questions)
+   - Exercise lessons: 15-30 minutes (hands-on coding/practice)
+   - Total must equal ${args.estimatedDuration} (±5 minutes)
 
 4. **Content Requirements**:
 
-   **For "article" lessons**:
-   - Write 500-1000 word comprehensive content in markdown
-   - Use ## for main sections, ### for subsections
-   - Include code examples (if applicable) in \`\`\` blocks
-   - Add practical examples or analogies
-   - Include 2-3 "💡 Pro Tips" or "⚠️ Common Pitfalls"
-   - End with "Key Takeaways" bullet list
-
    **For "video" lessons**:
-   - Provide detailed script outline (what the video should cover)
-   - Include videoSearchQuery: specific YouTube search terms
-   - Example: "React useState hook tutorial ${args.level}"
-   - Make search queries specific to avoid irrelevant results
+   - Provide detailed outline (5-8 key points to cover)
+   - Include videoSearchQuery: specific, targeted search terms
+   - Format: "${args.chapterTitle} {specific topic} tutorial ${args.level}"
+   - Example: "React useState hook tutorial beginner"
+   - Focus: Conceptual explanations, demonstrations, walkthroughs
+
+   **For "article" lessons**:
+   - Write 600-1200 word comprehensive content in markdown
+   - Structure: 
+     - ## Introduction (what and why)
+     - ## Main Content (2-4 major sections with ### subsections)
+     - ## Practical Example
+     - ## Key Takeaways
+   - Include code examples in \`\`\` blocks (if applicable)
+   - Add callouts: 💡 **Pro Tip**, ⚠️ **Common Mistake**, 📝 **Note**
+   - Use bullet points, numbered lists for clarity
+   - End with 3-5 key takeaways
 
    **For "quiz" lessons**:
-   - Set content to null (quiz generated separately)
-   - Description should mention which previous lessons it covers
+   - Set content to null (generated separately)
+   - Description: "Test your understanding of [topics from previous 2-3 lessons]"
+   - Should cover content from previous lessons only
+   - Place after every 2-4 content lessons
 
-5. **Resources** (1-3 per lesson):
-   - Official documentation (highest priority)
-   - High-quality tutorials or articles
-   - Relevant tools or playgrounds
-   - GitHub repositories (for code examples)
-   - Avoid random blogs; prefer authoritative sources
+   **For "exercise" lessons**:
+   - Set content to null (interactive coding environment)
+   - Description: Clear task description
+   - Example: "Build a login form with email validation and error handling"
+   - Include starter code hints in description
+   - Specify expected deliverables
 
-6. **Prerequisite Knowledge**:
-   - List 2-4 concepts students should know before this lesson
-   - Reference earlier lessons if applicable
-   - For first lesson: can be empty or course prerequisites
+5. **Resources** (2-4 per lesson):
+   - **Priority 1**: Official documentation
+   - **Priority 2**: High-quality tutorials (MDN, freeCodeCamp, etc.)
+   - **Priority 3**: Interactive tools (CodePen, Repl.it, playgrounds)
+   - **Priority 4**: GitHub repos (examples, starter templates)
+   - **Priority 5**: Video supplements (YouTube, egghead.io)
+   - Add description explaining what each resource provides
 
-**Level-Specific Content**:
-- **Beginner**: More explanations, step-by-step guides, simple examples
-- **Intermediate**: Practical applications, real-world scenarios, some theory
-- **Advanced**: Minimal hand-holding, complex patterns, performance considerations
+6. **Learning Outcome** (1 per lesson):
+   - Single, specific statement
+   - Use action verbs
+   - Example: "Implement form validation using HTML5 attributes"
+   - Should directly support chapter objectives
+
+7. **Prerequisites**:
+   - List 2-4 concepts students should know
+   - Reference earlier lessons if needed
+   - Example: ["HTML forms basics", "JavaScript events", "DOM manipulation"]
+   - First lesson can reference chapter prerequisites
+
+**Lesson Naming Conventions**:
+- Use clear, descriptive titles
+- Good: "Understanding useState Hook", "Building Dynamic Forms", "Error Handling Patterns"
+- Bad: "Lesson 1", "More About React", "Important Concepts"
+- Start with verbs when possible: "Creating", "Building", "Implementing", "Understanding"
+
+**Level-Specific Guidelines**:
+- **Beginner**:
+  - More video lessons (visual learning)
+  - Shorter, focused content
+  - Step-by-step instructions
+  - Frequent quizzes (after every 2 lessons)
+  - Lots of examples and analogies
+
+- **Intermediate**:
+  - Balanced video and articles
+  - Real-world scenarios
+  - More exercises (hands-on practice)
+  - Quizzes after 3-4 lessons
+  - Practical, applicable content
+
+- **Advanced**:
+  - More article lessons (self-paced deep reading)
+  - Dense, technical content
+  - Complex exercises
+  - Fewer but harder quizzes
+  - Best practices, edge cases, optimization
+
+**Article Lesson Template**:
+\`\`\`markdown
+# {Lesson Title}
+
+## Introduction
+Brief overview (2-3 sentences) explaining what this lesson covers and why it matters.
+
+## {Main Topic 1}
+Detailed explanation with examples
+
+### {Subtopic}
+Specific details
+
+\`\`\`javascript
+// Code example
+\`\`\`
+
+💡 **Pro Tip**: Helpful insight
+
+## {Main Topic 2}
+Continue with next major concept
+
+## Practical Example
+Real-world application or hands-on example
+
+## Key Takeaways
+- Takeaway 1
+- Takeaway 2
+- Takeaway 3
+\`\`\`
 
 **Quality Checklist**:
-- Lesson titles start with action verbs when possible
-- Each lesson has a clear, focused objective
-- Duration is realistic for the content depth
-- Resources are relevant and high-quality
-- Total duration = ${args.estimatedDuration} ± 5 minutes
-- At least one quiz for assessment
-- Content flows logically from lesson to lesson
+- Lessons flow logically from concept to practice
+- Each lesson has a single, clear focus
+- Total duration = ${args.estimatedDuration} (±5 minutes)
+- At least one assessment (quiz or exercise) included
+- Video search queries are specific and targeted
+- Article content is comprehensive and well-structured
+- Resources are high-quality and relevant
+- Learning outcomes are specific and measurable
 
-**CRITICAL**: 
+**CRITICAL**:
 - lessonOrder must be sequential: 1, 2, 3, etc.
-- For quiz type, content must be null
+- For quiz/exercise type, content must be null
 - videoSearchQuery only for video type, null for others
+- Create exactly ${args.estimatedLessonCount} lessons
 
 Return only the JSON object with the lessons array.`;

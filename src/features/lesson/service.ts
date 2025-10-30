@@ -2,7 +2,7 @@ import { geminiCall } from '../../utils/geminiCall';
 import { logger } from '../../utils/loggers';
 import { generateLessonsPrompt } from '../../utils/prompts/lesson-temp';
 import { LessonRepository } from './repository';
-import { lessonSchema, type GenerateLessonRequest } from './types';
+import { lessonsSchema, type GenerateLessonRequest } from './types';
 
 export class LessonService {
   private lessonRepository: LessonRepository;
@@ -38,7 +38,7 @@ export class LessonService {
       });
 
       const result = await geminiCall(prompt, {
-        responseSchema: lessonSchema,
+        responseSchema: lessonsSchema,
         temperature: 0.7,
         maxRetries: 3,
       });

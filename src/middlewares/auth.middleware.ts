@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import * as admin from 'firebase-admin';
 import { AppError } from '../utils/errors';
 import { logger } from '../utils/loggers';
 import { config } from '../config/environment';
+import { firebaseAuth } from '../config/firebase';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -28,7 +28,7 @@ export const authMiddleware = async (
       throw new AppError('No authentication token provided', 401);
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(token);
+    const decodedToken = await firebaseAuth.verifyIdToken(token);
 
     req.user = {
       ...decodedToken,

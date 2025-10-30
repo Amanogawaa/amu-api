@@ -1,24 +1,29 @@
 export const generateChaptersPrompt = (args: {
-  courseId: string;
+  moduleId: string;
+  moduleName: string;
+  moduleDescription: string;
+  moduleLearningObjectives: string[];
+  moduleKeySkills: string[];
+  estimatedDuration: string;
+  estimatedChapterCount: number;
   courseName: string;
-  description: string;
-  learningOutcomes: string[];
-  duration: string;
-  noOfChapters: string;
   level: string;
   language: string;
-  prerequisites: string;
-}) => `You are a course design expert. Create a progressive chapter structure that builds knowledge systematically.
+  moduleOrder: number;
+}) => `You are a course design expert. Create detailed chapters for this module.
 
 **Course Context**:
 - Course: ${args.courseName}
-- Description: ${args.description}
-- Learning Outcomes: ${args.learningOutcomes.join('; ')}
-- Prerequisites: ${args.prerequisites}
 - Level: ${args.level}
 - Language: ${args.language}
-- Total Duration: ${args.duration}
-- Required Chapters: ${args.noOfChapters}
+
+**Module Context**:
+- Module ${args.moduleOrder}: ${args.moduleName}
+- Description: ${args.moduleDescription}
+- Learning Objectives: ${args.moduleLearningObjectives.join('; ')}
+- Key Skills: ${args.moduleKeySkills.join(', ')}
+- Module Duration: ${args.estimatedDuration}
+- Target Chapter Count: ${args.estimatedChapterCount}
 
 **Output Requirements**:
 Return ONLY valid JSON. No markdown blocks, no explanations.
@@ -27,9 +32,10 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
   "chapters": [
     {
       "chapterOrder": 1,
-      "title": "Clear, engaging chapter title",
-      "description": "Comprehensive 100-150 word description covering: what topics are covered, why this chapter matters, how it builds on previous chapters (if applicable), and what students will be able to do after completion",
+      "title": "Clear, focused chapter title",
+      "description": "100-150 words: what topics are covered, why this chapter matters, how it connects to module objectives, what students will be able to do",
       "estimatedDuration": "Xh Ym format (e.g., 1h 30m or 45m)",
+      "estimatedLessonCount": 4,
       "learningObjectives": [
         "Specific objective 1",
         "Specific objective 2",
@@ -37,54 +43,99 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
       ],
       "keyTopics": [
         "Topic 1",
-        "Topic 2", 
+        "Topic 2",
         "Topic 3"
       ],
-      "estimatedLessonCount": 4
+      "prerequisites": [
+        "Previous chapter or concept needed"
+      ],
+      "practicalApplication": "1-2 sentences on how students will apply this knowledge"
     }
   ]
 }
 
 **Chapter Design Principles**:
 
-1. **Progressive Structure**:
-   - Chapter 1: Foundations and setup (if applicable)
-   - Middle chapters: Core concepts and skills building progressively
-   - Final chapter: Integration, real-world application, or capstone project
+1. **Chapter Scope**:
+   - Each chapter = ONE focused topic or concept
+   - Example: "useState Hook", "CSS Grid Layout", "API Authentication"
+   - NOT: "React Hooks Overview" (too broad - should be multiple chapters)
 
 2. **Duration Distribution**:
-   - Total across all chapters must approximately equal ${args.duration}
-   - Earlier chapters may be shorter (foundations)
-   - Middle chapters typically longest (core content)
-   - Consider: 1 hour = roughly 3-4 lessons
+   - Total across all chapters must equal ${args.estimatedDuration} (±10%)
+   - Typical chapter: 45m - 2h
+   - Shorter chapters (< 1h): Introductory or supplementary content
+   - Longer chapters (> 1.5h): Core concepts with practice
 
-3. **Learning Objectives** (3-5 per chapter):
-   - Use action verbs: Explain, Implement, Apply, Compare, Analyze, Create
-   - Should be achievable within the chapter's scope
-   - Should collectively lead to course learning outcomes
+3. **Progressive Structure Within Module**:
+   - Chapter 1: Introduction to module topic, basic concepts
+   - Middle chapters: Deep dives into specific aspects
+   - Final chapter: Integration, advanced techniques, or preparation for capstone
 
-4. **Key Topics**:
-   - List 3-6 main topics/concepts covered
-   - Be specific, not vague
-   - Show clear progression between chapters
+4. **Learning Objectives** (2-4 per chapter):
+   - More specific than module objectives
+   - Use verbs: Explain, Implement, Apply, Compare, Create, Debug
+   - Achievable within chapter duration
+   - Directly support module learning objectives
 
-5. **Estimated Lesson Count**:
-   - Based on chapter duration and complexity
-   - Typical: 3-6 lessons per chapter
-   - Shorter chapters (< 1h): 3-4 lessons
-   - Longer chapters (> 1.5h): 5-6 lessons
+5. **Key Topics** (3-6 per chapter):
+   - Specific concepts covered
+   - Bullet-point level detail
+   - Example: Instead of "CSS Layouts", use "Flexbox container properties", "Flex item behavior", "Common layout patterns"
+
+6. **Estimated Lesson Count**:
+   - Based on chapter duration and topic complexity
+   - 30-45 min chapters: 2-3 lessons
+   - 1-1.5 hour chapters: 4-5 lessons
+   - 1.5-2 hour chapters: 5-6 lessons
+
+7. **Prerequisites**:
+   - List previous chapters from THIS module, or
+   - Core concepts from previous modules
+   - Keep it specific (not "basic programming knowledge")
+
+8. **Practical Application**:
+   - How will students USE this knowledge?
+   - Example: "Build responsive navigation bars using Flexbox"
+   - Connects theory to practice
+
+**Chapter Naming Conventions**:
+- Start with clear nouns or verbs
+- Good: "Building Forms with React", "Async/Await Patterns", "Git Branching Strategies"
+- Bad: "More About React", "Advanced Stuff", "Other Concepts"
 
 **Level-Specific Guidelines**:
-- **Beginner**: More foundational chapters, gentler pace, more examples
-- **Intermediate**: Balance theory and practice, include projects
-- **Advanced**: Dense content, complex topics, focus on mastery
+- **Beginner**: 
+  - Shorter chapters (45m - 1h)
+  - More foundational content
+  - Step-by-step progression
+  - ${args.estimatedChapterCount} chapters with gentle pacing
+
+- **Intermediate**:
+  - Balanced chapters (1h - 1.5h)
+  - Mix theory and practice
+  - Real-world scenarios
+  - ${args.estimatedChapterCount} chapters with practical focus
+
+- **Advanced**:
+  - Dense chapters (1h - 2h)
+  - Assume prior knowledge
+  - Complex topics, edge cases
+  - ${args.estimatedChapterCount} chapters with depth
 
 **Quality Checklist**:
-- Each chapter has a clear, focused theme
-- Chapters build logically on each other
-- No topic overlap between chapters
-- Total duration ≈ ${args.duration} (±10%)
+- Each chapter has a single, clear focus
+- Chapter titles are descriptive and specific
+- Chapters build logically within the module
+- Total duration = ${args.estimatedDuration} (±10%)
 - Learning objectives are specific and measurable
-- Chapter titles are descriptive and engaging
+- Key topics are granular, not vague
+- Prerequisites are clearly identified
+- Practical applications are concrete
+
+**Important**: 
+- Create exactly ${args.estimatedChapterCount} chapters
+- Ensure smooth progression from chapter to chapter
+- Each chapter should feel complete but also flow to the next
 
 Return only the JSON object with the chapters array.`;

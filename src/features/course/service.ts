@@ -45,7 +45,7 @@ export class CourseService {
         topic: request.topic,
         level: request.level,
         duration: request.duration,
-        noOfChapters: request.noOfChapters,
+        noOfModules: request.noOfModules,
         language: request.language,
       });
 
@@ -57,7 +57,14 @@ export class CourseService {
 
       logger.info('Course generated successfully', result);
 
-      const createdCourse = await this.courseRepository.createCourse(result);
+      const courseData = {
+        ...result,
+        uid: request.uid,
+      };
+
+      const createdCourse = await this.courseRepository.createCourse(
+        courseData
+      );
 
       return createdCourse;
     } catch (error) {

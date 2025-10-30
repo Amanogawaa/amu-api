@@ -7,6 +7,7 @@ import {
 import { logger } from '../../utils/loggers';
 import type { CourseService } from './service';
 import type { CourseQueryParams } from './types';
+import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
 
 export class CourseController {
   private service: CourseService;
@@ -76,12 +77,15 @@ export class CourseController {
   }
 
   async generateCourse(
-    request: Request,
+    request: AuthenticatedRequest,
     response: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const courseRequest = request.body;
+      const courseRequest = {
+        ...request.body,
+        uid: request.user?.uid,
+      };
       console.log('Received course generation request:', courseRequest);
       const course = await this.service.generateCourse(courseRequest);
 

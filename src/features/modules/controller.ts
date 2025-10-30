@@ -1,15 +1,15 @@
 import { logger } from '../../utils/loggers';
-import type { ChapterService } from './service';
+import type { ModuleService } from './service';
 import type { NextFunction, Request, Response } from 'express';
 
-export class ChapterController {
-  private service: ChapterService;
+export class ModuleController {
+  private service: ModuleService;
 
-  constructor(service: ChapterService) {
+  constructor(service: ModuleService) {
     this.service = service;
   }
 
-  async getChapters(
+  async getModules(
     request: Request,
     response: Response,
     next: NextFunction
@@ -23,32 +23,30 @@ export class ChapterController {
         return;
       }
 
-      const chapters = await this.service.getChapters(courseId!);
+      const modules = await this.service.getModules(courseId!);
 
-      response.status(200).send(chapters);
+      response.status(200).send(modules);
     } catch (error) {
-      logger.error('Error in ChapterController.getChapters:', error);
+      logger.error('Error in ModuleController.getModules:', error);
       next(error);
     }
   }
 
-  async generateChapter(
+  async generateModules(
     request: Request,
     response: Response,
     next: NextFunction
   ): Promise<void> {
     try {
-      const chapterRequest = request.body;
-      const createdChapter = await this.service.generateChapters(
-        chapterRequest
-      );
+      const moduleRequest = request.body;
+      const createdModules = await this.service.generateModules(moduleRequest);
 
       response.status(201).json({
-        data: createdChapter,
-        message: 'Chapter generated successfully',
+        data: createdModules,
+        message: 'Modules generated successfully',
       });
     } catch (error) {
-      logger.error('Error in ChapterController.generateChapter:', error);
+      logger.error('Error in ModuleController.generateModules:', error);
       next(error);
     }
   }

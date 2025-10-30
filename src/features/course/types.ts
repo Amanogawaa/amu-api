@@ -1,5 +1,6 @@
 export interface Course {
   id: string;
+  uid: string;
   skillsGained: string[];
   targetAudience: string;
   topic: string;
@@ -21,11 +22,12 @@ export interface Course {
 }
 
 export interface GenerateCourseRequest {
+  uid: string;
   category: string;
   topic: string;
   level: 'beginner' | 'intermediate' | 'advanced';
   duration: string;
-  noOfChapters: number;
+  noOfModules: number;
   language: string;
 }
 
@@ -100,6 +102,7 @@ export const courseSchema = {
       minItems: 5,
       maxItems: 8,
     },
+    publish: { type: 'boolean' },
     duration: { type: 'string' },
     noOfChapters: { type: 'integer' },
     targetAudience: { type: 'string' },

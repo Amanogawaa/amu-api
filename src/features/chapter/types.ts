@@ -20,62 +20,49 @@ export interface ChapterResponse {
 }
 
 export interface GenerateChaptersRequest {
-  courseId: string;
+  moduleId: string;
+  moduleName: string;
+  moduleDescription: string;
+  moduleLearningObjectives: string[];
+  moduleKeySkills: string[];
+  estimatedDuration: string;
+  estimatedChapterCount: number;
   courseName: string;
-  description: string;
-  learningOutcomes: string[];
-  duration: string;
-  noOfChapters: string;
   level: string;
   language: string;
-  prerequisites?: string;
+  moduleOrder: number;
 }
 
-export const chapterSchema = {
-  type: 'OBJECT',
+export const chaptersSchema = {
+  type: 'object',
   properties: {
     chapters: {
-      type: 'ARRAY',
+      type: 'array',
       items: {
-        type: 'OBJECT',
+        type: 'object',
         properties: {
-          chapterOrder: {
-            type: 'NUMBER',
-            description:
-              'The sequential order of this chapter (starting from 1)',
-          },
-          title: {
-            type: 'STRING',
-            description: 'The title of the chapter',
-          },
-          description: {
-            type: 'STRING',
-            description:
-              'A comprehensive 100-150 word description of what this chapter covers',
-          },
-          estimatedDuration: {
-            type: 'STRING',
-            description:
-              'Estimated duration in format "Xh Ym" (e.g., "1h 30m" or "45m")',
-          },
+          chapterOrder: { type: 'integer', minimum: 1 },
+          title: { type: 'string', minLength: 5, maxLength: 100 },
+          description: { type: 'string', minLength: 100, maxLength: 600 },
+          estimatedDuration: { type: 'string' },
+          estimatedLessonCount: { type: 'integer', minimum: 2, maximum: 8 },
           learningObjectives: {
-            type: 'ARRAY',
-            items: {
-              type: 'STRING',
-            },
-            description: '3-5 specific learning objectives for this chapter',
+            type: 'array',
+            items: { type: 'string' },
+            minItems: 2,
+            maxItems: 4,
           },
           keyTopics: {
-            type: 'ARRAY',
-            items: {
-              type: 'STRING',
-            },
-            description: '3-6 main topics/concepts covered in this chapter',
+            type: 'array',
+            items: { type: 'string' },
+            minItems: 3,
+            maxItems: 6,
           },
-          estimatedLessonCount: {
-            type: 'NUMBER',
-            description: 'Estimated number of lessons in this chapter (3-6)',
+          prerequisites: {
+            type: 'array',
+            items: { type: 'string' },
           },
+          practicalApplication: { type: 'string' },
         },
         required: [
           'chapterOrder',
@@ -84,7 +71,6 @@ export const chapterSchema = {
           'estimatedDuration',
           'learningObjectives',
           'keyTopics',
-          'estimatedLessonCount',
         ],
       },
     },

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { CourseController } from './controller';
 import { validateCourseId, validateGenerateCourse } from './validation';
+import { authMiddleware } from '../../middlewares/auth.middleware';
 
 export class CourseRoute {
   public router: Router;
@@ -138,6 +139,7 @@ export class CourseRoute {
      */
     this.router.post(
       '/courses',
+      authMiddleware,
       validateGenerateCourse,
       this.controller.generateCourse.bind(this.controller)
     );
@@ -194,6 +196,7 @@ export class CourseRoute {
      */
     this.router.delete(
       '/courses/:id',
+      authMiddleware,
       validateCourseId,
       this.controller.deleteCourse.bind(this.controller)
     );

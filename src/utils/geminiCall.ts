@@ -21,7 +21,7 @@ export const geminiCall = async (
       });
 
       // const model = 'gemini-2.5-pro';
-      const model = 'gemini-2.0-flash-exp';
+      const model = 'gemini-2.5-flash';
 
       const contents = [
         {

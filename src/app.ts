@@ -16,6 +16,7 @@ import { CourseContainer } from './features/course/container';
 import { errorHandler } from './middlewares/error.middleware';
 import { AppRoutes } from './routes';
 import { LessonContainer } from './features/lesson/container';
+import { ModuleContainer } from './features/modules/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -32,12 +33,14 @@ class App {
   private courseContainer: CourseContainer;
   private chapterContainer: ChapterContainer;
   private lessonContainer: LessonContainer;
+  private moduleContainer: ModuleContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
     courseContainer: CourseContainer = new CourseContainer(),
     chapterContainer: ChapterContainer = new ChapterContainer(),
-    lessonContainer: LessonContainer = new LessonContainer()
+    lessonContainer: LessonContainer = new LessonContainer(),
+    moduleContainer: ModuleContainer = new ModuleContainer()
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -46,6 +49,7 @@ class App {
     this.courseContainer = courseContainer;
     this.chapterContainer = chapterContainer;
     this.lessonContainer = lessonContainer;
+    this.moduleContainer = moduleContainer;
 
     this.app.use(express.json());
     this.app.use(helmet());
@@ -70,7 +74,8 @@ class App {
       this.authContainer,
       this.courseContainer,
       this.chapterContainer,
-      this.lessonContainer
+      this.lessonContainer,
+      this.moduleContainer
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -39,104 +39,57 @@ export interface LessonResponse {
   total?: number;
 }
 
-export const lessonSchema = {
-  type: 'OBJECT',
+export const lessonsSchema = {
+  type: 'object',
   properties: {
     lessons: {
-      type: 'ARRAY',
+      type: 'array',
       items: {
-        type: 'OBJECT',
+        type: 'object',
         properties: {
-          lessonOrder: {
-            type: 'NUMBER',
-            description:
-              'The sequential order of this lesson within the chapter (starting from 1)',
-          },
-          title: {
-            type: 'STRING',
-            description: 'Clear, descriptive title for the lesson',
-          },
+          lessonOrder: { type: 'integer', minimum: 1 },
+          title: { type: 'string' },
           type: {
-            type: 'STRING',
-            description: 'Type of lesson content',
-            enum: ['video', 'article', 'quiz'],
+            type: 'string',
+            enum: ['video', 'article', 'quiz', 'exercise'],
           },
-          duration: {
-            type: 'STRING',
-            description:
-              'Estimated duration in format "Xm" (e.g., "15m", "30m")',
-          },
-          description: {
-            type: 'STRING',
-            description:
-              'Detailed 50-100 word description of what this lesson covers',
-          },
+          duration: { type: 'string', pattern: '^\\d+m$' }, // e.g., "15m"
+          description: { type: 'string' },
           content: {
-            type: 'STRING',
-            description:
-              'Detailed lesson content in markdown format (for article type) or null for video/quiz',
-            nullable: true,
+            type: ['string', 'null'],
+            minLength: 100, // Only for article type
           },
-          videoSearchQuery: {
-            type: 'STRING',
-            description:
-              'YouTube search query for finding relevant video (for video type) or null',
-            nullable: true,
-          },
+          videoSearchQuery: { type: ['string', 'null'] },
           resources: {
-            type: 'ARRAY',
+            type: 'array',
             items: {
-              type: 'OBJECT',
+              type: 'object',
               properties: {
-                title: {
-                  type: 'STRING',
-                  description: 'Title of the resource',
-                },
-                url: {
-                  type: 'STRING',
-                  description: 'URL to the resource',
-                },
+                title: { type: 'string' },
+                url: { type: 'string' },
                 type: {
-                  type: 'STRING',
-                  description: 'Type of resource',
+                  type: 'string',
                   enum: [
                     'documentation',
                     'article',
                     'tool',
                     'github',
-                    'reference',
+                    'video',
+                    'interactive',
                   ],
                 },
-                description: {
-                  type: 'STRING',
-                  description:
-                    'Brief description of what this resource provides',
-                },
+                description: { type: 'string' },
               },
-              required: ['title', 'url', 'type', 'description'],
+              required: ['title', 'url', 'type'],
             },
-            description: '2-4 supplementary learning resources',
           },
-          prerequisiteKnowledge: {
-            type: 'ARRAY',
-            items: {
-              type: 'STRING',
-            },
-            description:
-              '2-3 key concepts students should know before this lesson',
+          learningOutcome: { type: 'string' },
+          prerequisites: {
+            type: 'array',
+            items: { type: 'string' },
           },
         },
-        required: [
-          'lessonOrder',
-          'title',
-          'type',
-          'duration',
-          'description',
-          'content',
-          'videoSearchQuery',
-          'resources',
-          'prerequisiteKnowledge',
-        ],
+        required: ['lessonOrder', 'title', 'type', 'duration', 'description'],
       },
     },
   },
