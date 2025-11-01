@@ -1,4 +1,3 @@
-// TypeScript Interfaces
 export interface CapstoneProject {
   title: string;
   description: string;
@@ -41,6 +40,11 @@ export interface GenerateModulesRequest {
   noOfModules: number;
   language: string;
   prerequisites: string;
+}
+
+export interface UpdateModuleRequest extends GenerateModulesRequest {
+  userInstructions?: string;
+  keepExistingIds?: boolean;
 }
 
 export interface ModuleQueryParams {
@@ -135,6 +139,7 @@ export const modulesSchema = {
           'description',
           'estimatedDuration',
           'learningObjectives',
+          'capstoneProject',
         ],
       },
     },

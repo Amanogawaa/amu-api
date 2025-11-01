@@ -57,10 +57,23 @@ export class CourseService {
 
       logger.info('Course generated successfully', result);
 
-      const courseData = {
+      const courseData: Course = {
         ...result,
         uid: request.uid,
       };
+
+      console.log('Generated course data:', courseData);
+
+      const nameExist = await this.courseRepository.courseNameExists(
+        courseData.name,
+        courseData.uid
+      );
+
+      console.log('Course name exists:', nameExist);
+
+      if (nameExist) {
+        courseData.name = `${courseData.name} (${Date.now()})`;
+      }
 
       const createdCourse = await this.courseRepository.createCourse(
         courseData
@@ -73,9 +86,9 @@ export class CourseService {
     }
   }
 
-  public async deleteCourse(slug: string): Promise<void> {
+  public async deleteCourse(courseId: string): Promise<void> {
     try {
-      await this.courseRepository.deleteCourse(slug);
+      await this.courseRepository.deleteCourse(courseId);
     } catch (error) {
       logger.error('Error in CoursesService.deleteCourse:', error);
       throw error;

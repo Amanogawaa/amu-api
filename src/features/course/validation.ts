@@ -9,7 +9,7 @@ export const generateCourseSchema = z.object({
   duration: z.string().regex(/^\d+\s*(hour|hours|minute|minutes|day|days)$/i, {
     message: 'Duration must be in format: "X hours" or "X minutes"',
   }),
-  noOfChapters: z.number().int().min(1).max(20),
+  noOfModules: z.number().int().min(1).max(20),
   language: z.string().min(2).max(50),
 });
 
@@ -48,7 +48,7 @@ export const validateCourseId = (
     // Explicitly type as unknown
     if (error instanceof z.ZodError) {
       throw new ValidationError(
-        error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ') // Use `issues` instead of `errors`
+        error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
       );
     }
     next(error);

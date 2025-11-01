@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { CourseController } from './controller';
 import { validateCourseId, validateGenerateCourse } from './validation';
 import { authMiddleware } from '../../middlewares/auth.middleware';
+import { courseOwnershipMiddleware } from '../../middlewares/ownership.middle';
 
 export class CourseRoute {
   public router: Router;
@@ -16,10 +17,10 @@ export class CourseRoute {
   private initializeRoutes(): void {
     /**
      * @openapi
-     * /courses:
+     * /my-courses:
      *   get:
      *     tags:
-     *       - Courses
+     *       - My Courses
      *     summary: Retrieve a list of courses
      *     description: Returns an array of course objects with optional filtering
      *     parameters:
@@ -29,6 +30,11 @@ export class CourseRoute {
      *           type: string
      *           enum: [beginner, intermediate, advanced]
      *         description: Filter by difficulty level
+     *       - in: query
+     *         name: uid
+     *         schema:
+     *           type: string
+     *         description: Filter by user ID
      *       - in: query
      *         name: category
      *         schema:
@@ -59,16 +65,17 @@ export class CourseRoute {
      *         description: Internal server error
      */
     this.router.get(
-      '/courses',
+      '/my-courses',
+      authMiddleware,
       this.controller.getCourses.bind(this.controller)
     );
 
     /**
      * @openapi
-     * /courses/{id}:
+     * /my-courses/{id}:
      *   get:
      *     tags:
-     *       - Courses
+     *       - My Courses
      *     summary: Get a course by ID
      *     parameters:
      *       - in: path
@@ -84,8 +91,9 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.get(
-      '/courses/:id',
-      validateCourseId,
+      '/my-courses/:id',
+      authMiddleware,
+      courseOwnershipMiddleware,
       this.controller.getCourseById.bind(this.controller)
     );
 
@@ -94,7 +102,7 @@ export class CourseRoute {
      * /courses:
      *   post:
      *     tags:
-     *       - Courses
+     *       - My Courses
      *     summary: Generate a new course outline using AI
      *     requestBody:
      *       required: true
@@ -149,7 +157,7 @@ export class CourseRoute {
      * /courses/{id}:
      *   patch:
      *     tags:
-     *       - Courses
+     *       - My Courses
      *     summary: Update a course
      *     parameters:
      *       - in: path
@@ -180,7 +188,7 @@ export class CourseRoute {
      * /courses/{id}:
      *   delete:
      *     tags:
-     *       - Courses
+     *       - My Courses
      *     summary: Delete a course
      *     parameters:
      *       - in: path
@@ -197,8 +205,91 @@ export class CourseRoute {
     this.router.delete(
       '/courses/:id',
       authMiddleware,
+      courseOwnershipMiddleware,
       validateCourseId,
       this.controller.deleteCourse.bind(this.controller)
+    );
+
+    // public route no need auth here
+
+    /**
+     * @openapi
+     * /courses:
+     *   get:
+     *     tags:
+     *       - Public Route Courses
+     *     summary: Retrieve a list of courses
+     *     description: Returns an array of course objects with optional filtering
+     *     parameters:
+     *       - in: query
+     *         name: level
+     *         schema:
+     *           type: string
+     *           enum: [beginner, intermediate, advanced]
+     *         description: Filter by difficulty level
+     *       - in: query
+     *         name: category
+     *         schema:
+     *           type: string
+     *         description: Filter by category
+     *       - in: query
+     *         name: search
+     *         schema:
+     *           type: string
+     *         description: Filter by search term
+     *       - in: query
+     *         name: language
+     *         schema:
+     *           type: string
+     *         description: Filter by language
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           maximum: 100
+     *         description: Number of courses to return
+     *       - in: query
+     *         name: offset
+     *         schema:
+     *           type: integer
+     *           minimum: 0
+     *         description: Number of courses to skip
+     *     responses:
+     *       200:
+     *         description: A list of courses
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.get(
+      '/courses',
+      this.controller.getCourses.bind(this.controller)
+    );
+
+    /**
+     * @openapi
+     * /courses/{id}:
+     *   get:
+     *     tags:
+     *       - Public Route Courses
+     *     summary: Get a course by ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Course found
+     *       404:
+     *         description: Course not found
+     */
+    this.router.get(
+      '/courses/:id',
+      validateCourseId,
+      this.controller.getCourseById.bind(this.controller)
     );
   }
 

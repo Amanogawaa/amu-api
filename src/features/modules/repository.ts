@@ -1,7 +1,6 @@
 import { Firestore } from 'firebase-admin/firestore';
 import { firebaseFirestore } from '../../config/firebase';
 import { logger } from '../../utils/loggers';
-import type { Chapter } from '../chapter/types';
 import type { Module } from './types';
 
 export class ModuleRepository {
@@ -67,6 +66,55 @@ export class ModuleRepository {
       return createdModules;
     } catch (error) {
       logger.error('Error creating modules:', error);
+      throw error;
+    }
+  }
+
+  async updateModulesBatch(
+    modules: Module[]
+  ): Promise<{ updated: number; errors: any[] }> {
+    const batch = this.firebaseStore.batch();
+    const errors: any[] = [];
+    let updated = 0;
+
+    try {
+      for (const module of modules) {
+        if (!module.id) {
+          errors.push({ module, error: 'Module ID is required for update' });
+          continue;
+        }
+
+        const docRef = this.firebaseStore
+          .collection(this.COLLECTION_NAME)
+          .doc(module.id);
+
+        // Check if document exists
+        const doc = await docRef.get();
+        if (!doc.exists) {
+          errors.push({ module, error: 'Module not found' });
+          continue;
+        }
+
+        const { id, ...moduleDataWithoutId } = module;
+
+        const moduleData = {
+          ...moduleDataWithoutId,
+          updatedAt: new Date(),
+          learningObjectives: JSON.stringify(module.learningObjectives),
+          keySkills: JSON.stringify(module.keySkills),
+          prerequisiteModules: JSON.stringify(module.prerequisiteModules),
+          capstoneProject: module.capstoneProject
+            ? JSON.stringify(module.capstoneProject)
+            : null,
+        };
+
+        batch.update(docRef, moduleData);
+        updated++;
+      }
+
+      await batch.commit();
+      return { updated, errors };
+    } catch (error) {
       throw error;
     }
   }

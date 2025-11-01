@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { ModuleController } from './controller';
+import { validateGenerateModules } from './validation';
 
 export class ModuleRoute {
   public route: Router;
@@ -159,7 +160,7 @@ export class ModuleRoute {
      *       500:
      *         description: Internal server error
      */
-    this.route.post('/modules', (req, res, next) =>
+    this.route.post('/modules', validateGenerateModules, (req, res, next) =>
       this.controller.generateModules(req, res, next)
     );
   }

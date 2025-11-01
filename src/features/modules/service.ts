@@ -1,19 +1,25 @@
+import { AppError } from '../../utils/errors';
 import { geminiCall } from '../../utils/geminiCall';
 import { logger } from '../../utils/loggers';
 import { generateModulesPrompt } from '../../utils/prompts/module-temp';
 import type { ModuleRepository } from './repository';
-import { modulesSchema, type GenerateModulesRequest } from './types';
+import {
+  modulesSchema,
+  type GenerateModulesRequest,
+  type Module,
+  type UpdateModuleRequest,
+} from './types';
 
 export class ModuleService {
-  private moduleRepository: ModuleRepository;
+  private repository: ModuleRepository;
 
-  constructor(moduleRepository: ModuleRepository) {
-    this.moduleRepository = moduleRepository;
+  constructor(repository: ModuleRepository) {
+    this.repository = repository;
   }
 
   public async getModules(courseId: string) {
     try {
-      const modules = await this.moduleRepository.getModules(courseId);
+      const modules = await this.repository.getModules(courseId);
       return modules;
     } catch (error) {
       logger.error('Error in ModuleService.getModules:', error);
@@ -47,7 +53,7 @@ export class ModuleService {
         throw new Error('Invalid response from Gemini: missing modules array');
       }
 
-      const createdModules = await this.moduleRepository.createModules(
+      const createdModules = await this.repository.createModules(
         request.courseId,
         request.courseName,
         result.modules

@@ -7,7 +7,7 @@ export interface Course {
   subtitle?: string;
   publish: boolean;
   prerequisites: string;
-  noOfChapters: number;
+  noOfModules: number;
   name: string;
   level: 'beginner' | 'intermediate' | 'advanced';
   learning_outcomes: string[];
@@ -15,7 +15,6 @@ export interface Course {
   duration: string;
   description: string;
   category: string;
-  include_certificate: boolean;
   banner_url: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -33,6 +32,8 @@ export interface GenerateCourseRequest {
 
 export interface CourseQueryParams {
   level?: 'beginner' | 'intermediate' | 'advanced';
+  uid?: string;
+  search?: string;
   category?: string;
   language?: string;
   limit?: number;
@@ -112,5 +113,5 @@ export const courseSchema = {
     },
     bannerUrl: { type: 'string' },
   },
-  required: ['name', 'description', 'learning_outcomes', 'prerequisites'],
+  required: ['name', 'description', 'learning_outcomes', 'prerequisite  s'],
 };

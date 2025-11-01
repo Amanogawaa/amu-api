@@ -17,13 +17,14 @@ export class CourseController {
   }
 
   async getCourses(
-    request: Request,
+    request: AuthenticatedRequest,
     response: Response,
     next: NextFunction
   ): Promise<void> {
     try {
       const queryParams: CourseQueryParams = {
         level: request.query.level as any,
+        uid: request.user?.uid as string,
         category: request.query.category as string,
         language: request.query.language as string,
         limit: request.query.limit

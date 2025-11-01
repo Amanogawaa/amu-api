@@ -1,8 +1,8 @@
 import type { Firestore } from 'firebase-admin/firestore';
-import { admin, firebaseFirestore } from '../../config/firebase';
+import { firebaseFirestore } from '../../config/firebase';
+import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
 import type { Course, CourseQueryParams } from './types';
-import { AppError } from '../../utils/errors';
 
 export class CourseRepository {
   private firebaseStore: Firestore;
@@ -15,6 +15,16 @@ export class CourseRepository {
   async getCourse(params?: CourseQueryParams): Promise<Course[]> {
     try {
       let query = this.firebaseStore.collection(this.COLLECTION_NAME);
+
+      if (params?.uid) {
+        query = query.where('uid', '==', params.uid) as any;
+      }
+
+      if (params?.search) {
+        query = query
+          .where('name', '>=', params.search)
+          .where('name', '<=', params.search + '\uf8ff') as any;
+      }
 
       if (params?.level) {
         query = query.where('level', '==', params.level) as any;
@@ -98,7 +108,6 @@ export class CourseRepository {
         updatedAt: new Date(),
       };
 
-      console.log('Data from repository:', data);
       const res = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
         .add(data);
@@ -122,23 +131,77 @@ export class CourseRepository {
     }
   }
 
-  async deleteCourse(slug: string): Promise<void> {
+  async deleteCourse(courseId: string): Promise<void> {
     try {
-      const docRef = this.firebaseStore
+      const batchSize = 500;
+
+      const deleteCollection = async (collectionPath: string) => {
+        const query = this.firebaseStore
+          .collection(collectionPath)
+          .where('courseId', '==', courseId)
+          .limit(batchSize);
+
+        return new Promise<void>((resolve, reject) => {
+          this.deleteQueryBatch(query, resolve, reject);
+        });
+      };
+
+      await Promise.all([
+        deleteCollection('modules'),
+        deleteCollection('chapters'),
+        deleteCollection('lessons'),
+      ]);
+
+      await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .doc(slug);
-      const doc = await docRef.get();
+        .doc(courseId)
+        .delete();
 
-      if (!doc.exists) {
-        logger.info(`No course found with ID: ${slug}`);
-        throw new AppError('Course not found', 404);
-      }
-
-      await docRef.delete();
-      logger.info(`Course with ID: ${slug} has been deleted.`);
+      logger.info(
+        `Course with ID: ${courseId} and its related data have been deleted.`
+      );
     } catch (error) {
       logger.error('Error in CourseRepository.deleteCourse:', error);
       throw error;
     }
+  }
+
+  private async deleteQueryBatch(
+    query: any,
+    resolve: () => void,
+    reject: (error: any) => void
+  ): Promise<void> {
+    try {
+      const snapshot = await query.get();
+
+      if (snapshot.size === 0) {
+        resolve();
+        return;
+      }
+
+      const batch = this.firebaseStore.batch();
+      snapshot.docs.forEach((doc: any) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+
+      process.nextTick(() => {
+        this.deleteQueryBatch(query, resolve, reject);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  }
+
+  async courseNameExists(name: string, uid: string): Promise<boolean> {
+    const snapshot = await this.firebaseStore
+      .collection(this.COLLECTION_NAME)
+      .where('uid', '==', uid)
+      .where('name', '==', name)
+      .limit(1)
+      .get();
+
+    return !snapshot.empty;
   }
 }

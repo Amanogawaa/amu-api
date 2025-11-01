@@ -8,6 +8,7 @@ export const generateModulesPrompt = (args: {
   noOfModules: number;
   language: string;
   prerequisites: string;
+  userInstruction?: string;
 }) => `You are an expert curriculum designer. Create a comprehensive module structure for this course.
 
 **Course Context**:
@@ -19,6 +20,13 @@ export const generateModulesPrompt = (args: {
 - Language: ${args.language}
 - Total Duration: ${args.duration}
 - Required Modules: ${args.noOfModules}
+
+${
+  args.userInstruction
+    ? `**Additional Instructions from User**:\n${args.userInstruction}\n`
+    : ''
+}
+
 
 **Output Requirements**:
 Return ONLY valid JSON. No markdown blocks, no explanations.

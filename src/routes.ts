@@ -26,20 +26,20 @@ export class AppRoutes {
     moduleContainer: ModuleContainer
   ) {
     this.router = Router();
-    this.courseContainer = courseContainer;
     this.authContainer = authContainer;
+    this.courseContainer = courseContainer;
+    this.moduleContainer = moduleContainer;
     this.chapterContainer = chapterContainer;
     this.lessonContainer = lessonContainer;
-    this.moduleContainer = moduleContainer;
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
     this.router.use('/', this.authContainer.getRouter());
     this.router.use('/', this.courseContainer.getRouter());
+    this.router.use('/', this.moduleContainer.getRouter());
     this.router.use('/', this.chapterContainer.getRouter());
     // this.router.use('/', this.lessonContainer.getRouter());
-    this.router.use('/', this.moduleContainer.getRouter());
   }
 
   public getRouter(): Router {
