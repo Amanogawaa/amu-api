@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+bun.lockb
+
+# Development files
+.env.development.local
+.env.test.local
+.env.local
+
+# Logs
+logs
+*.log
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+REGENERATION_GUIDE.md
+.github
+
+# IDE
+.idea
+.vscode
+.DS_Store
+
+# Build artifacts
+dist
+out
+*.tsbuildinfo
+.cache
+
+# Coverage
+coverage
+*.lcov
+
+# Development config
+nodemon.json

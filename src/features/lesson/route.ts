@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import type { LessonController } from './controller';
+import { authMiddleware } from '../../middlewares/auth.middleware';
+import { courseOwnershipMiddleware } from '../../middlewares/ownership.middle';
 
 export class LessonRoute {
   public router: Router;
@@ -209,8 +211,11 @@ export class LessonRoute {
      *       500:
      *         description: Internal server error
      */
-    this.router.post('/lessons', (req, res, next) =>
-      this.controller.generateLessons(req, res, next)
+    this.router.post(
+      '/lessons',
+      authMiddleware,
+      courseOwnershipMiddleware,
+      (req, res, next) => this.controller.generateLessons(req, res, next)
     );
   }
 

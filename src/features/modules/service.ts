@@ -67,10 +67,6 @@ export class ModuleService {
     }
   }
 
-  /**
-   * Regenerate module content while preserving IDs and relationships.
-   * This updates existing modules in-place without breaking child references.
-   */
   public async regenerateModules(request: UpdateModuleRequest) {
     try {
       const existingModules = await this.repository.getModules(

@@ -115,6 +115,7 @@ export class ChapterService {
             id: existing.id,
             moduleId: existing.moduleId,
             courseName: existing.courseName,
+            moduleName: existing.moduleName,
             chapterOrder: existing.chapterOrder,
             createdAt: existing.createdAt,
           };

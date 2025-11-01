@@ -96,7 +96,6 @@ export class ChapterRepository {
           .collection(this.COLLECTION_NAME)
           .doc(chapter.id);
 
-        // Check if document exists
         const doc = await docRef.get();
         if (!doc.exists) {
           errors.push({ chapter, error: 'Chapter not found' });

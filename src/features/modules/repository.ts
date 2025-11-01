@@ -88,7 +88,6 @@ export class ModuleRepository {
           .collection(this.COLLECTION_NAME)
           .doc(module.id);
 
-        // Check if document exists
         const doc = await docRef.get();
         if (!doc.exists) {
           errors.push({ module, error: 'Module not found' });
