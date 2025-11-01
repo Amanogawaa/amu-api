@@ -11,11 +11,11 @@ export class ChapterRepository {
     this.firebaseStore = firestore;
   }
 
-  async getChapters(courseId: string) {
+  async getChapters(moduleId: string) {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where('courseId', '==', courseId)
+        .where('moduleId', '==', moduleId)
         .get();
 
       if (querySnapshot.empty) {
@@ -34,12 +34,12 @@ export class ChapterRepository {
   }
 
   async createChapters(
-    courseId: string,
-    courseName: string,
+    moduleId: string,
+    moduleName: string,
     chapters: Array<
       Omit<
         Chapter,
-        'id' | 'courseId' | 'courseName' | 'createdAt' | 'updatedAt'
+        'id' | 'moduleId' | 'moduleName' | 'createdAt' | 'updatedAt'
       >
     >
   ): Promise<Chapter[]> {
@@ -53,8 +53,8 @@ export class ChapterRepository {
           .doc();
         const data = {
           ...chapter,
-          courseId,
-          courseName,
+          moduleId,
+          moduleName,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -68,12 +68,87 @@ export class ChapterRepository {
 
       await batch.commit();
       logger.info(
-        `Created ${createdChapters.length} chapters for course ${courseId}`
+        `Created ${createdChapters.length} chapters for module ${moduleId}`
       );
 
       return createdChapters;
     } catch (error) {
       logger.error('Error in ChapterRepository.createChapters:', error);
+      throw error;
+    }
+  }
+
+  async updateChaptersBatch(
+    chapters: Chapter[]
+  ): Promise<{ updated: number; errors: any[] }> {
+    const batch = this.firebaseStore.batch();
+    const errors: any[] = [];
+    let updated = 0;
+
+    try {
+      for (const chapter of chapters) {
+        if (!chapter.id) {
+          errors.push({ chapter, error: 'Chapter ID is required for update' });
+          continue;
+        }
+
+        const docRef = this.firebaseStore
+          .collection(this.COLLECTION_NAME)
+          .doc(chapter.id);
+
+        // Check if document exists
+        const doc = await docRef.get();
+        if (!doc.exists) {
+          errors.push({ chapter, error: 'Chapter not found' });
+          continue;
+        }
+
+        const { id, ...chapterDataWithoutId } = chapter;
+
+        const chapterData = {
+          ...chapterDataWithoutId,
+          updatedAt: new Date(),
+        };
+
+        batch.update(docRef, chapterData);
+        updated++;
+      }
+
+      await batch.commit();
+      return { updated, errors };
+    } catch (error) {
+      logger.error('Error in ChapterRepository.updateChaptersBatch:', error);
+      throw error;
+    }
+  }
+
+  async deleteChaptersByModuleId(moduleId: string): Promise<void> {
+    try {
+      const querySnapshot = await this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .where('moduleId', '==', moduleId)
+        .get();
+
+      if (querySnapshot.empty) {
+        logger.info('No chapters found to delete for moduleId:', moduleId);
+        return;
+      }
+
+      const batch = this.firebaseStore.batch();
+
+      querySnapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+      logger.info(
+        `Deleted ${querySnapshot.size} chapters for moduleId: ${moduleId}`
+      );
+    } catch (error) {
+      logger.error(
+        'Error in ChapterRepository.deleteChaptersByModuleId:',
+        error
+      );
       throw error;
     }
   }

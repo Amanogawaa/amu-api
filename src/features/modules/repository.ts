@@ -118,4 +118,25 @@ export class ModuleRepository {
       throw error;
     }
   }
+
+  async deleteModulesByCourseId(courseId: string): Promise<void> {
+    try {
+      const querySnapshot = await this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .where('courseId', '==', courseId)
+        .get();
+
+      const batch = this.firebaseStore.batch();
+
+      querySnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+      logger.info(`Deleted modules for courseId: ${courseId}`);
+    } catch (error) {
+      logger.error('Error deleting modules by courseId:', error);
+      throw error;
+    }
+  }
 }

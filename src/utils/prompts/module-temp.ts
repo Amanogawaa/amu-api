@@ -8,7 +8,6 @@ export const generateModulesPrompt = (args: {
   noOfModules: number;
   language: string;
   prerequisites: string;
-  userInstruction?: string;
 }) => `You are an expert curriculum designer. Create a comprehensive module structure for this course.
 
 **Course Context**:
@@ -21,13 +20,6 @@ export const generateModulesPrompt = (args: {
 - Total Duration: ${args.duration}
 - Required Modules: ${args.noOfModules}
 
-${
-  args.userInstruction
-    ? `**Additional Instructions from User**:\n${args.userInstruction}\n`
-    : ''
-}
-
-
 **Output Requirements**:
 Return ONLY valid JSON. No markdown blocks, no explanations.
 
@@ -35,8 +27,8 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
   "modules": [
     {
       "moduleOrder": 1,
-      "title": "Clear, descriptive module title (e.g., 'JavaScript Fundamentals', 'Backend API Design')",
-      "description": "2-3 sentences explaining what learners will master in this module and why it matters",
+      "moduleName": "Clear, descriptive module title (e.g., 'JavaScript Fundamentals', 'Backend API Design')",
+      "moduleDescription": "2-3 sentences explaining what learners will master in this module and why it matters",
       "estimatedDuration": "Xh Ym format (e.g., 6h 30m)",
       "estimatedChapterCount": 4,
       "learningObjectives": [

@@ -1,10 +1,10 @@
 export interface Chapter {
   id: string;
-  courseId: string;
-  courseName: string;
+  moduleId: string;
   chapterOrder: number;
-  title: string;
-  description: string;
+  courseName: string;
+  chapterName: string;
+  chapterDescription: string;
   estimatedDuration: string;
   learningObjectives: string[];
   keyTopics: string[];
@@ -33,6 +33,10 @@ export interface GenerateChaptersRequest {
   moduleOrder: number;
 }
 
+export interface RegenerateChaptersRequest extends GenerateChaptersRequest {
+  userInstructions?: string;
+}
+
 export const chaptersSchema = {
   type: 'object',
   properties: {
@@ -42,8 +46,12 @@ export const chaptersSchema = {
         type: 'object',
         properties: {
           chapterOrder: { type: 'integer', minimum: 1 },
-          title: { type: 'string', minLength: 5, maxLength: 100 },
-          description: { type: 'string', minLength: 100, maxLength: 600 },
+          chapterName: { type: 'string', minLength: 5, maxLength: 100 },
+          chapterDescription: {
+            type: 'string',
+            minLength: 100,
+            maxLength: 600,
+          },
           estimatedDuration: { type: 'string' },
           estimatedLessonCount: { type: 'integer', minimum: 2, maximum: 8 },
           learningObjectives: {
@@ -66,11 +74,14 @@ export const chaptersSchema = {
         },
         required: [
           'chapterOrder',
-          'title',
-          'description',
+          'chapterName',
+          'chapterDescription',
           'estimatedDuration',
+          'estimatedLessonCount',
           'learningObjectives',
           'keyTopics',
+          'prerequisites',
+          'practicalApplication',
         ],
       },
     },
