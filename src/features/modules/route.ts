@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import type { ModuleController } from './controller';
 import { validateGenerateModules } from './validation';
+import { authMiddleware } from '../../middlewares/auth.middleware';
+import { courseOwnershipMiddleware } from '../../middlewares/ownership.middle';
 
 export class ModuleRoute {
   public route: Router;
@@ -75,7 +77,7 @@ export class ModuleRoute {
      * /modules:
      *   post:
      *     tags:
-     *       - Modules
+     *       - My Modules
      *     summary: Generate modules for a course using AI
      *     description: |
      *       Creates a complete module structure for a course using AI.
@@ -160,8 +162,12 @@ export class ModuleRoute {
      *       500:
      *         description: Internal server error
      */
-    this.route.post('/modules', validateGenerateModules, (req, res, next) =>
-      this.controller.generateModules(req, res, next)
+    this.route.post(
+      '/modules',
+      authMiddleware,
+      courseOwnershipMiddleware,
+      validateGenerateModules,
+      (req, res, next) => this.controller.generateModules(req, res, next)
     );
 
     /**
@@ -271,6 +277,8 @@ export class ModuleRoute {
      */
     this.route.put(
       '/:courseId/modules',
+      authMiddleware,
+      courseOwnershipMiddleware,
       validateGenerateModules,
       (req, res, next) => this.controller.regenerateModules(req, res, next)
     );
@@ -298,7 +306,7 @@ export class ModuleRoute {
      *             schema:
      *               type: object
      *               properties:
-     *                 message:\
+     *                 message:
      *                   type: string
      *                   example: "Modules for courseId abc123xyz deleted successfully"
      *       404:
@@ -306,8 +314,12 @@ export class ModuleRoute {
      *       500:
      *         description: Internal server error
      */
-    this.route.delete('/:courseId/modules', (req, res, next) =>
-      this.controller.deleteModulesByCourseId(req, res, next)
+    this.route.delete(
+      '/:courseId/modules',
+      authMiddleware,
+      courseOwnershipMiddleware,
+      (req, res, next) =>
+        this.controller.deleteModulesByCourseId(req, res, next)
     );
   }
 

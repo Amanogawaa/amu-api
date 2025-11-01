@@ -3,6 +3,7 @@ export interface Chapter {
   moduleId: string;
   chapterOrder: number;
   courseName: string;
+  moduleName: string;
   chapterName: string;
   chapterDescription: string;
   estimatedDuration: string;
