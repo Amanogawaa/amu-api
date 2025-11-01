@@ -1,6 +1,6 @@
 export const generateLessonsPrompt = (args: {
   chapterId: string;
-  chapterTitle: string;
+  chapterName: string;
   chapterDescription: string;
   chapterOrder: number;
   learningObjectives: string[];
@@ -20,7 +20,7 @@ export const generateLessonsPrompt = (args: {
 - Language: ${args.language}
 
 **Chapter Information**:
-- Chapter ${args.chapterOrder}: ${args.chapterTitle}
+- Chapter ${args.chapterOrder}: ${args.chapterName}
 - Description: ${args.chapterDescription}
 - Learning Objectives: ${args.learningObjectives.join('; ')}
 - Key Topics: ${args.keyTopics.join(', ')}
@@ -34,10 +34,10 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
   "lessons": [
     {
       "lessonOrder": 1,
-      "title": "Clear, action-oriented lesson title",
+      "lessonName": "Clear, action-oriented lesson title",
       "type": "video | article | quiz | exercise",
       "duration": "Xm format (e.g., 15m, 30m)",
-      "description": "2-3 sentences: what is covered, why it matters, what students will learn",
+      "lessonDescription": "2-3 sentences: what is covered, why it matters, what students will learn",
       "content": "For article: comprehensive markdown. For video: detailed script outline. For quiz/exercise: null",
       "videoSearchQuery": "For video: specific YouTube search query. For others: null",
       "resources": [
@@ -81,7 +81,7 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
    **For "video" lessons**:
    - Provide detailed outline (5-8 key points to cover)
    - Include videoSearchQuery: specific, targeted search terms
-   - Format: "${args.chapterTitle} {specific topic} tutorial ${args.level}"
+   - Format: "${args.chapterName} {specific topic} tutorial ${args.level}"
    - Example: "React useState hook tutorial beginner"
    - Focus: Conceptual explanations, demonstrations, walkthroughs
 

@@ -2,14 +2,15 @@ export interface Lesson {
   id: string;
   chapterId: string;
   lessonOrder: number;
-  title: string;
+  lessonName: string;
   type: 'video' | 'article' | 'quiz';
   duration: string;
-  description: string;
+  lessonDescription: string;
   content: string | null;
   videoSearchQuery: string | null;
   resources: LessonResource[];
-  prerequisiteKnowledge: string[];
+  learningOutcome: string;
+  prerequisites: string[];
 }
 
 export interface LessonResource {
@@ -21,7 +22,7 @@ export interface LessonResource {
 
 export interface GenerateLessonRequest {
   chapterId: string;
-  chapterTitle: string;
+  chapterName: string;
   chapterDescription: string;
   chapterOrder: number;
   learningObjectives: string[];
@@ -29,6 +30,7 @@ export interface GenerateLessonRequest {
   estimatedDuration: string;
   estimatedLessonCount: number;
   courseName: string;
+  moduleName: string;
   level: string;
   language: string;
 }
@@ -48,16 +50,16 @@ export const lessonsSchema = {
         type: 'object',
         properties: {
           lessonOrder: { type: 'integer', minimum: 1 },
-          title: { type: 'string' },
+          lessonName: { type: 'string' },
           type: {
             type: 'string',
             enum: ['video', 'article', 'quiz', 'exercise'],
           },
-          duration: { type: 'string', pattern: '^\\d+m$' }, // e.g., "15m"
-          description: { type: 'string' },
+          duration: { type: 'string', pattern: '^\\d+m$' },
+          lessonDescription: { type: 'string' },
           content: {
             type: ['string', 'null'],
-            minLength: 100, // Only for article type
+            minLength: 100,
           },
           videoSearchQuery: { type: ['string', 'null'] },
           resources: {
@@ -89,7 +91,18 @@ export const lessonsSchema = {
             items: { type: 'string' },
           },
         },
-        required: ['lessonOrder', 'title', 'type', 'duration', 'description'],
+        required: [
+          'lessonOrder',
+          'lessonName',
+          'type',
+          'duration',
+          'lessonDescription',
+          'content',
+          'videoSearchQuery',
+          'resources',
+          'learningOutcome',
+          'prerequisites',
+        ],
       },
     },
   },

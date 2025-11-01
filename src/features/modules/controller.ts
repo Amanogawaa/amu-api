@@ -50,4 +50,64 @@ export class ModuleController {
       next(error);
     }
   }
+
+  async regenerateModules(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { courseId } = request.params;
+
+      if (!courseId) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      const regenerationRequest = {
+        ...request.body,
+        courseId,
+      };
+
+      const result = await this.service.regenerateModules(regenerationRequest);
+
+      response.status(200).json({
+        data: result.modules,
+        message: `Successfully regenerated ${result.updated} modules`,
+        updated: result.updated,
+        errors: result.errors.length > 0 ? result.errors : undefined,
+      });
+    } catch (error) {
+      logger.error('Error in ModuleController.regenerateModules:', error);
+      next(error);
+    }
+  }
+
+  async deleteModulesByCourseId(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { courseId } = request.params;
+
+      if (!courseId) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      await this.service.deleteModulesByCourseId(courseId);
+
+      response.status(200).json({
+        message: `Modules for courseId ${courseId} deleted successfully`,
+      });
+    } catch (error) {
+      logger.error('Error in ModuleController.deleteModulesByCourseId:', error);
+      next(error);
+    }
+  }
 }

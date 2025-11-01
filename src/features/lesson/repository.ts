@@ -71,4 +71,48 @@ export class LessonRepository {
       throw error;
     }
   }
+
+  async updateLessonsBatch(
+    lessons: Lesson[]
+  ): Promise<{ updated: number; errors: any[] }> {
+    const batch = this.firebaseStore.batch();
+    const errors: any[] = [];
+    let updated = 0;
+
+    try {
+      for (const lesson of lessons) {
+        if (!lesson.id) {
+          errors.push({ lesson, error: 'Lesson ID is required for update' });
+          continue;
+        }
+
+        const docRef = this.firebaseStore
+          .collection(this.COLLECTION_NAME)
+          .doc(lesson.id);
+
+        // Check if document exists
+        const doc = await docRef.get();
+        if (!doc.exists) {
+          errors.push({ lesson, error: 'Lesson not found' });
+          continue;
+        }
+
+        const { id, ...lessonDataWithoutId } = lesson;
+
+        const lessonData = {
+          ...lessonDataWithoutId,
+          updatedAt: new Date(),
+        };
+
+        batch.update(docRef, lessonData);
+        updated++;
+      }
+
+      await batch.commit();
+      return { updated, errors };
+    } catch (error) {
+      logger.error('Error in LessonRepository.updateLessonsBatch:', error);
+      throw error;
+    }
+  }
 }

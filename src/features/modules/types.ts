@@ -14,18 +14,18 @@ export interface CapstoneProject {
 }
 
 export interface Module {
+  capstoneProject?: CapstoneProject;
   id: string;
   courseId: string;
   courseName: string;
   moduleOrder: number;
-  title: string;
-  description: string;
+  moduleName: string;
+  moduleDescription: string;
   estimatedDuration: string;
   estimatedChapterCount?: number;
   learningObjectives: string[];
   keySkills?: string[];
   prerequisiteModules?: string[];
-  capstoneProject?: CapstoneProject;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -59,7 +59,6 @@ export interface ModuleResponse {
   total?: number;
 }
 
-// Schema for Gemini AI structured output
 export const modulesSchema = {
   type: 'object',
   properties: {
@@ -69,8 +68,8 @@ export const modulesSchema = {
         type: 'object',
         properties: {
           moduleOrder: { type: 'integer', minimum: 1 },
-          title: { type: 'string', minLength: 5, maxLength: 100 },
-          description: { type: 'string', minLength: 50, maxLength: 500 },
+          moduleName: { type: 'string', minLength: 5, maxLength: 100 },
+          moduleDescription: { type: 'string', minLength: 50, maxLength: 500 },
           estimatedDuration: {
             type: 'string',
             pattern: '^\\d+h( \\d+m)?$|^\\d+m$', // e.g., "6h 30m" or "45m"
@@ -135,11 +134,14 @@ export const modulesSchema = {
         },
         required: [
           'moduleOrder',
-          'title',
-          'description',
+          'moduleName',
+          'moduleDescription',
           'estimatedDuration',
           'learningObjectives',
           'capstoneProject',
+          'estimatedChapterCount',
+          'keySkills',
+          'prerequisiteModules',
         ],
       },
     },
