@@ -16,6 +16,8 @@ export interface Course {
   description: string;
   category: string;
   banner_url: string;
+  likesCount?: number;
+  commentsCount?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -113,5 +115,5 @@ export const courseSchema = {
     },
     bannerUrl: { type: 'string' },
   },
-  required: ['name', 'description', 'learning_outcomes', 'prerequisite  s'],
+  required: ['name', 'description', 'learning_outcomes', 'prerequisites'],
 };

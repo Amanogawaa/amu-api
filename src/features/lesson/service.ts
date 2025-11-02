@@ -2,7 +2,11 @@ import { geminiCall } from '../../utils/geminiCall';
 import { logger } from '../../utils/loggers';
 import { generateLessonsPrompt } from '../../utils/prompts/lesson-temp';
 import { LessonRepository } from './repository';
-import { lessonsSchema, type GenerateLessonRequest } from './types';
+import {
+  lessonsSchema,
+  type GenerateLessonRequest,
+  type Lesson,
+} from './types';
 
 export class LessonService {
   private lessonRepository: LessonRepository;
@@ -25,7 +29,7 @@ export class LessonService {
     try {
       const prompt = generateLessonsPrompt({
         chapterId: request.chapterId,
-        chapterTitle: request.chapterTitle,
+        chapterName: request.chapterName,
         chapterDescription: request.chapterDescription,
         chapterOrder: request.chapterOrder,
         learningObjectives: request.learningObjectives,
@@ -33,6 +37,7 @@ export class LessonService {
         estimatedDuration: request.estimatedDuration,
         estimatedLessonCount: request.estimatedLessonCount,
         courseName: request.courseName,
+        moduleName: request.moduleName,
         level: request.level,
         language: request.language,
       });
@@ -58,6 +63,44 @@ export class LessonService {
       return createdLessons;
     } catch (error) {
       logger.error('Error in LessonService.generateLessons:', error);
+      throw error;
+    }
+  }
+
+  public async getLessonById(lessonId: string) {
+    try {
+      const lesson = await this.lessonRepository.getLessonById(lessonId);
+      if (!lesson) {
+        throw new Error('Lesson not found');
+      }
+      return lesson;
+    } catch (error) {
+      logger.error('Error in LessonService.getLessonById:', error);
+      throw error;
+    }
+  }
+
+  public async updateLesson(
+    lessonId: string,
+    lessonData: Partial<Omit<Lesson, 'id' | 'chapterId' | 'createdAt'>>
+  ) {
+    try {
+      const updatedLesson = await this.lessonRepository.updateLesson(
+        lessonId,
+        lessonData
+      );
+      return updatedLesson;
+    } catch (error) {
+      logger.error('Error in LessonService.updateLesson:', error);
+      throw error;
+    }
+  }
+
+  public async deleteLesson(lessonId: string) {
+    try {
+      await this.lessonRepository.deleteLesson(lessonId);
+    } catch (error) {
+      logger.error('Error in LessonService.deleteLesson:', error);
       throw error;
     }
   }

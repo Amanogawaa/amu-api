@@ -115,4 +115,76 @@ export class LessonRepository {
       throw error;
     }
   }
+
+  async getLessonById(lessonId: string): Promise<Lesson | null> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .doc(lessonId);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      return {
+        id: doc.id,
+        ...doc.data(),
+      } as Lesson;
+    } catch (error) {
+      logger.error('Error in LessonRepository.getLessonById:', error);
+      throw error;
+    }
+  }
+
+  async updateLesson(
+    lessonId: string,
+    lessonData: Partial<Omit<Lesson, 'id' | 'chapterId' | 'createdAt'>>
+  ): Promise<Lesson> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .doc(lessonId);
+
+      const doc = await docRef.get();
+      if (!doc.exists) {
+        throw new Error('Lesson not found');
+      }
+
+      const updateData = {
+        ...lessonData,
+        updatedAt: new Date(),
+      };
+
+      await docRef.update(updateData);
+
+      const updatedDoc = await docRef.get();
+      return {
+        id: updatedDoc.id,
+        ...updatedDoc.data(),
+      } as Lesson;
+    } catch (error) {
+      logger.error('Error in LessonRepository.updateLesson:', error);
+      throw error;
+    }
+  }
+
+  async deleteLesson(lessonId: string): Promise<void> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .doc(lessonId);
+
+      const doc = await docRef.get();
+      if (!doc.exists) {
+        throw new Error('Lesson not found');
+      }
+
+      await docRef.delete();
+      logger.info(`Deleted lesson ${lessonId}`);
+    } catch (error) {
+      logger.error('Error in LessonRepository.deleteLesson:', error);
+      throw error;
+    }
+  }
 }

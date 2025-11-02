@@ -41,6 +41,19 @@ export interface LessonResponse {
   total?: number;
 }
 
+export interface UpdateLessonRequest {
+  lessonOrder?: number;
+  lessonName?: string;
+  type?: 'video' | 'article' | 'quiz';
+  duration?: string;
+  lessonDescription?: string;
+  content?: string | null;
+  videoSearchQuery?: string | null;
+  resources?: LessonResource[];
+  learningOutcome?: string;
+  prerequisites?: string[];
+}
+
 export const lessonsSchema = {
   type: 'object',
   properties: {
