@@ -1,5 +1,7 @@
 # Amu API
 
+testing github action
+
 Backend API for the Amu AI-powered learning platform. Built with Express, Bun runtime, Firebase Admin SDK, and Google Gemini AI for intelligent course content generation.
 
 ## 🚀 Quick Start
