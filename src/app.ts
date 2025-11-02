@@ -17,6 +17,9 @@ import { errorHandler } from './middlewares/error.middleware';
 import { AppRoutes } from './routes';
 import { LessonContainer } from './features/lesson/container';
 import { ModuleContainer } from './features/modules/container';
+import { ProgressContainer } from './features/progress/container';
+import { LikesContainer } from './features/likes/container';
+import { CommentsContainer } from './features/comments/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -34,13 +37,19 @@ class App {
   private chapterContainer: ChapterContainer;
   private lessonContainer: LessonContainer;
   private moduleContainer: ModuleContainer;
+  private progressContainer: ProgressContainer;
+  private likesContainer: LikesContainer;
+  private commentsContainer: CommentsContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
     courseContainer: CourseContainer = new CourseContainer(),
     chapterContainer: ChapterContainer = new ChapterContainer(),
     lessonContainer: LessonContainer = new LessonContainer(),
-    moduleContainer: ModuleContainer = new ModuleContainer()
+    moduleContainer: ModuleContainer = new ModuleContainer(),
+    progressContainer: ProgressContainer = new ProgressContainer(),
+    likesContainer: LikesContainer = new LikesContainer(),
+    commentsContainer: CommentsContainer = new CommentsContainer()
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -50,6 +59,9 @@ class App {
     this.chapterContainer = chapterContainer;
     this.lessonContainer = lessonContainer;
     this.moduleContainer = moduleContainer;
+    this.progressContainer = progressContainer;
+    this.likesContainer = likesContainer;
+    this.commentsContainer = commentsContainer;
 
     this.app.use(express.json());
     this.app.use(helmet());
@@ -75,7 +87,10 @@ class App {
       this.courseContainer,
       this.chapterContainer,
       this.lessonContainer,
-      this.moduleContainer
+      this.moduleContainer,
+      this.progressContainer,
+      this.likesContainer,
+      this.commentsContainer
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -202,8 +202,8 @@ export class ChapterRoute {
      */
     this.router.post(
       '/chapter',
-      authMiddleware,
-      courseOwnershipMiddleware,
+      // authMiddleware,
+      // courseOwnershipMiddleware,
       (req, res, next) => this.controller.generateChapter(req, res, next)
     );
 

@@ -48,7 +48,7 @@ export class LessonRoute {
      *                         type: string
      *                       lessonOrder:
      *                         type: integer
-     *                       title:
+     *                       lessonName:
      *                         type: string
      *                       type:
      *                         type: string
@@ -56,7 +56,7 @@ export class LessonRoute {
      *                       duration:
      *                         type: string
      *                         example: "15m"
-     *                       description:
+     *                       lessonDescription:
      *                         type: string
      *                       content:
      *                         type: string
@@ -78,16 +78,12 @@ export class LessonRoute {
      *                               enum: [documentation, article, tool, github, reference]
      *                             description:
      *                               type: string
-     *                       prerequisiteKnowledge:
+     *                       learningOutcome:
+     *                         type: string
+     *                       prerequisites:
      *                         type: array
      *                         items:
      *                           type: string
-     *                       createdAt:
-     *                         type: string
-     *                         format: date-time
-     *                       updatedAt:
-     *                         type: string
-     *                         format: date-time
      *                 message:
      *                   type: string
      *                 total:
@@ -117,7 +113,7 @@ export class LessonRoute {
      *             type: object
      *             required:
      *               - chapterId
-     *               - chapterTitle
+     *               - chapterName
      *               - chapterDescription
      *               - chapterOrder
      *               - learningObjectives
@@ -125,12 +121,13 @@ export class LessonRoute {
      *               - estimatedDuration
      *               - estimatedLessonCount
      *               - courseName
+     *               - moduleName
      *               - level
      *               - language
      *             properties:
      *               chapterId:
      *                 type: string
-     *               chapterTitle:
+     *               chapterName:
      *                 type: string
      *               chapterDescription:
      *                 type: string
@@ -151,13 +148,15 @@ export class LessonRoute {
      *                 type: integer
      *               courseName:
      *                 type: string
+     *               moduleName:
+     *                 type: string
      *               level:
      *                 type: string
      *                 enum: [beginner, intermediate, advanced]
      *               language:
      *                 type: string
      *     responses:
-     *       200:
+     *       201:
      *         description: Lessons generated successfully
      *         content:
      *           application/json:
@@ -171,14 +170,14 @@ export class LessonRoute {
      *                     properties:
      *                       lessonOrder:
      *                         type: integer
-     *                       title:
+     *                       lessonName:
      *                         type: string
      *                       type:
      *                         type: string
      *                         enum: [video, article, quiz]
      *                       duration:
      *                         type: string
-     *                       description:
+     *                       lessonDescription:
      *                         type: string
      *                       content:
      *                         type: string
@@ -200,7 +199,9 @@ export class LessonRoute {
      *                               enum: [documentation, article, tool, github, reference]
      *                             description:
      *                               type: string
-     *                       prerequisiteKnowledge:
+     *                       learningOutcome:
+     *                         type: string
+     *                       prerequisites:
      *                         type: array
      *                         items:
      *                           type: string
@@ -213,9 +214,251 @@ export class LessonRoute {
      */
     this.router.post(
       '/lessons',
+      // authMiddleware,
+      // courseOwnershipMiddleware,
+      (req, res, next) => this.controller.generateLessons(req, res, next)
+    );
+
+    /**
+     * @openapi
+     * /lessons/{lessonId}:
+     *   get:
+     *     tags:
+     *       - Lessons
+     *     summary: Get a single lesson by ID
+     *     description: Retrieves detailed information about a specific lesson
+     *     parameters:
+     *       - in: path
+     *         name: lessonId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the lesson to retrieve
+     *     responses:
+     *       200:
+     *         description: Lesson retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     id:
+     *                       type: string
+     *                     chapterId:
+     *                       type: string
+     *                     lessonOrder:
+     *                       type: integer
+     *                     lessonName:
+     *                       type: string
+     *                     type:
+     *                       type: string
+     *                       enum: [video, article, quiz]
+     *                     duration:
+     *                       type: string
+     *                     lessonDescription:
+     *                       type: string
+     *                     content:
+     *                       type: string
+     *                       nullable: true
+     *                     videoSearchQuery:
+     *                       type: string
+     *                       nullable: true
+     *                     resources:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         properties:
+     *                           title:
+     *                             type: string
+     *                           url:
+     *                             type: string
+     *                           type:
+     *                             type: string
+     *                             enum: [documentation, article, tool, github, reference]
+     *                           description:
+     *                             type: string
+     *                     learningOutcome:
+     *                       type: string
+     *                     prerequisites:
+     *                       type: array
+     *                       items:
+     *                         type: string
+     *                 message:
+     *                   type: string
+     *       404:
+     *         description: Lesson not found
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.get('/lessons/:lessonId', (req, res, next) =>
+      this.controller.getLessonById(req, res, next)
+    );
+
+    /**
+     * @openapi
+     * /lessons/{lessonId}:
+     *   patch:
+     *     tags:
+     *       - Lessons
+     *     summary: Update a lesson
+     *     description: Updates specific fields of an existing lesson
+     *     parameters:
+     *       - in: path
+     *         name: lessonId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the lesson to update
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               lessonOrder:
+     *                 type: integer
+     *               lessonName:
+     *                 type: string
+     *               type:
+     *                 type: string
+     *                 enum: [video, article, quiz]
+     *               duration:
+     *                 type: string
+     *               lessonDescription:
+     *                 type: string
+     *               content:
+     *                 type: string
+     *                 nullable: true
+     *               videoSearchQuery:
+     *                 type: string
+     *                 nullable: true
+     *               resources:
+     *                 type: array
+     *                 items:
+     *                   type: object
+     *                   properties:
+     *                     title:
+     *                       type: string
+     *                     url:
+     *                       type: string
+     *                     type:
+     *                       type: string
+     *                       enum: [documentation, article, tool, github, reference]
+     *                     description:
+     *                       type: string
+     *               learningOutcome:
+     *                 type: string
+     *               prerequisites:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *     responses:
+     *       200:
+     *         description: Lesson updated successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     id:
+     *                       type: string
+     *                     chapterId:
+     *                       type: string
+     *                     lessonOrder:
+     *                       type: integer
+     *                     lessonName:
+     *                       type: string
+     *                     type:
+     *                       type: string
+     *                       enum: [video, article, quiz]
+     *                     duration:
+     *                       type: string
+     *                     lessonDescription:
+     *                       type: string
+     *                     content:
+     *                       type: string
+     *                       nullable: true
+     *                     videoSearchQuery:
+     *                       type: string
+     *                       nullable: true
+     *                     resources:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         properties:
+     *                           title:
+     *                             type: string
+     *                           url:
+     *                             type: string
+     *                           type:
+     *                             type: string
+     *                             enum: [documentation, article, tool, github, reference]
+     *                           description:
+     *                             type: string
+     *                     learningOutcome:
+     *                       type: string
+     *                     prerequisites:
+     *                       type: array
+     *                       items:
+     *                         type: string
+     *                 message:
+     *                   type: string
+     *       404:
+     *         description: Lesson not found
+     *       400:
+     *         description: Invalid request body
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.patch(
+      '/lessons/:lessonId',
       authMiddleware,
       courseOwnershipMiddleware,
-      (req, res, next) => this.controller.generateLessons(req, res, next)
+      (req, res, next) => this.controller.updateLesson(req, res, next)
+    );
+
+    /**
+     * @openapi
+     * /lessons/{lessonId}:
+     *   delete:
+     *     tags:
+     *       - Lessons
+     *     summary: Delete a lesson
+     *     description: Permanently deletes a lesson from the system
+     *     parameters:
+     *       - in: path
+     *         name: lessonId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the lesson to delete
+     *     responses:
+     *       200:
+     *         description: Lesson deleted successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *       404:
+     *         description: Lesson not found
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.delete(
+      '/lessons/:lessonId',
+      // authMiddleware,
+      // courseOwnershipMiddleware,
+      (req, res, next) => this.controller.deleteLesson(req, res, next)
     );
   }
 

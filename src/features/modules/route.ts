@@ -77,7 +77,7 @@ export class ModuleRoute {
      * /modules:
      *   post:
      *     tags:
-     *       - My Modules
+     *       - Modules
      *     summary: Generate modules for a course using AI
      *     description: |
      *       Creates a complete module structure for a course using AI.
