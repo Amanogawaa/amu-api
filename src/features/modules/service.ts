@@ -27,6 +27,16 @@ export class ModuleService {
     }
   }
 
+  public async getModule(moduleId: string) {
+    try {
+      const module = await this.repository.getModule(moduleId);
+      return module;
+    } catch (error) {
+      logger.error('Error in ModuleService.getModule:', error);
+      throw error;
+    }
+  }
+
   public async generateModules(request: GenerateModulesRequest) {
     try {
       const prompt = generateModulesPrompt({
@@ -56,6 +66,8 @@ export class ModuleService {
       const createdModules = await this.repository.createModules(
         request.courseId,
         request.courseName,
+        request.level,
+        request.language,
         result.modules
       );
 
@@ -113,6 +125,8 @@ export class ModuleService {
             id: existing.id,
             courseId: existing.courseId,
             courseName: existing.courseName,
+            level: existing.level,
+            language: existing.language,
             moduleOrder: existing.moduleOrder,
             createdAt: existing.createdAt,
           };

@@ -32,6 +32,36 @@ export class ModuleController {
     }
   }
 
+  async getModule(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { moduleId } = request.params;
+      if (!moduleId) {
+        response.status(400).json({
+          message: 'Module ID is required',
+        });
+        return;
+      }
+
+      const module = await this.service.getModule(moduleId!);
+
+      if (!module) {
+        response.status(404).json({
+          message: 'Module not found',
+        });
+        return;
+      }
+
+      response.status(200).send(module);
+    } catch (error) {
+      logger.error('Error in ModuleController.getModule:', error);
+      next(error);
+    }
+  }
+
   async generateModules(
     request: Request,
     response: Response,

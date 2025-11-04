@@ -33,11 +33,41 @@ export class ModuleRepository {
     }
   }
 
+  async getModule(moduleId: string) {
+    try {
+      const docRef = await this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .doc(moduleId)
+        .get();
+
+      if (!docRef.exists) {
+        logger.info('No matching module found.');
+        return null;
+      }
+
+      return { id: docRef.id, ...docRef.data() } as Module;
+    } catch (error) {
+      logger.error('Error in ModuleRepository.getModule:', error);
+      throw error;
+    }
+  }
+
   async createModules(
     courseId: string,
     courseName: string,
+    level: 'beginner' | 'intermediate' | 'advanced',
+    language: string,
     modules: Array<
-      Omit<Module, 'id' | 'courseId' | 'courseName' | 'createdAt' | 'updatedAt'>
+      Omit<
+        Module,
+        | 'id'
+        | 'courseId'
+        | 'courseName'
+        | 'level'
+        | 'language'
+        | 'createdAt'
+        | 'updatedAt'
+      >
     >
   ): Promise<Module[]> {
     const batch = this.firebaseStore.batch();
@@ -53,6 +83,8 @@ export class ModuleRepository {
           ...module,
           courseId,
           courseName,
+          level,
+          language,
           createdAt: new Date(),
           updatedAt: new Date(),
         };

@@ -123,4 +123,90 @@ export class CourseController {
       next(error);
     }
   }
+
+  async validateCourseCompleteness(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = request.params;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      const validation = await this.service.validateCourseCompleteness(id);
+
+      response.status(200).json({
+        data: validation,
+        message: validation.isComplete
+          ? 'Course is complete and ready to publish'
+          : 'Course is incomplete',
+      });
+    } catch (error) {
+      logger.error(
+        'Error in CourseController.validateCourseCompleteness:',
+        error
+      );
+      next(error);
+    }
+  }
+
+  async publishCourse(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = request.params;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      const course = await this.service.publishCourse(id);
+
+      response.status(200).json({
+        data: course,
+        message: 'Course published successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CourseController.publishCourse:', error);
+      next(error);
+    }
+  }
+
+  async unpublishCourse(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = request.params;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      const course = await this.service.unpublishCourse(id);
+
+      response.status(200).json({
+        data: course,
+        message: 'Course unpublished successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CourseController.unpublishCourse:', error);
+      next(error);
+    }
+  }
 }

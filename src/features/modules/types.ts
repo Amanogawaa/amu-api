@@ -26,6 +26,8 @@ export interface Module {
   learningObjectives: string[];
   keySkills?: string[];
   prerequisiteModules?: string[];
+  level: 'beginner' | 'intermediate' | 'advanced';
+  language: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

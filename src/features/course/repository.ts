@@ -204,4 +204,30 @@ export class CourseRepository {
 
     return !snapshot.empty;
   }
+
+  async updateCourse(
+    courseId: string,
+    updates: Partial<Course>
+  ): Promise<void> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .doc(courseId);
+
+      const doc = await docRef.get();
+      if (!doc.exists) {
+        throw new AppError('Course not found', 404);
+      }
+
+      await docRef.update({
+        ...updates,
+        updatedAt: new Date(),
+      });
+
+      logger.info(`Course with ID: ${courseId} has been updated.`);
+    } catch (error) {
+      logger.error('Error in CourseRepository.updateCourse:', error);
+      throw error;
+    }
+  }
 }

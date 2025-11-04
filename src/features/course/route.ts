@@ -291,6 +291,126 @@ export class CourseRoute {
       validateCourseId,
       this.controller.getCourseById.bind(this.controller)
     );
+
+    /**
+     * @openapi
+     * /courses/{id}/validate:
+     *   get:
+     *     tags:
+     *       - My Courses
+     *     summary: Validate course completeness before publishing
+     *     description: Check if course has all required components (modules, chapters, lessons)
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Validation result
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     isComplete:
+     *                       type: boolean
+     *                     missingComponents:
+     *                       type: array
+     *                       items:
+     *                         type: string
+     *                     details:
+     *                       type: object
+     *                       properties:
+     *                         hasModules:
+     *                           type: boolean
+     *                         modulesCount:
+     *                           type: integer
+     *                         hasChapters:
+     *                           type: boolean
+     *                         chaptersCount:
+     *                           type: integer
+     *                         hasLessons:
+     *                           type: boolean
+     *                         lessonsCount:
+     *                           type: integer
+     *       400:
+     *         description: Invalid course ID
+     *       404:
+     *         description: Course not found
+     */
+    this.router.get(
+      '/courses/:id/validate',
+      authMiddleware,
+      validateCourseId,
+      courseOwnershipMiddleware,
+      this.controller.validateCourseCompleteness.bind(this.controller)
+    );
+
+    /**
+     * @openapi
+     * /courses/{id}/publish:
+     *   patch:
+     *     tags:
+     *       - My Courses
+     *     summary: Publish a course
+     *     description: Publish a course after validating it has all required components
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Course published successfully
+     *       400:
+     *         description: Course is incomplete or invalid
+     *       404:
+     *         description: Course not found
+     */
+    this.router.patch(
+      '/courses/:id/publish',
+      authMiddleware,
+      validateCourseId,
+      courseOwnershipMiddleware,
+      this.controller.publishCourse.bind(this.controller)
+    );
+
+    /**
+     * @openapi
+     * /courses/{id}/unpublish:
+     *   patch:
+     *     tags:
+     *       - My Courses
+     *     summary: Unpublish a course
+     *     description: Set course publish status to false
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Course unpublished successfully
+     *       404:
+     *         description: Course not found
+     */
+    this.router.patch(
+      '/courses/:id/unpublish',
+      authMiddleware,
+      validateCourseId,
+      courseOwnershipMiddleware,
+      this.controller.unpublishCourse.bind(this.controller)
+    );
   }
 
   public getRouter(): Router {

@@ -73,6 +73,37 @@ export class ModuleRoute {
     );
 
     /**
+     *  @openapi
+     * /modules/{moduleId}:
+     *   get:
+     *     tags:
+     *       - Modules
+     *     summary: Get a specific module by ID
+     *     description: Retrieves a learning module by its unique ID
+     *     parameters:
+     *       - in: path
+     *         name: moduleId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the module
+     *     responses:
+     *       200:
+     *         description: Module retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Module'
+     *       404:
+     *         description: Module not found
+     *       500:
+     *         description: Internal server error
+     */
+    this.route.get('/modules/:moduleId', (req, res, next) =>
+      this.controller.getModule(req, res, next)
+    );
+
+    /**
      * @openapi
      * /modules:
      *   post:
