@@ -12,6 +12,7 @@ import type { ModuleContainer } from './features/modules/container';
 import type { ProgressContainer } from './features/progress/container';
 import type { LikesContainer } from './features/likes/container';
 import type { CommentsContainer } from './features/comments/container';
+import socketTestRoutes from './features/socket/route';
 
 export class AppRoutes {
   private router: Router;
@@ -65,6 +66,7 @@ export class AppRoutes {
     this.router.use('/', this.progressContainer.getRouter());
     this.router.use('/', this.likesContainer.getRouter());
     this.router.use('/', this.commentsContainer.getRouter());
+    this.router.use('/socket', socketTestRoutes);
   }
 
   public getRouter(): Router {

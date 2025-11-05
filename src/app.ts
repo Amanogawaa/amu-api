@@ -8,6 +8,10 @@ import http from 'http';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger';
 import { logger } from './utils/loggers';
+import type { Server as SocketIOServer } from 'socket.io';
+import { initializeSocketIO } from './config/socket';
+import { socketAuthMiddleware } from './middlewares/socket.middleware';
+import { SocketHandlers } from './utils/socket.handlers';
 
 // mods
 import { AuthContainer } from './features/auth/container';
@@ -30,6 +34,8 @@ const CORSOPTIONS = {
 class App {
   public app: Application;
   public server: http.Server;
+  public io: SocketIOServer;
+  public socketHandlers: SocketHandlers;
 
   private appRoutes!: AppRoutes;
   private authContainer: AuthContainer;
@@ -53,6 +59,11 @@ class App {
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
+
+    this.io = initializeSocketIO(this.server);
+    this.io.use(socketAuthMiddleware);
+    this.socketHandlers = new SocketHandlers(this.io);
+    this.socketHandlers.registerHandlers();
 
     this.authContainer = authContainer;
     this.courseContainer = courseContainer;
@@ -96,6 +107,9 @@ class App {
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
     this.app.use('/api', this.appRoutes.getRouter());
+
+    this.app.locals.io = this.io;
+    this.app.locals.socketHandlers = this.socketHandlers;
   }
 
   private initializeMiddleware(): void {

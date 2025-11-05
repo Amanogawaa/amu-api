@@ -1,6 +1,7 @@
 import { logger } from '../../utils/loggers';
 import type { ModuleService } from './service';
 import type { NextFunction, Request, Response } from 'express';
+import { notifyModuleCreated } from './../../utils/socket.helpers';
 
 export class ModuleController {
   private service: ModuleService;
@@ -71,6 +72,8 @@ export class ModuleController {
       const moduleRequest = request.body;
       const createdModules = await this.service.generateModules(moduleRequest);
 
+      notifyModuleCreated(request, moduleRequest.courseId, createdModules);
+
       response.status(201).json({
         data: createdModules,
         message: 'Modules generated successfully',
@@ -102,6 +105,8 @@ export class ModuleController {
       };
 
       const result = await this.service.regenerateModules(regenerationRequest);
+
+      notifyModuleCreated(request, courseId, result.modules);
 
       response.status(200).json({
         data: result.modules,
