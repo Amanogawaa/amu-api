@@ -18,10 +18,7 @@ export class LessonController {
       const { chapterId } = request.params;
       const lessons = await this.service.getLessons(chapterId!);
 
-      response.status(200).json({
-        data: lessons,
-        message: 'Lessons retrieved successfully',
-      });
+      response.status(200).send(lessons);
     } catch (error) {
       logger.error('Error in LessonController.getLessons:', error);
       next(error);

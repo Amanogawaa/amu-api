@@ -60,6 +60,36 @@ export interface ServerToClientEvents {
     data?: any;
     timestamp: string;
   }) => void;
+
+  // Course generation progress events
+  'generation:progress': (data: {
+    jobId: string;
+    userId: string;
+    status: 'pending' | 'in_progress' | 'completed' | 'failed';
+    currentStep: 'course' | 'modules' | 'chapters' | 'lessons';
+    progress: number;
+    message: string;
+    data?: any;
+    error?: string;
+    timestamp: string;
+  }) => void;
+
+  'generation:completed': (data: {
+    jobId: string;
+    courseId: string;
+    modulesCount: number;
+    chaptersCount: number;
+    lessonsCount: number;
+    totalDuration: string;
+    timestamp: string;
+  }) => void;
+
+  'generation:failed': (data: {
+    jobId: string;
+    error: string;
+    currentStep: string;
+    timestamp: string;
+  }) => void;
 }
 
 // ============= Client to Server Events =============
@@ -94,6 +124,18 @@ export interface ClientToServerEvents {
   // Presence
   'presence:active': () => void;
   'presence:away': () => void;
+
+  // Course generation control
+  'generation:start': (data: {
+    category: string;
+    topic: string;
+    level: string;
+    duration: string;
+    noOfModules: number;
+    language: string;
+  }) => void;
+
+  'generation:cancel': (data: { jobId: string }) => void;
 }
 
 // ============= Socket Data =============

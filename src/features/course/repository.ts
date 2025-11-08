@@ -26,6 +26,14 @@ export class CourseRepository {
           .where('name', '<=', params.search + '\uf8ff') as any;
       }
 
+      if (params?.publish !== undefined) {
+        query = query.where('publish', '==', params.publish) as any;
+      }
+
+      if (params?.archive !== undefined) {
+        query = query.where('archive', '==', params.archive) as any;
+      }
+
       if (params?.level) {
         query = query.where('level', '==', params.level) as any;
       }
@@ -43,8 +51,6 @@ export class CourseRepository {
       }
 
       const snapshot = await query.get();
-
-      console.log(query.get());
 
       if (snapshot.empty) {
         logger.info('No matching courses found.');

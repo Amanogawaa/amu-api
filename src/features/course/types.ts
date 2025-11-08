@@ -6,6 +6,7 @@ export interface Course {
   topic: string;
   subtitle?: string;
   publish: boolean;
+  archive: boolean;
   prerequisites: string;
   noOfModules: number;
   name: string;
@@ -30,11 +31,14 @@ export interface GenerateCourseRequest {
   duration: string;
   noOfModules: number;
   language: string;
+  userInstructions?: string;
 }
 
 export interface CourseQueryParams {
   level?: 'beginner' | 'intermediate' | 'advanced';
   uid?: string;
+  publish?: boolean;
+  archive?: boolean;
   search?: string;
   category?: string;
   language?: string;
@@ -61,46 +65,6 @@ export interface CourseValidationResponse {
   };
 }
 
-// export const courseSchema = {
-//   type: 'OBJECT',
-//   properties: {
-//     course: {
-//       type: 'OBJECT',
-//       properties: {
-//         name: { type: 'STRING' },
-//         subtitle: { type: 'STRING' },
-//         description: { type: 'STRING' },
-//         category: { type: 'STRING' },
-//         topic: { type: 'STRING' },
-//         level: { type: 'STRING' },
-//         language: { type: 'STRING' },
-//         prerequisites: { type: 'STRING' },
-//         learning_outcomes: {
-//           type: 'ARRAY',
-//           items: { type: 'STRING' },
-//         },
-//         duration: { type: 'STRING' },
-//         no_of_chapters: { type: 'INTEGER' },
-//         publish: { type: 'BOOLEAN' },
-//         include_certificate: { type: 'BOOLEAN' },
-//         banner_url: { type: 'STRING' },
-//       },
-//       required: [
-//         'name',
-//         'description',
-//         'category',
-//         'topic',
-//         'level',
-//         'language',
-//         'prerequisites',
-//         'learning_outcomes',
-//         'duration',
-//         'no_of_chapters',
-//       ],
-//     },
-//   },
-// };
-
 export const courseSchema = {
   type: 'object',
   properties: {
@@ -119,6 +83,7 @@ export const courseSchema = {
       maxItems: 8,
     },
     publish: { type: 'boolean' },
+    archive: { type: 'boolean' },
     duration: { type: 'string' },
     noOfChapters: { type: 'integer' },
     targetAudience: { type: 'string' },

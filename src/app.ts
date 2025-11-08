@@ -12,6 +12,7 @@ import type { Server as SocketIOServer } from 'socket.io';
 import { initializeSocketIO } from './config/socket';
 import { socketAuthMiddleware } from './middlewares/socket.middleware';
 import { SocketHandlers } from './utils/socket.handlers';
+import path from 'path';
 
 // mods
 import { AuthContainer } from './features/auth/container';
@@ -24,6 +25,7 @@ import { ModuleContainer } from './features/modules/container';
 import { ProgressContainer } from './features/progress/container';
 import { LikesContainer } from './features/likes/container';
 import { CommentsContainer } from './features/comments/container';
+import { UserContainer } from './features/user/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -46,16 +48,18 @@ class App {
   private progressContainer: ProgressContainer;
   private likesContainer: LikesContainer;
   private commentsContainer: CommentsContainer;
+  private userContainer: UserContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
-    courseContainer: CourseContainer = new CourseContainer(),
+    moduleContainer: ModuleContainer = new ModuleContainer(),
     chapterContainer: ChapterContainer = new ChapterContainer(),
     lessonContainer: LessonContainer = new LessonContainer(),
-    moduleContainer: ModuleContainer = new ModuleContainer(),
+    courseContainer?: CourseContainer,
     progressContainer: ProgressContainer = new ProgressContainer(),
     likesContainer: LikesContainer = new LikesContainer(),
-    commentsContainer: CommentsContainer = new CommentsContainer()
+    commentsContainer: CommentsContainer = new CommentsContainer(),
+    userContainer: UserContainer = new UserContainer()
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -66,19 +70,36 @@ class App {
     this.socketHandlers.registerHandlers();
 
     this.authContainer = authContainer;
-    this.courseContainer = courseContainer;
+    this.moduleContainer = moduleContainer;
     this.chapterContainer = chapterContainer;
     this.lessonContainer = lessonContainer;
-    this.moduleContainer = moduleContainer;
+
+    // Initialize CourseContainer with all dependencies for full generation
+    this.courseContainer =
+      courseContainer ||
+      new CourseContainer(
+        undefined,
+        moduleContainer.service,
+        chapterContainer.service,
+        lessonContainer.service
+      );
+
     this.progressContainer = progressContainer;
     this.likesContainer = likesContainer;
     this.commentsContainer = commentsContainer;
+    this.userContainer = userContainer;
 
     this.app.use(express.json());
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cors(CORSOPTIONS));
     this.app.use(cookieParser());
+
+    // Serve static files from uploads directory
+    this.app.use(
+      '/uploads',
+      express.static(path.join(process.cwd(), 'uploads'))
+    );
 
     this.app.use(
       cors({
@@ -101,7 +122,8 @@ class App {
       this.moduleContainer,
       this.progressContainer,
       this.likesContainer,
-      this.commentsContainer
+      this.commentsContainer,
+      this.userContainer
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

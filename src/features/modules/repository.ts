@@ -134,9 +134,6 @@ export class ModuleRepository {
           learningObjectives: JSON.stringify(module.learningObjectives),
           keySkills: JSON.stringify(module.keySkills),
           prerequisiteModules: JSON.stringify(module.prerequisiteModules),
-          capstoneProject: module.capstoneProject
-            ? JSON.stringify(module.capstoneProject)
-            : null,
         };
 
         batch.update(docRef, moduleData);

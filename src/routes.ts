@@ -12,6 +12,7 @@ import type { ModuleContainer } from './features/modules/container';
 import type { ProgressContainer } from './features/progress/container';
 import type { LikesContainer } from './features/likes/container';
 import type { CommentsContainer } from './features/comments/container';
+import type { UserContainer } from './features/user/container';
 import socketTestRoutes from './features/socket/route';
 
 export class AppRoutes {
@@ -24,6 +25,7 @@ export class AppRoutes {
   private progressContainer: ProgressContainer;
   private likesContainer: LikesContainer;
   private commentsContainer: CommentsContainer;
+  private userContainer: UserContainer;
 
   constructor(
     authContainer: AuthContainer,
@@ -33,7 +35,8 @@ export class AppRoutes {
     moduleContainer: ModuleContainer,
     progressContainer: ProgressContainer,
     likesContainer: LikesContainer,
-    commentsContainer: CommentsContainer
+    commentsContainer: CommentsContainer,
+    userContainer: UserContainer
   ) {
     this.router = Router();
     this.authContainer = authContainer;
@@ -44,6 +47,7 @@ export class AppRoutes {
     this.progressContainer = progressContainer;
     this.likesContainer = likesContainer;
     this.commentsContainer = commentsContainer;
+    this.userContainer = userContainer;
     this.initializeRoutes();
   }
 
@@ -67,6 +71,7 @@ export class AppRoutes {
     this.router.use('/', this.likesContainer.getRouter());
     this.router.use('/', this.commentsContainer.getRouter());
     this.router.use('/socket', socketTestRoutes);
+    this.router.use('/', this.userContainer.getRouter());
   }
 
   public getRouter(): Router {

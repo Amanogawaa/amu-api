@@ -21,7 +21,7 @@ Return ONLY valid JSON starting with { and ending with }. No markdown blocks, no
 {
   "name": "Professional course title",
   "subtitle": "Engaging one-line tagline (optional, max 80 chars)",
-  "description": "Comprehensive 300-500 word description covering: what the course teaches, who it's for, key benefits, and what makes it unique",
+  "description": "Comprehensive 150-300 word description covering: what the course teaches, who it's for, key benefits, and what makes it unique",
   "category": "${args.category}",
   "topic": "${args.topic}",
   "level": "${args.level}",
@@ -32,6 +32,7 @@ Return ONLY valid JSON starting with { and ending with }. No markdown blocks, no
     "5-8 outcomes total, each starting with an action verb"
   ],
   "publish": false,
+  "archive": false,
   "duration": "${args.duration}",
   "no_of_modules": ${args.noOfModules},
   "target_audience": "Who this course is designed for (1-2 sentences)",
@@ -57,7 +58,7 @@ Return ONLY valid JSON starting with { and ending with }. No markdown blocks, no
 - Be achievable within ${args.duration}
 
 **Quality Checklist**:
-- Course name is concise (3-8 words) and professional
+- Course name is concise (3-6 words) and professional
 - Description is compelling and explains the "why" not just "what"
 - Prerequisites are realistic for the target level
 - Learning outcomes are specific, not vague (avoid "understand" or "learn about")

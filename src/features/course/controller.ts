@@ -1,19 +1,21 @@
-import {
-  type Request,
-  type Response,
-  type NextFunction,
-  response,
-} from 'express';
+import { type Request, type Response, type NextFunction } from 'express';
 import { logger } from '../../utils/loggers';
 import type { CourseService } from './service';
 import type { CourseQueryParams } from './types';
 import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
+import { notifyCourseCreated } from '../../utils/socket.helpers';
+import type { FullCourseGenerationService } from '../../utils/generation.service';
 
 export class CourseController {
   private service: CourseService;
+  private fullGenerationService?: FullCourseGenerationService;
 
-  constructor(service: CourseService) {
+  constructor(
+    service: CourseService,
+    fullGenerationService?: FullCourseGenerationService
+  ) {
     this.service = service;
+    this.fullGenerationService = fullGenerationService;
   }
 
   async getCourses(
@@ -25,6 +27,19 @@ export class CourseController {
       const queryParams: CourseQueryParams = {
         level: request.query.level as any,
         uid: request.user?.uid as string,
+        archive:
+          request.query.archive === 'true'
+            ? true
+            : request.query.archive === 'false'
+            ? false
+            : undefined,
+        publish:
+          request.query.publish === 'true'
+            ? true
+            : request.query.publish === 'false'
+            ? false
+            : undefined,
+
         category: request.query.category as string,
         language: request.query.language as string,
         limit: request.query.limit
@@ -87,8 +102,10 @@ export class CourseController {
         ...request.body,
         uid: request.user?.uid,
       };
-      console.log('Received course generation request:', courseRequest);
+
       const course = await this.service.generateCourse(courseRequest);
+
+      notifyCourseCreated(request, course);
 
       response.status(201).json({
         data: course,
@@ -206,6 +223,132 @@ export class CourseController {
       });
     } catch (error) {
       logger.error('Error in CourseController.unpublishCourse:', error);
+      next(error);
+    }
+  }
+
+  async archiveCourse(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = request.params;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      const course = await this.service.archiveCourse(id);
+
+      response.status(200).json({
+        data: course,
+        message: 'Course archived successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CourseController.archiveCourse:', error);
+      next(error);
+    }
+  }
+
+  async unarchiveCourse(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { id } = request.params;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      const course = await this.service.unarchiveCourse(id);
+
+      response.status(200).json({
+        data: course,
+        message: 'Course unarchived successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CourseController.unarchiveCourse:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Generate a complete course with modules, chapters, and lessons
+   * Uses Socket.IO for real-time progress updates
+   */
+  async generateFullCourse(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      if (!this.fullGenerationService) {
+        response.status(503).json({
+          message: 'Full course generation service not available',
+        });
+        return;
+      }
+
+      const courseRequest = {
+        ...request.body,
+        uid: request.user?.uid,
+      };
+
+      // Validate required fields
+      const requiredFields = [
+        'category',
+        'topic',
+        'level',
+        'duration',
+        'noOfModules',
+        'language',
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !courseRequest[field]
+      );
+
+      if (missingFields.length > 0) {
+        response.status(400).json({
+          message: 'Missing required fields',
+          missingFields,
+        });
+        return;
+      }
+
+      logger.info('Starting full course generation', {
+        userId: request.user?.uid,
+        request: courseRequest,
+      });
+
+      // Return immediately with job ID, generation continues in background
+      response.status(202).json({
+        message:
+          'Course generation started. Listen to Socket.IO events for progress updates.',
+        note: 'Connect to Socket.IO and listen for "generation:progress" events',
+      });
+
+      // Run generation in background
+      setImmediate(async () => {
+        try {
+          await this.fullGenerationService!.generateFullCourse(
+            request,
+            courseRequest
+          );
+        } catch (error: any) {
+          logger.error('Background course generation failed:', error);
+        }
+      });
+    } catch (error) {
+      logger.error('Error in CourseController.generateFullCourse:', error);
       next(error);
     }
   }

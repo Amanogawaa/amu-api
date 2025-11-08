@@ -41,15 +41,7 @@ export class CourseService {
 
   public async generateCourse(request: GenerateCourseRequest) {
     try {
-      const prompt = generateCoursePrompt({
-        category: request.category,
-        topic: request.topic,
-        level: request.level,
-        duration: request.duration,
-        noOfModules: request.noOfModules,
-        language: request.language,
-      });
-
+      const prompt = this.customInstructions(request);
       const result = await geminiCall(prompt, {
         responseSchema: courseSchema,
         temperature: 0.7,
@@ -87,6 +79,23 @@ export class CourseService {
     }
   }
 
+  private customInstructions(request: GenerateCourseRequest): string {
+    const basePrompt = generateCoursePrompt({
+      category: request.category,
+      topic: request.topic,
+      level: request.level,
+      duration: request.duration,
+      noOfModules: request.noOfModules,
+      language: request.language,
+    });
+
+    if (request.userInstructions) {
+      return `${basePrompt}\n\n**IMPORTANT USER FEEDBACK FOR REGENERATION:**\n${request.userInstructions}\n\nPlease adjust the content based on the above feedback while maintaining the same structure.`;
+    }
+
+    return basePrompt;
+  }
+
   public async deleteCourse(courseId: string): Promise<void> {
     try {
       await this.courseRepository.deleteCourse(courseId);
@@ -111,7 +120,6 @@ export class CourseService {
     try {
       const firestore = this.courseRepository['firebaseStore'];
 
-      // Check modules (have courseId)
       const modulesSnapshot = await firestore
         .collection('modules')
         .where('courseId', '==', courseId)
@@ -119,7 +127,6 @@ export class CourseService {
       const hasModules = !modulesSnapshot.empty;
       const modulesCount = modulesSnapshot.size;
 
-      // Get all module IDs to check chapters
       const moduleIds = modulesSnapshot.docs.map((doc) => doc.id);
 
       let hasChapters = false;
@@ -127,8 +134,6 @@ export class CourseService {
       let chapterIds: string[] = [];
 
       if (moduleIds.length > 0) {
-        // Check chapters (have moduleId)
-        // Firestore 'in' query supports up to 10 values, so we batch if needed
         const chapterPromises = [];
         for (let i = 0; i < moduleIds.length; i += 10) {
           const batch = moduleIds.slice(i, i + 10);
@@ -153,7 +158,6 @@ export class CourseService {
       let lessonsCount = 0;
 
       if (chapterIds.length > 0) {
-        // Check lessons (have chapterId)
         const lessonPromises = [];
         for (let i = 0; i < chapterIds.length; i += 10) {
           const batch = chapterIds.slice(i, i + 10);
@@ -198,7 +202,6 @@ export class CourseService {
 
   public async publishCourse(courseId: string): Promise<Course> {
     try {
-      // Validate course completeness
       const validation = await this.validateCourseCompleteness(courseId);
 
       if (!validation.isComplete) {
@@ -210,10 +213,11 @@ export class CourseService {
         );
       }
 
-      // Update publish status
-      await this.courseRepository.updateCourse(courseId, { publish: true });
+      await this.courseRepository.updateCourse(courseId, {
+        publish: true,
+        archive: false,
+      });
 
-      // Return updated course
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {
       logger.error('Error in CourseService.publishCourse:', error);
@@ -227,6 +231,29 @@ export class CourseService {
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {
       logger.error('Error in CourseService.unpublishCourse:', error);
+      throw error;
+    }
+  }
+
+  public async archiveCourse(courseId: string): Promise<Course> {
+    try {
+      await this.courseRepository.updateCourse(courseId, {
+        archive: true,
+        publish: false,
+      });
+      return await this.courseRepository.getCourseById(courseId);
+    } catch (error) {
+      logger.error('Error in CourseService.archiveCourse:', error);
+      throw error;
+    }
+  }
+
+  public async unarchiveCourse(courseId: string): Promise<Course> {
+    try {
+      await this.courseRepository.updateCourse(courseId, { archive: false });
+      return await this.courseRepository.getCourseById(courseId);
+    } catch (error) {
+      logger.error('Error in CourseService.unarchiveCourse:', error);
       throw error;
     }
   }

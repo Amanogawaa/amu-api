@@ -13,21 +13,28 @@ export class LessonRepository {
 
   async getLessons(chapterId: string) {
     try {
+      logger.info(`Fetching lessons for chapter: ${chapterId}`);
+
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
         .where('chapterId', '==', chapterId)
-        .orderBy('order', 'asc')
         .get();
 
+      logger.info(
+        `Found ${querySnapshot.size} lessons for chapter: ${chapterId}`
+      );
+
       if (querySnapshot.empty) {
-        logger.info('No matching chapters found.');
+        logger.info(`No matching lessons found for chapter: ${chapterId}`);
         return [];
       }
 
-      return querySnapshot.docs.map((doc) => ({
+      const lessons = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as Lesson[];
+
+      return lessons.sort((a, b) => a.lessonOrder - b.lessonOrder);
     } catch (error) {
       logger.error('Error in ChapterRepository.getChapter:', error);
       throw error;

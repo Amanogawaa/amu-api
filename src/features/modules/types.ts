@@ -1,20 +1,4 @@
-export interface CapstoneProject {
-  title: string;
-  description: string;
-  type:
-    | 'code_project'
-    | 'design_project'
-    | 'writing_project'
-    | 'analysis_project';
-  deliverables: string[];
-  technicalRequirements?: string[];
-  assessmentType: 'automated' | 'self_assessment' | 'peer_review';
-  estimatedTime?: string;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-}
-
 export interface Module {
-  capstoneProject?: CapstoneProject;
   id: string;
   courseId: string;
   courseName: string;
@@ -92,47 +76,6 @@ export const modulesSchema = {
             type: 'array',
             items: { type: 'string' },
           },
-          capstoneProject: {
-            type: 'object',
-            properties: {
-              title: { type: 'string' },
-              description: { type: 'string' },
-              type: {
-                type: 'string',
-                enum: [
-                  'code_project',
-                  'design_project',
-                  'writing_project',
-                  'analysis_project',
-                ],
-              },
-              deliverables: {
-                type: 'array',
-                items: { type: 'string' },
-                minItems: 3,
-              },
-              technicalRequirements: {
-                type: 'array',
-                items: { type: 'string' },
-              },
-              assessmentType: {
-                type: 'string',
-                enum: ['automated', 'self_assessment', 'peer_review'],
-              },
-              estimatedTime: { type: 'string' },
-              difficulty: {
-                type: 'string',
-                enum: ['beginner', 'intermediate', 'advanced'],
-              },
-            },
-            required: [
-              'title',
-              'description',
-              'type',
-              'deliverables',
-              'assessmentType',
-            ],
-          },
         },
         required: [
           'moduleOrder',
@@ -140,7 +83,6 @@ export const modulesSchema = {
           'moduleDescription',
           'estimatedDuration',
           'learningObjectives',
-          'capstoneProject',
           'estimatedChapterCount',
           'keySkills',
           'prerequisiteModules',

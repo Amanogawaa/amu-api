@@ -70,15 +70,15 @@ Return ONLY valid JSON. No markdown blocks, no explanations.
 3. **Progressive Structure Within Module**:
    - Chapter 1: Introduction to module topic, basic concepts
    - Middle chapters: Deep dives into specific aspects
-   - Final chapter: Integration, advanced techniques, or preparation for capstone
+   - Final chapter: Integration, advanced techniques, real-world application  
 
-4. **Learning Objectives** (2-4 per chapter):
+4. **Learning Objectives** (1-3 per chapter):
    - More specific than module objectives
    - Use verbs: Explain, Implement, Apply, Compare, Create, Debug
    - Achievable within chapter duration
    - Directly support module learning objectives
 
-5. **Key Topics** (3-6 per chapter):
+5. **Key Topics** (1-3 per chapter):
    - Specific concepts covered
    - Bullet-point level detail
    - Example: Instead of "CSS Layouts", use "Flexbox container properties", "Flex item behavior", "Common layout patterns"

@@ -154,6 +154,88 @@ export class CourseRoute {
 
     /**
      * @openapi
+     * /courses/generate-full:
+     *   post:
+     *     tags:
+     *       - My Courses
+     *     summary: Generate a complete course with modules, chapters, and lessons using AI
+     *     description: |
+     *       Generates a full course structure including all nested components.
+     *       This is an asynchronous operation that returns immediately with a 202 status.
+     *       Connect to Socket.IO and listen for 'generation:progress' events to track progress.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - category
+     *               - topic
+     *               - level
+     *               - duration
+     *               - noOfModules
+     *               - language
+     *             properties:
+     *               category:
+     *                 type: string
+     *                 example: Programming
+     *                 description: Course category
+     *               topic:
+     *                 type: string
+     *                 example: Full Stack Web Development
+     *                 description: Main topic of the course
+     *               level:
+     *                 type: string
+     *                 enum: [beginner, intermediate, advanced]
+     *                 example: intermediate
+     *                 description: Difficulty level
+     *               duration:
+     *                 type: string
+     *                 example: 40 hours
+     *                 description: Total course duration
+     *               noOfModules:
+     *                 type: integer
+     *                 minimum: 1
+     *                 maximum: 10
+     *                 example: 5
+     *                 description: Number of modules to generate
+     *               language:
+     *                 type: string
+     *                 example: English
+     *                 description: Course language
+     *               userInstructions:
+     *                 type: string
+     *                 example: Focus on practical projects
+     *                 description: Optional custom instructions for AI
+     *     responses:
+     *       202:
+     *         description: Generation started, listen to Socket.IO for progress
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *                   example: Course generation started
+     *                 note:
+     *                   type: string
+     *                   example: Connect to Socket.IO and listen for generation:progress events
+     *       400:
+     *         description: Invalid request body
+     *       503:
+     *         description: Service not available
+     */
+    this.router.post(
+      '/courses/generate-full',
+      authMiddleware,
+      validateGenerateCourse,
+      this.controller.generateFullCourse.bind(this.controller)
+    );
+
+    /**
+     * @openapi
      * /courses/{id}:
      *   patch:
      *     tags:
@@ -227,6 +309,16 @@ export class CourseRoute {
      *           type: string
      *           enum: [beginner, intermediate, advanced]
      *         description: Filter by difficulty level
+     *       - in: query
+     *         name: archive
+     *         schema:
+     *           type: boolean
+     *         description: Filter by archive status
+     *       - in: query
+     *         name: publish
+     *         schema:
+     *           type: boolean
+     *         description: Filter by publish status
      *       - in: query
      *         name: category
      *         schema:
@@ -410,6 +502,64 @@ export class CourseRoute {
       validateCourseId,
       courseOwnershipMiddleware,
       this.controller.unpublishCourse.bind(this.controller)
+    );
+
+    /**
+     * @openapi
+     * /courses/{id}/archive:
+     *   patch:
+     *     tags:
+     *       - My Courses
+     *     summary: Archive a course
+     *     description: Archive a course (makes it private and unpublished)
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Course archived successfully
+     *       404:
+     *         description: Course not found
+     */
+    this.router.patch(
+      '/courses/:id/archive',
+      authMiddleware,
+      validateCourseId,
+      courseOwnershipMiddleware,
+      this.controller.archiveCourse.bind(this.controller)
+    );
+
+    /**
+     * @openapi
+     * /courses/{id}/unarchive:
+     *   patch:
+     *     tags:
+     *       - My Courses
+     *     summary: Unarchive a course
+     *     description: Remove archive status from a course
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Course unarchived successfully
+     *       404:
+     *         description: Course not found
+     */
+    this.router.patch(
+      '/courses/:id/unarchive',
+      authMiddleware,
+      validateCourseId,
+      courseOwnershipMiddleware,
+      this.controller.unarchiveCourse.bind(this.controller)
     );
   }
 

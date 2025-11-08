@@ -1,4 +1,5 @@
 import { logger } from '../../utils/loggers';
+import { notifyChapterCreated } from '../../utils/socket.helpers';
 import type { ChapterService } from './service';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -42,6 +43,8 @@ export class ChapterController {
       const createdChapter = await this.service.generateChapters(
         chapterRequest
       );
+
+      notifyChapterCreated(request, chapterRequest.moduleId, createdChapter);
 
       response.status(201).json({
         data: createdChapter,
