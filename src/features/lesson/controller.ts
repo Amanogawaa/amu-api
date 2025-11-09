@@ -53,10 +53,7 @@ export class LessonController {
       const { lessonId } = request.params;
       const lesson = await this.service.getLessonById(lessonId!);
 
-      response.status(200).json({
-        data: lesson,
-        message: 'Lesson retrieved successfully',
-      });
+      response.status(200).send(lesson);
     } catch (error) {
       logger.error('Error in LessonController.getLessonById:', error);
       next(error);
