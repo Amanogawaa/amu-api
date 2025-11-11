@@ -8,6 +8,10 @@ export interface Lesson {
   lessonDescription: string;
   content: string | null;
   videoSearchQuery: string | null;
+  selectedVideoId?: string; // YouTube video ID for video lessons
+  videoTranscript?: string | null; // Extracted transcript from video
+  transcriptLanguage?: string; // Language code of the transcript (e.g., 'en')
+  transcriptFetchedAt?: string; // ISO timestamp when transcript was fetched
   resources: LessonResource[];
   learningOutcome: string;
   prerequisites: string[];
@@ -49,6 +53,10 @@ export interface UpdateLessonRequest {
   lessonDescription?: string;
   content?: string | null;
   videoSearchQuery?: string | null;
+  selectedVideoId?: string; // YouTube video ID for video lessons
+  videoTranscript?: string | null; // Extracted transcript from video
+  transcriptLanguage?: string; // Language code of the transcript
+  transcriptFetchedAt?: string; // ISO timestamp when transcript was fetched
   resources?: LessonResource[];
   learningOutcome?: string;
   prerequisites?: string[];

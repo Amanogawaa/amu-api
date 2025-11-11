@@ -48,7 +48,7 @@ const options: swaggerJSDoc.Options = {
             'topic',
             'level',
             'duration',
-            'noOfChapters',
+            'noOfModules',
             'language',
           ],
           properties: {
@@ -60,7 +60,7 @@ const options: swaggerJSDoc.Options = {
               default: 'beginner',
             },
             duration: { type: 'string', default: '6 hours' },
-            noOfChapters: { type: 'integer', default: 6 },
+            noOfModules: { type: 'integer', default: 6 },
             language: { type: 'string', default: 'en' },
           },
         },

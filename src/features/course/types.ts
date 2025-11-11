@@ -85,7 +85,7 @@ export const courseSchema = {
     publish: { type: 'boolean' },
     archive: { type: 'boolean' },
     duration: { type: 'string' },
-    noOfChapters: { type: 'integer' },
+    noOfModules: { type: 'integer' },
     targetAudience: { type: 'string' },
     skillsGained: {
       type: 'array',

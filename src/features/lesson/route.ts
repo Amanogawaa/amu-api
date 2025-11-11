@@ -460,6 +460,181 @@ export class LessonRoute {
       // courseOwnershipMiddleware,
       (req, res, next) => this.controller.deleteLesson(req, res, next)
     );
+
+    /**
+     * @openapi
+     * /lessons/{lessonId}/videos:
+     *   get:
+     *     tags:
+     *       - Lessons
+     *     summary: Get YouTube videos for a video lesson
+     *     description: Searches YouTube for videos based on the lesson's videoSearchQuery
+     *     parameters:
+     *       - in: path
+     *         name: lessonId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the lesson
+     *       - in: query
+     *         name: maxResults
+     *         schema:
+     *           type: integer
+     *           default: 5
+     *         description: Maximum number of videos to return
+     *     responses:
+     *       200:
+     *         description: YouTube videos retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 videos:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       videoId:
+     *                         type: string
+     *                       title:
+     *                         type: string
+     *                       description:
+     *                         type: string
+     *                       thumbnailUrl:
+     *                         type: string
+     *                       channelTitle:
+     *                         type: string
+     *                       publishedAt:
+     *                         type: string
+     *                       duration:
+     *                         type: string
+     *                       viewCount:
+     *                         type: string
+     *                 totalResults:
+     *                   type: integer
+     *       400:
+     *         description: Lesson does not have video search query
+     *       404:
+     *         description: Lesson not found
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.get('/lessons/:lessonId/videos', (req, res, next) =>
+      this.controller.getLessonVideos(req, res, next)
+    );
+
+    /**
+     * @openapi
+     * /lessons/{lessonId}/transcript:
+     *   post:
+     *     tags:
+     *       - Lessons
+     *     summary: Fetch and store YouTube transcript for a video lesson
+     *     description: Fetches the transcript from YouTube and stores it in the lesson
+     *     parameters:
+     *       - in: path
+     *         name: lessonId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the lesson
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - videoId
+     *             properties:
+     *               videoId:
+     *                 type: string
+     *                 description: YouTube video ID
+     *               language:
+     *                 type: string
+     *                 description: Preferred language code (default 'en')
+     *                 default: en
+     *     responses:
+     *       200:
+     *         description: Transcript fetched successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *                 transcript:
+     *                   type: string
+     *                 language:
+     *                   type: string
+     *                 stats:
+     *                   type: object
+     *                   properties:
+     *                     wordCount:
+     *                       type: integer
+     *                     duration:
+     *                       type: integer
+     *                     segmentCount:
+     *                       type: integer
+     *                     averageWordsPerMinute:
+     *                       type: integer
+     *       400:
+     *         description: Invalid request or not a video lesson
+     *       404:
+     *         description: Lesson not found or transcript not available
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.post(
+      '/lessons/:lessonId/transcript',
+      authMiddleware,
+      (req, res, next) => this.controller.fetchTranscript(req, res, next)
+    );
+
+    /**
+     * @openapi
+     * /lessons/{lessonId}/transcript:
+     *   get:
+     *     tags:
+     *       - Lessons
+     *     summary: Get stored transcript for a video lesson
+     *     description: Returns the stored transcript if available
+     *     parameters:
+     *       - in: path
+     *         name: lessonId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the lesson
+     *       - in: query
+     *         name: withTimestamps
+     *         schema:
+     *           type: boolean
+     *         description: Include timestamps in the transcript
+     *     responses:
+     *       200:
+     *         description: Transcript retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 transcript:
+     *                   type: string
+     *                 language:
+     *                   type: string
+     *                 fetchedAt:
+     *                   type: string
+     *       404:
+     *         description: Lesson not found or transcript not available
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.get('/lessons/:lessonId/transcript', (req, res, next) =>
+      this.controller.getTranscript(req, res, next)
+    );
   }
 
   public getRouter(): Router {
