@@ -82,7 +82,6 @@ export class CommentsRepository {
       .where('courseId', '==', courseId)
       .where('deleted', '==', false);
 
-    // Filter by parentId if provided (for threaded comments)
     if (parentId !== undefined) {
       query = query.where('parentId', '==', parentId || null);
     }
@@ -100,7 +99,6 @@ export class CommentsRepository {
       updatedAt: doc.data().updatedAt?.toDate(),
     })) as Comment[];
 
-    // Get total count
     let countQuery = this.db
       .collection(this.commentsCollection)
       .where('courseId', '==', courseId)

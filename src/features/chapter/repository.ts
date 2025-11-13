@@ -33,6 +33,28 @@ export class ChapterRepository {
     }
   }
 
+  async getChapter(chapterId: string): Promise<Chapter | null> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .doc(chapterId);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        logger.info(`Chapter with ID ${chapterId} not found.`);
+        return null;
+      }
+
+      return {
+        id: doc.id,
+        ...doc.data(),
+      } as Chapter;
+    } catch (error) {
+      logger.error('Error in ChapterRepository.getChapter:', error);
+      throw error;
+    }
+  }
+
   async createChapters(
     moduleId: string,
     moduleName: string,

@@ -1,0 +1,53 @@
+export const RATE_LIMIT_CONFIG = {
+  GEMINI: {
+    MIN_TIME_BETWEEN_REQUESTS: 1500,
+
+    MAX_CONCURRENT: 1,
+
+    RESERVOIR: 60,
+    RESERVOIR_REFRESH_AMOUNT: 60,
+    RESERVOIR_REFRESH_INTERVAL: 60 * 1000,
+
+    INITIAL_RETRY_WAIT: 2000,
+    MAX_RETRY_WAIT: 30000,
+    MAX_RETRIES: 3,
+
+    NORMAL_ERROR_MULTIPLIER: 2,
+    RATE_LIMIT_MULTIPLIER: 5,
+
+    DEFAULT_TEMPERATURE: 0.7,
+  },
+
+  TIER_PRESETS: {
+    FREE: {
+      MIN_TIME_BETWEEN_REQUESTS: 4000,
+      RESERVOIR: 15,
+      RESERVOIR_REFRESH_AMOUNT: 15,
+      RESERVOIR_REFRESH_INTERVAL: 60 * 1000,
+    },
+    PAID: {
+      MIN_TIME_BETWEEN_REQUESTS: 1000,
+      RESERVOIR: 60,
+      RESERVOIR_REFRESH_AMOUNT: 60,
+      RESERVOIR_REFRESH_INTERVAL: 60 * 1000,
+    },
+    ENTERPRISE: {
+      MIN_TIME_BETWEEN_REQUESTS: 200,
+      RESERVOIR: 300,
+      RESERVOIR_REFRESH_AMOUNT: 300,
+      RESERVOIR_REFRESH_INTERVAL: 60 * 1000,
+    },
+  },
+};
+
+/**
+ * Helper function to get current tier configuration
+ */
+export const getCurrentTierConfig = () => {
+  const tier = (
+    process.env.GEMINI_TIER || 'PAID'
+  ).toUpperCase() as keyof typeof RATE_LIMIT_CONFIG.TIER_PRESETS;
+  return (
+    RATE_LIMIT_CONFIG.TIER_PRESETS[tier] || RATE_LIMIT_CONFIG.TIER_PRESETS.PAID
+  );
+};

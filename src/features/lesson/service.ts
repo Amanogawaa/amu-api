@@ -9,12 +9,15 @@ import {
 } from './types';
 import { youtubeService } from '../../utils/youtube.service';
 import { youtubeTranscriptService } from '../../utils/youtube-transcript.service';
+import type { QuizService } from '../quiz/service';
 
 export class LessonService {
   private lessonRepository: LessonRepository;
+  private quizService?: QuizService;
 
-  constructor(lessonRepository: LessonRepository) {
+  constructor(lessonRepository: LessonRepository, quizService?: QuizService) {
     this.lessonRepository = lessonRepository;
+    this.quizService = quizService;
   }
 
   public async getLessons(chapterId: string) {
@@ -67,6 +70,10 @@ export class LessonService {
         logger.error('Error auto-fetching transcripts:', error)
       );
 
+      this.autoGenerateQuizzes(createdLessons, request.chapterId).catch(
+        (error) => logger.error('Error auto-generating quizzes:', error)
+      );
+
       return createdLessons;
     } catch (error) {
       logger.error('Error in LessonService.generateLessons:', error);
@@ -74,10 +81,6 @@ export class LessonService {
     }
   }
 
-  /**
-   * Auto-fetch transcripts for video lessons
-   * Runs in background after lesson generation
-   */
   private async autoFetchTranscriptsForVideoLessons(
     lessons: Lesson[]
   ): Promise<void> {
@@ -90,10 +93,9 @@ export class LessonService {
             `Fetching video and transcript for lesson: ${lesson.lessonName}`
           );
 
-          // 1. Search for videos
           const videos = await youtubeService.searchVideos(
             lesson.videoSearchQuery,
-            1 // Get top result only
+            1
           );
 
           if (videos.videos.length === 0) {
@@ -114,16 +116,14 @@ export class LessonService {
             `Selected video: ${topVideo.title} (${topVideo.videoId})`
           );
 
-          // 2. Fetch transcript
           const transcript = await youtubeTranscriptService.getTranscript(
             topVideo.videoId
           );
 
           if (transcript) {
-            // 3. Update lesson with video and transcript
             await this.updateLesson(lesson.id, {
               selectedVideoId: topVideo.videoId,
-              content: transcript.fullText, // Store transcript in content field
+              content: transcript.fullText,
               videoTranscript: transcript.fullText,
               transcriptLanguage: transcript.language,
               transcriptFetchedAt: new Date().toISOString(),
@@ -139,7 +139,6 @@ export class LessonService {
               `No transcript available for video ${topVideo.videoId} (lesson ${lesson.id})`
             );
 
-            // Still save the video ID even without transcript
             await this.updateLesson(lesson.id, {
               selectedVideoId: topVideo.videoId,
             });
@@ -149,12 +148,100 @@ export class LessonService {
             `Failed to fetch transcript for lesson ${lesson.id}:`,
             error
           );
-          // Continue with other lessons
         }
       }
     }
 
     logger.info('Completed auto-fetch transcripts');
+  }
+
+  private async autoGenerateQuizzes(
+    lessons: Lesson[],
+    chapterId: string
+  ): Promise<void> {
+    if (!this.quizService) {
+      logger.warn('Quiz service not available, skipping quiz generation');
+      return;
+    }
+
+    logger.info('Starting auto-generation of quizzes for quiz lessons...');
+
+    const quizLessons = lessons.filter((lesson) => lesson.type === 'quiz');
+
+    if (quizLessons.length === 0) {
+      logger.info('No quiz lessons to generate');
+      return;
+    }
+
+    const allLessons = await this.lessonRepository.getLessons(chapterId);
+    const sortedLessons = allLessons.sort(
+      (a, b) => a.lessonOrder - b.lessonOrder
+    );
+
+    for (const quizLesson of quizLessons) {
+      try {
+        logger.info(
+          `Generating quiz for lesson: ${quizLesson.lessonName} (order: ${quizLesson.lessonOrder})`
+        );
+
+        const previousLessons = sortedLessons.filter(
+          (lesson) =>
+            lesson.lessonOrder < quizLesson.lessonOrder &&
+            lesson.type !== 'quiz'
+        );
+
+        if (previousLessons.length === 0) {
+          logger.warn(
+            `No previous lessons found for quiz ${quizLesson.id}, skipping`
+          );
+          continue;
+        }
+
+        const previousLessonsContent = previousLessons
+          .map((lesson) => {
+            let content = `**Lesson ${lesson.lessonOrder}: ${lesson.lessonName}**\n`;
+            content += `Description: ${lesson.lessonDescription}\n`;
+            content += `Learning Outcome: ${lesson.learningOutcome}\n`;
+
+            if (lesson.content) {
+              content += `Content:\n${lesson.content}\n`;
+            }
+
+            if (lesson.videoTranscript) {
+              content += `Transcript:\n${lesson.videoTranscript}\n`;
+            }
+
+            return content;
+          })
+          .join('\n\n---\n\n');
+
+        let difficulty: 'easy' | 'medium' | 'hard' = 'medium';
+        if (quizLesson.lessonOrder <= 3) {
+          difficulty = 'easy';
+        } else if (quizLesson.lessonOrder >= 7) {
+          difficulty = 'hard';
+        }
+
+        const quiz = await this.quizService.generateQuiz({
+          lessonId: quizLesson.id,
+          lessonName: quizLesson.lessonName,
+          previousLessonsContent,
+          numberOfQuestions: Math.min(previousLessons.length * 5, 10),
+          difficulty,
+        });
+
+        logger.info(
+          `✅ Quiz generated for lesson ${quizLesson.id}: ${quiz.questions.length} questions, ${difficulty} difficulty`
+        );
+      } catch (error) {
+        logger.error(
+          `Failed to generate quiz for lesson ${quizLesson.id}:`,
+          error
+        );
+      }
+    }
+
+    logger.info('Completed auto-generation of quizzes');
   }
 
   public async getLessonById(lessonId: string) {

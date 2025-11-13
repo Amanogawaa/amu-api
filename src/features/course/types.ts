@@ -19,6 +19,8 @@ export interface Course {
   banner_url: string;
   likesCount?: number;
   commentsCount?: number;
+  enrollmentCount?: number;
+  isEnrolled?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

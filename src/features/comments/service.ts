@@ -15,7 +15,6 @@ export class CommentsService {
     authorName?: string,
     authorEmail?: string
   ): Promise<Comment> {
-    // Validate parent comment exists if parentId provided
     if (data.parentId) {
       const parentComment = await this.repository.getCommentById(data.parentId);
       if (!parentComment) {
@@ -83,7 +82,6 @@ export class CommentsService {
       throw new AppError('Comment not found', 404);
     }
 
-    // Allow deletion if user is comment author or course owner
     if (comment.authorId !== userId && !isCourseOwner) {
       throw new AppError('Not authorized to delete this comment', 403);
     }

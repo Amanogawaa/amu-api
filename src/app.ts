@@ -26,6 +26,8 @@ import { ProgressContainer } from './features/progress/container';
 import { LikesContainer } from './features/likes/container';
 import { CommentsContainer } from './features/comments/container';
 import { UserContainer } from './features/user/container';
+import { QuizContainer } from './features/quiz/container';
+import { EnrollmentContainer } from './features/enrollment/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -49,17 +51,20 @@ class App {
   private likesContainer: LikesContainer;
   private commentsContainer: CommentsContainer;
   private userContainer: UserContainer;
+  private quizContainer: QuizContainer;
+  private enrollmentContainer: EnrollmentContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
     moduleContainer: ModuleContainer = new ModuleContainer(),
     chapterContainer: ChapterContainer = new ChapterContainer(),
-    lessonContainer: LessonContainer = new LessonContainer(),
+    lessonContainer?: LessonContainer,
     courseContainer?: CourseContainer,
     progressContainer: ProgressContainer = new ProgressContainer(),
     likesContainer: LikesContainer = new LikesContainer(),
     commentsContainer: CommentsContainer = new CommentsContainer(),
-    userContainer: UserContainer = new UserContainer()
+    userContainer: UserContainer = new UserContainer(),
+    quizContainer: QuizContainer = new QuizContainer()
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -72,7 +77,11 @@ class App {
     this.authContainer = authContainer;
     this.moduleContainer = moduleContainer;
     this.chapterContainer = chapterContainer;
-    this.lessonContainer = lessonContainer;
+    this.quizContainer = quizContainer;
+
+    // Initialize LessonContainer with QuizService
+    this.lessonContainer =
+      lessonContainer || new LessonContainer(undefined, quizContainer.service);
 
     // Initialize CourseContainer with all dependencies for full generation
     this.courseContainer =
@@ -81,13 +90,19 @@ class App {
         undefined,
         moduleContainer.service,
         chapterContainer.service,
-        lessonContainer.service
+        this.lessonContainer.service
       );
 
     this.progressContainer = progressContainer;
     this.likesContainer = likesContainer;
     this.commentsContainer = commentsContainer;
     this.userContainer = userContainer;
+
+    // Initialize EnrollmentContainer with dependencies
+    this.enrollmentContainer = new EnrollmentContainer(
+      this.courseContainer.repository,
+      this.progressContainer.repository
+    );
 
     this.app.use(express.json());
     this.app.use(helmet());
@@ -123,7 +138,9 @@ class App {
       this.progressContainer,
       this.likesContainer,
       this.commentsContainer,
-      this.userContainer
+      this.userContainer,
+      this.quizContainer,
+      this.enrollmentContainer
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

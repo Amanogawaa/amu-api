@@ -236,4 +236,76 @@ export class CourseRepository {
       throw error;
     }
   }
+
+  /**
+   * Get enrollment count for a course
+   */
+  async getEnrollmentCount(courseId: string): Promise<number> {
+    try {
+      const snapshot = await this.firebaseStore
+        .collection('enrollments')
+        .where('courseId', '==', courseId)
+        .where('status', '==', 'active')
+        .count()
+        .get();
+
+      return snapshot.data().count;
+    } catch (error) {
+      logger.error('Error in CourseRepository.getEnrollmentCount:', error);
+      return 0; // Return 0 instead of throwing to not break course queries
+    }
+  }
+
+  /**
+   * Check if user is enrolled in a course
+   */
+  async isUserEnrolled(courseId: string, userId: string): Promise<boolean> {
+    try {
+      const enrollmentId = `${courseId}_${userId}`;
+      const doc = await this.firebaseStore
+        .collection('enrollments')
+        .doc(enrollmentId)
+        .get();
+
+      if (!doc.exists) {
+        return false;
+      }
+
+      const data = doc.data();
+      return data?.status === 'active';
+    } catch (error) {
+      logger.error('Error in CourseRepository.isUserEnrolled:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get course with enrollment information
+   */
+  async getCourseWithEnrollmentInfo(
+    courseId: string,
+    userId?: string
+  ): Promise<Course> {
+    try {
+      const course = await this.getCourseById(courseId);
+      const enrollmentCount = await this.getEnrollmentCount(courseId);
+
+      let isEnrolled = false;
+      if (userId) {
+        isEnrolled = await this.isUserEnrolled(courseId, userId);
+      }
+
+      return {
+        ...course,
+        enrollmentCount,
+        isEnrolled,
+      };
+    } catch (error) {
+      logger.error(
+        'Error in CourseRepository.getCourseWithEnrollmentInfo:',
+        error
+      );
+      throw error;
+    }
+  }
 }

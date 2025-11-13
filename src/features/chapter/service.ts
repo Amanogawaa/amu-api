@@ -27,6 +27,16 @@ export class ChapterService {
     }
   }
 
+  public async getChapter(chapterId: string) {
+    try {
+      const chapter = await this.chapterRepository.getChapter(chapterId);
+      return chapter;
+    } catch (error) {
+      logger.error('Error in ChapterService.getChapter:', error);
+      throw error;
+    }
+  }
+
   public async generateChapters(request: GenerateChaptersRequest) {
     try {
       const prompt = generateChaptersPrompt({

@@ -15,6 +15,7 @@ export interface ProgressUpdateRequest {
   courseId: string;
   lessonId: string;
   completed: boolean; // true to mark complete, false to unmark
+  totalLessons?: number; // optional: update total lessons if provided
 }
 
 export interface ProgressResponse {

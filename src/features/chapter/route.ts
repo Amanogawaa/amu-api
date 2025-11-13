@@ -88,6 +88,10 @@ export class ChapterRoute {
       this.controller.getChapters(req, res, next)
     );
 
+    this.router.get('/chapter/:chapterId', (req, res, next) =>
+      this.controller.getChapter(req, res, next)
+    );
+
     /**
      * @openapi
      * /chapter:

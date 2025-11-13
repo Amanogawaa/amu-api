@@ -5,15 +5,75 @@ import type {
   ProgressUpdateRequest,
   UserProgress,
 } from './types';
+import { firebaseFirestore } from '../../config/firebase';
+import { logger } from '../../utils/loggers';
 
 export class ProgressService {
   constructor(private repository: ProgressRepository) {}
+
+  /**
+   * Check if user is enrolled in a course or is the course owner
+   */
+  private async checkEnrollmentOrOwnership(
+    courseId: string,
+    userId: string
+  ): Promise<void> {
+    try {
+      // Check if user is the course owner
+      const courseDoc = await firebaseFirestore
+        .collection('courses')
+        .doc(courseId)
+        .get();
+
+      if (!courseDoc.exists) {
+        throw new AppError('Course not found', 404);
+      }
+
+      const courseData = courseDoc.data();
+
+      // If user owns the course, they can track progress
+      if (courseData?.uid === userId) {
+        return;
+      }
+
+      // Otherwise, check enrollment
+      const enrollmentId = `${courseId}_${userId}`;
+      const enrollmentDoc = await firebaseFirestore
+        .collection('enrollments')
+        .doc(enrollmentId)
+        .get();
+
+      if (!enrollmentDoc.exists) {
+        throw new AppError(
+          'You must enroll in this course before tracking progress',
+          403
+        );
+      }
+
+      const enrollmentData = enrollmentDoc.data();
+
+      if (enrollmentData?.status !== 'active') {
+        throw new AppError('Your enrollment in this course is not active', 403);
+      }
+    } catch (error) {
+      logger.error('Error checking enrollment or ownership:', error);
+      throw error;
+    }
+  }
 
   async markLessonProgress(
     userId: string,
     data: ProgressUpdateRequest
   ): Promise<UserProgress> {
-    const { courseId, lessonId, completed } = data;
+    const {
+      courseId,
+      lessonId,
+      completed,
+      totalLessons: newTotalLessons,
+    } = data;
+
+    // Check enrollment or ownership before allowing progress tracking
+    await this.checkEnrollmentOrOwnership(courseId, userId);
 
     // Get existing progress or create new
     let progress = await this.repository.getProgressByCourse(courseId, userId);
@@ -24,7 +84,7 @@ export class ProgressService {
         courseId,
         userId,
         lessonsCompleted: completed ? [lessonId] : [],
-        totalLessons: 0, // Will be updated when we fetch course structure
+        totalLessons: newTotalLessons || 0, // Use provided or default to 0
         percentComplete: 0,
         lastActivityAt: new Date(),
         enrolledAt: new Date(),
@@ -48,16 +108,33 @@ export class ProgressService {
         }
       }
 
-      // Calculate percentage
-      const totalLessons = progress.totalLessons || 1; // Avoid division by zero
-      const percentComplete = Math.round(
-        (lessonsCompleted.length / totalLessons) * 100
-      );
+      // Update totalLessons if provided
+      const totalLessons =
+        newTotalLessons !== undefined
+          ? newTotalLessons
+          : progress.totalLessons || 1;
 
-      progress = await this.repository.updateProgress(courseId, userId, {
+      // Calculate percentage
+      const percentComplete =
+        totalLessons > 0
+          ? Math.round((lessonsCompleted.length / totalLessons) * 100)
+          : 0;
+
+      const updates: Partial<UserProgress> = {
         lessonsCompleted,
         percentComplete,
-      });
+      };
+
+      // Only update totalLessons if a new value was provided
+      if (newTotalLessons !== undefined) {
+        updates.totalLessons = newTotalLessons;
+      }
+
+      progress = await this.repository.updateProgress(
+        courseId,
+        userId,
+        updates
+      );
     }
 
     return progress;

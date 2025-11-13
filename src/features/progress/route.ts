@@ -77,7 +77,7 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.post(
-      '/',
+      '/progress',
       authMiddleware,
       this.controller.markLessonProgress.bind(this.controller)
     );
@@ -132,7 +132,7 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/summary',
+      '/progress/summary',
       authMiddleware,
       this.controller.getProgressSummary.bind(this.controller)
     );
@@ -185,7 +185,7 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/me',
+      '/progress/me',
       authMiddleware,
       this.controller.getProgressForUser.bind(this.controller)
     );
@@ -262,13 +262,13 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/course/:courseId',
+      '/progress/course/:courseId',
       authMiddleware,
       this.controller.getProgressForCourse.bind(this.controller)
     );
 
     this.router.delete(
-      '/course/:courseId',
+      '/progress/course/:courseId',
       authMiddleware,
       this.controller.deleteProgress.bind(this.controller)
     );
@@ -313,7 +313,7 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/course/:courseId/stats',
+      '/progress/course/:courseId/stats',
       authMiddleware,
       this.controller.getCourseStatistics.bind(this.controller)
     );

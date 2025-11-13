@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { logger } from '../../utils/loggers';
 import { notifyChapterCreated } from '../../utils/socket.helpers';
 import type { ChapterService } from './service';
@@ -29,6 +30,28 @@ export class ChapterController {
       response.status(200).send(chapters);
     } catch (error) {
       logger.error('Error in ChapterController.getChapters:', error);
+      next(error);
+    }
+  }
+
+  async getChapter(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const { chapterId } = request.params;
+      if (!chapterId) {
+        response.status(400).json({
+          message: 'Chapter ID is required',
+        });
+        return;
+      }
+
+      const chapter = await this.service.getChapter(chapterId);
+      response.status(200).json(chapter);
+    } catch (error) {
+      logger.error('Error in ChapterController.getChapter:', error);
       next(error);
     }
   }
