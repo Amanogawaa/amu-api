@@ -124,10 +124,32 @@ export class EnrollmentService {
     params?: EnrollmentQueryParams
   ): Promise<Enrollment[]> {
     try {
-      return await this.enrollmentRepository.getEnrollmentsByUser(
+      const enrollments = await this.enrollmentRepository.getEnrollmentsByUser(
         userId,
         params
       );
+
+      const enrollmentsWithCourses = await Promise.all(
+        enrollments.map(async (enrollment) => {
+          try {
+            const course = await this.courseRepository.getCourseById(
+              enrollment.courseId
+            );
+            return {
+              ...enrollment,
+              course,
+            };
+          } catch (error) {
+            logger.warn(
+              `Failed to fetch course ${enrollment.courseId} for enrollment ${enrollment.id}`,
+              error
+            );
+            return enrollment;
+          }
+        })
+      );
+
+      return enrollmentsWithCourses as any;
     } catch (error) {
       logger.error('Error in EnrollmentService.getUserEnrollments:', error);
       throw error;

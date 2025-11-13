@@ -1,3 +1,5 @@
+import type { Course } from '../course/types';
+
 export interface Enrollment {
   id: string;
   courseId: string;
@@ -8,12 +10,20 @@ export interface Enrollment {
   updatedAt: Date;
 }
 
+export interface EnrollmentWithCourse extends Enrollment {
+  course: Course;
+}
+
 export interface EnrollmentRequest {
   courseId: string;
 }
 
 export interface EnrollmentResponse {
-  data: Enrollment | Enrollment[];
+  data:
+    | Enrollment
+    | Enrollment[]
+    | EnrollmentWithCourse
+    | EnrollmentWithCourse[];
   message: string;
   total?: number;
 }
