@@ -72,7 +72,6 @@ export class UserRepository {
         });
       }
 
-      // Update photoURL in Firebase Auth if provided
       if (updates.photoURL) {
         await firebaseAuth.updateUser(uid, {
           photoURL: updates.photoURL,

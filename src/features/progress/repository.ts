@@ -16,7 +16,6 @@ export class ProgressRepository {
     const snapshot = await this.db
       .collection(this.collectionName)
       .where('userId', '==', userId)
-      .orderBy('lastActivityAt', 'desc')
       .get();
 
     return snapshot.docs.map((doc) => ({

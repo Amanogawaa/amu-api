@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { getSocketHandlers } from '../../utils/socket.helpers';
+import { getSocketHandlers } from '../../utils/socket/socket.helpers';
 import type { AuthenticatedSocket } from '../../middlewares/socket.middleware';
 
 const router = Router();

@@ -9,16 +9,13 @@ export class LikesService {
     courseId: string,
     userId: string
   ): Promise<{ liked: boolean; likesCount: number }> {
-    // Check if like already exists
     const existingLike = await this.repository.getLike(courseId, userId);
 
     if (existingLike) {
-      // Unlike: delete the like
       await this.repository.deleteLike(courseId, userId);
       const likesCount = await this.repository.getLikesCount(courseId);
       return { liked: false, likesCount };
     } else {
-      // Like: create new like
       await this.repository.createLike(courseId, userId);
       const likesCount = await this.repository.getLikesCount(courseId);
       return { liked: true, likesCount };

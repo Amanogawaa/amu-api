@@ -12,15 +12,10 @@ export class EnrollmentService {
     private progressRepository: ProgressRepository
   ) {}
 
-  /**
-   * Enroll a user in a course
-   */
   async enrollInCourse(courseId: string, userId: string): Promise<Enrollment> {
     try {
-      // 1. Get the course
       const course = await this.courseRepository.getCourseById(courseId);
 
-      // 2. Validate enrollment rules
       if (!course.publish) {
         throw new AppError('Cannot enroll in unpublished courses', 403);
       }
@@ -33,7 +28,6 @@ export class EnrollmentService {
         throw new AppError('Cannot enroll in your own course', 400);
       }
 
-      // 3. Create enrollment
       const enrollment = await this.enrollmentRepository.createEnrollment({
         courseId,
         userId,
@@ -41,12 +35,11 @@ export class EnrollmentService {
         status: 'active',
       });
 
-      // 4. Create initial progress record
       await this.progressRepository.createProgress({
         courseId,
         userId,
         lessonsCompleted: [],
-        totalLessons: 0, // Will be updated when user starts lessons
+        totalLessons: 0,
         percentComplete: 0,
         lastActivityAt: new Date(),
         enrolledAt: new Date(),
@@ -63,9 +56,6 @@ export class EnrollmentService {
     }
   }
 
-  /**
-   * Unenroll a user from a course
-   */
   async unenrollFromCourse(courseId: string, userId: string): Promise<void> {
     try {
       const enrollmentId = `${courseId}_${userId}`;
@@ -81,7 +71,6 @@ export class EnrollmentService {
         throw new AppError('Enrollment is not active', 400);
       }
 
-      // Soft delete - mark as dropped
       await this.enrollmentRepository.deleteEnrollment(enrollmentId);
 
       logger.info(`User ${userId} unenrolled from course ${courseId}`);
@@ -91,9 +80,6 @@ export class EnrollmentService {
     }
   }
 
-  /**
-   * Get enrollment status for a course
-   */
   async getEnrollmentStatus(
     courseId: string,
     userId: string
@@ -116,9 +102,6 @@ export class EnrollmentService {
     }
   }
 
-  /**
-   * Get all enrollments for a user
-   */
   async getUserEnrollments(
     userId: string,
     params?: EnrollmentQueryParams
@@ -156,9 +139,6 @@ export class EnrollmentService {
     }
   }
 
-  /**
-   * Get enrollment count for a course
-   */
   async getCourseEnrollmentCount(courseId: string): Promise<number> {
     try {
       return await this.enrollmentRepository.getEnrollmentCountByCourse(
@@ -173,9 +153,6 @@ export class EnrollmentService {
     }
   }
 
-  /**
-   * Check if user is enrolled in a course
-   */
   async isUserEnrolled(courseId: string, userId: string): Promise<boolean> {
     try {
       return await this.enrollmentRepository.isUserEnrolled(courseId, userId);
@@ -185,9 +162,6 @@ export class EnrollmentService {
     }
   }
 
-  /**
-   * Mark enrollment as completed
-   */
   async markEnrollmentAsCompleted(
     courseId: string,
     userId: string

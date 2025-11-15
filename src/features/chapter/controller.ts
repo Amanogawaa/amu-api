@@ -1,8 +1,7 @@
-import { log } from 'console';
-import { logger } from '../../utils/loggers';
-import { notifyChapterCreated } from '../../utils/socket.helpers';
-import type { ChapterService } from './service';
 import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../../utils/loggers';
+import { notifyChapterCreated } from '../../utils/socket/socket.helpers';
+import type { ChapterService } from './service';
 
 export class ChapterController {
   private service: ChapterService;

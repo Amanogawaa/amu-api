@@ -3,7 +3,7 @@ import { logger } from '../../utils/loggers';
 import type { CourseService } from './service';
 import type { CourseQueryParams } from './types';
 import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
-import { notifyCourseCreated } from '../../utils/socket.helpers';
+import { notifyCourseCreated } from '../../utils/socket/socket.helpers';
 import type { FullCourseGenerationService } from '../../utils/generation.service';
 
 export class CourseController {

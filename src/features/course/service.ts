@@ -1,13 +1,12 @@
-import { GoogleGenAI, MediaResolution } from '@google/genai';
+import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
 import { generateCoursePrompt } from '../../utils/prompts/course-temp';
 import { CourseRepository } from './repository';
-import { AppError } from '../../utils/errors';
 
 import { geminiCall } from '../../utils/geminiCall';
 import {
-  type CourseQueryParams,
   type Course,
+  type CourseQueryParams,
   type GenerateCourseRequest,
   courseSchema,
 } from './types';

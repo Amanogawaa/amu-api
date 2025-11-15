@@ -1,4 +1,3 @@
-// packages
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import type { Application, NextFunction, Request, Response } from 'express';
@@ -11,10 +10,9 @@ import { logger } from './utils/loggers';
 import type { Server as SocketIOServer } from 'socket.io';
 import { initializeSocketIO } from './config/socket';
 import { socketAuthMiddleware } from './middlewares/socket.middleware';
-import { SocketHandlers } from './utils/socket.handlers';
+import { SocketHandlers } from './utils/socket/socket.handlers';
 import path from 'path';
 
-// mods
 import { AuthContainer } from './features/auth/container';
 import { ChapterContainer } from './features/chapter/container';
 import { CourseContainer } from './features/course/container';
@@ -28,6 +26,7 @@ import { CommentsContainer } from './features/comments/container';
 import { UserContainer } from './features/user/container';
 import { QuizContainer } from './features/quiz/container';
 import { EnrollmentContainer } from './features/enrollment/container';
+import { CodePlaygroundContainer } from './features/code-playground/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -53,6 +52,7 @@ class App {
   private userContainer: UserContainer;
   private quizContainer: QuizContainer;
   private enrollmentContainer: EnrollmentContainer;
+  private codePlaygroundContainer: CodePlaygroundContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
@@ -64,7 +64,8 @@ class App {
     likesContainer: LikesContainer = new LikesContainer(),
     commentsContainer: CommentsContainer = new CommentsContainer(),
     userContainer: UserContainer = new UserContainer(),
-    quizContainer: QuizContainer = new QuizContainer()
+    quizContainer: QuizContainer = new QuizContainer(),
+    codePlaygroundContainer: CodePlaygroundContainer = new CodePlaygroundContainer()
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -79,11 +80,9 @@ class App {
     this.chapterContainer = chapterContainer;
     this.quizContainer = quizContainer;
 
-    // Initialize LessonContainer with QuizService
     this.lessonContainer =
       lessonContainer || new LessonContainer(undefined, quizContainer.service);
 
-    // Initialize CourseContainer with all dependencies for full generation
     this.courseContainer =
       courseContainer ||
       new CourseContainer(
@@ -98,11 +97,12 @@ class App {
     this.commentsContainer = commentsContainer;
     this.userContainer = userContainer;
 
-    // Initialize EnrollmentContainer with dependencies
     this.enrollmentContainer = new EnrollmentContainer(
       this.courseContainer.repository,
       this.progressContainer.repository
     );
+
+    this.codePlaygroundContainer = codePlaygroundContainer;
 
     this.app.use(express.json());
     this.app.use(helmet());
@@ -110,7 +110,6 @@ class App {
     this.app.use(cors(CORSOPTIONS));
     this.app.use(cookieParser());
 
-    // Serve static files from uploads directory
     this.app.use(
       '/uploads',
       express.static(path.join(process.cwd(), 'uploads'))
@@ -140,7 +139,8 @@ class App {
       this.commentsContainer,
       this.userContainer,
       this.quizContainer,
-      this.enrollmentContainer
+      this.enrollmentContainer,
+      this.codePlaygroundContainer
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

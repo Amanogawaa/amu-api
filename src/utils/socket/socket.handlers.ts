@@ -1,6 +1,6 @@
 import type { Server as SocketIOServer } from 'socket.io';
-import { logger } from '../utils/loggers';
-import type { AuthenticatedSocket } from '../middlewares/socket.middleware';
+import { logger } from '../loggers';
+import type { AuthenticatedSocket } from '../../middlewares/socket.middleware';
 
 export class SocketHandlers {
   public io: SocketIOServer;
@@ -34,18 +34,13 @@ export class SocketHandlers {
     });
   }
 
-  /**
-   * Handle course-related socket events
-   */
   private handleCourseEvents(socket: AuthenticatedSocket): void {
-    // Join a course room
     socket.on('course:join', (courseId: string) => {
       socket.join(`course:${courseId}`);
       logger.info(`User ${socket.userId} joined course ${courseId}`);
       socket.emit('course:joined', { courseId });
     });
 
-    // Leave a course room
     socket.on('course:leave', (courseId: string) => {
       socket.leave(`course:${courseId}`);
       logger.info(`User ${socket.userId} left course ${courseId}`);
@@ -53,18 +48,13 @@ export class SocketHandlers {
     });
   }
 
-  /**
-   * Handle module-related socket events
-   */
   private handleModuleEvents(socket: AuthenticatedSocket): void {
-    // Join a module room
     socket.on('module:join', (moduleId: string) => {
       socket.join(`module:${moduleId}`);
       logger.info(`User ${socket.userId} joined module ${moduleId}`);
       socket.emit('module:joined', { moduleId });
     });
 
-    // Leave a module room
     socket.on('module:leave', (moduleId: string) => {
       socket.leave(`module:${moduleId}`);
       logger.info(`User ${socket.userId} left module ${moduleId}`);

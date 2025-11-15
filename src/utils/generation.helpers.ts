@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import type { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import type { SocketHandlers } from './socket.handlers';
+import type { SocketHandlers } from './socket/socket.handlers';
 import { logger } from './loggers';
 
 /**

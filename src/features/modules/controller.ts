@@ -1,7 +1,7 @@
 import { logger } from '../../utils/loggers';
 import type { ModuleService } from './service';
 import type { NextFunction, Request, Response } from 'express';
-import { notifyModuleCreated } from './../../utils/socket.helpers';
+import { notifyModuleCreated } from '../../utils/socket/socket.helpers';
 
 export class ModuleController {
   private service: ModuleService;

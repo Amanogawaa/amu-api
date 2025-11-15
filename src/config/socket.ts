@@ -5,7 +5,7 @@ import type {
   ClientToServerEvents,
   ServerToClientEvents,
   SocketData,
-} from '../utils/socket.types';
+} from '../utils/socket/socket.types';
 
 export interface SocketConfig {
   cors: {

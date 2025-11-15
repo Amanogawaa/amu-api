@@ -1,16 +1,19 @@
+import type { Firestore } from 'firebase-admin/firestore';
+import { firebaseFirestore } from '../../config/firebase';
 import type {
   Comment,
   CreateCommentRequest,
   UpdateCommentRequest,
 } from './types';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export class CommentsRepository {
-  private db: FirebaseFirestore.Firestore;
+  private firebaseStore: Firestore;
   private commentsCollection = 'comments';
   private coursesCollection = 'courses';
 
-  constructor(firestore: FirebaseFirestore.Firestore) {
-    this.db = firestore;
+  constructor(firestore: Firestore = firebaseFirestore) {
+    this.firebaseStore = firestore;
   }
 
   async createComment(
@@ -32,17 +35,18 @@ export class CommentsRepository {
       deleted: false,
     };
 
-    // Use batch to atomically create comment and increment count
-    const batch = this.db.batch();
+    const batch = this.firebaseStore.batch();
 
-    const commentRef = this.db.collection(this.commentsCollection).doc();
+    const commentRef = this.firebaseStore
+      .collection(this.commentsCollection)
+      .doc();
     batch.set(commentRef, commentData);
 
-    const courseRef = this.db
+    const courseRef = this.firebaseStore
       .collection(this.coursesCollection)
       .doc(data.courseId);
     batch.update(courseRef, {
-      commentsCount: FirebaseFirestore.FieldValue.increment(1),
+      commentsCount: FieldValue.increment(1),
     });
 
     await batch.commit();
@@ -54,7 +58,7 @@ export class CommentsRepository {
   }
 
   async getCommentById(commentId: string): Promise<Comment | null> {
-    const doc = await this.db
+    const doc = await this.firebaseStore
       .collection(this.commentsCollection)
       .doc(commentId)
       .get();
@@ -77,7 +81,7 @@ export class CommentsRepository {
     offset = 0,
     parentId?: string | null
   ): Promise<{ comments: Comment[]; total: number }> {
-    let query = this.db
+    let query = this.firebaseStore
       .collection(this.commentsCollection)
       .where('courseId', '==', courseId)
       .where('deleted', '==', false);
@@ -99,7 +103,7 @@ export class CommentsRepository {
       updatedAt: doc.data().updatedAt?.toDate(),
     })) as Comment[];
 
-    let countQuery = this.db
+    let countQuery = this.firebaseStore
       .collection(this.commentsCollection)
       .where('courseId', '==', courseId)
       .where('deleted', '==', false);
@@ -122,10 +126,13 @@ export class CommentsRepository {
   ): Promise<Comment> {
     const now = new Date();
 
-    await this.db.collection(this.commentsCollection).doc(commentId).update({
-      content: data.content,
-      updatedAt: now,
-    });
+    await this.firebaseStore
+      .collection(this.commentsCollection)
+      .doc(commentId)
+      .update({
+        content: data.content,
+        updatedAt: now,
+      });
 
     const updated = await this.getCommentById(commentId);
     if (!updated) {
@@ -136,10 +143,9 @@ export class CommentsRepository {
   }
 
   async deleteComment(commentId: string, courseId: string): Promise<void> {
-    // Soft delete
-    const batch = this.db.batch();
+    const batch = this.firebaseStore.batch();
 
-    const commentRef = this.db
+    const commentRef = this.firebaseStore
       .collection(this.commentsCollection)
       .doc(commentId);
     batch.update(commentRef, {
@@ -147,16 +153,18 @@ export class CommentsRepository {
       updatedAt: new Date(),
     });
 
-    const courseRef = this.db.collection(this.coursesCollection).doc(courseId);
+    const courseRef = this.firebaseStore
+      .collection(this.coursesCollection)
+      .doc(courseId);
     batch.update(courseRef, {
-      commentsCount: FirebaseFirestore.FieldValue.increment(-1),
+      commentsCount: FieldValue.increment(-1),
     });
 
     await batch.commit();
   }
 
   async getCommentsByUser(userId: string): Promise<Comment[]> {
-    const snapshot = await this.db
+    const snapshot = await this.firebaseStore
       .collection(this.commentsCollection)
       .where('authorId', '==', userId)
       .where('deleted', '==', false)
@@ -172,7 +180,7 @@ export class CommentsRepository {
   }
 
   async getReplies(parentId: string): Promise<Comment[]> {
-    const snapshot = await this.db
+    const snapshot = await this.firebaseStore
       .collection(this.commentsCollection)
       .where('parentId', '==', parentId)
       .where('deleted', '==', false)

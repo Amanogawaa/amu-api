@@ -1,12 +1,15 @@
+import type { Firestore } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import type { Like } from './types';
+import { firebaseFirestore } from '../../config/firebase';
 
 export class LikesRepository {
-  private db: FirebaseFirestore.Firestore;
+  private firebaseStore: Firestore;
   private likesCollection = 'likes';
   private coursesCollection = 'courses';
 
-  constructor(firestore: FirebaseFirestore.Firestore) {
-    this.db = firestore;
+  constructor(firestore: Firestore = firebaseFirestore) {
+    this.firebaseStore = firestore;
   }
 
   private getLikeId(courseId: string, userId: string): string {
@@ -15,7 +18,7 @@ export class LikesRepository {
 
   async getLike(courseId: string, userId: string): Promise<Like | null> {
     const likeId = this.getLikeId(courseId, userId);
-    const doc = await this.db
+    const doc = await this.firebaseStore
       .collection(this.likesCollection)
       .doc(likeId)
       .get();
@@ -41,15 +44,18 @@ export class LikesRepository {
       createdAt: now,
     };
 
-    // Use batch to atomically create like and increment count
-    const batch = this.db.batch();
+    const batch = this.firebaseStore.batch();
 
-    const likeRef = this.db.collection(this.likesCollection).doc(likeId);
+    const likeRef = this.firebaseStore
+      .collection(this.likesCollection)
+      .doc(likeId);
     batch.set(likeRef, likeData);
 
-    const courseRef = this.db.collection(this.coursesCollection).doc(courseId);
+    const courseRef = this.firebaseStore
+      .collection(this.coursesCollection)
+      .doc(courseId);
     batch.update(courseRef, {
-      likesCount: FirebaseFirestore.FieldValue.increment(1),
+      likesCount: FieldValue.increment(1),
     });
 
     await batch.commit();
@@ -63,15 +69,18 @@ export class LikesRepository {
   async deleteLike(courseId: string, userId: string): Promise<void> {
     const likeId = this.getLikeId(courseId, userId);
 
-    // Use batch to atomically delete like and decrement count
-    const batch = this.db.batch();
+    const batch = this.firebaseStore.batch();
 
-    const likeRef = this.db.collection(this.likesCollection).doc(likeId);
+    const likeRef = this.firebaseStore
+      .collection(this.likesCollection)
+      .doc(likeId);
     batch.delete(likeRef);
 
-    const courseRef = this.db.collection(this.coursesCollection).doc(courseId);
+    const courseRef = this.firebaseStore
+      .collection(this.coursesCollection)
+      .doc(courseId);
     batch.update(courseRef, {
-      likesCount: FirebaseFirestore.FieldValue.increment(-1),
+      likesCount: FieldValue.increment(-1),
     });
 
     await batch.commit();
@@ -82,7 +91,7 @@ export class LikesRepository {
     limit = 50,
     offset = 0
   ): Promise<{ likes: Like[]; total: number }> {
-    const snapshot = await this.db
+    const snapshot = await this.firebaseStore
       .collection(this.likesCollection)
       .where('courseId', '==', courseId)
       .orderBy('createdAt', 'desc')
@@ -96,8 +105,7 @@ export class LikesRepository {
       createdAt: doc.data().createdAt?.toDate(),
     })) as Like[];
 
-    // Get total count
-    const countSnapshot = await this.db
+    const countSnapshot = await this.firebaseStore
       .collection(this.likesCollection)
       .where('courseId', '==', courseId)
       .count()
@@ -110,7 +118,7 @@ export class LikesRepository {
   }
 
   async getLikesCount(courseId: string): Promise<number> {
-    const courseDoc = await this.db
+    const courseDoc = await this.firebaseStore
       .collection(this.coursesCollection)
       .doc(courseId)
       .get();
@@ -119,7 +127,7 @@ export class LikesRepository {
   }
 
   async getLikesByUser(userId: string): Promise<Like[]> {
-    const snapshot = await this.db
+    const snapshot = await this.firebaseStore
       .collection(this.likesCollection)
       .where('userId', '==', userId)
       .orderBy('createdAt', 'desc')

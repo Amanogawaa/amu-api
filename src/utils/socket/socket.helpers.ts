@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { AuthenticatedRequest } from '../middlewares/auth.middleware';
+import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
 import type { SocketHandlers } from './socket.handlers';
 
 export function getSocketHandlers(req: Request): SocketHandlers | null {
