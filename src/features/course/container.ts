@@ -7,6 +7,7 @@ import { FullCourseGenerationService } from '../../utils/generation.service';
 import type { ModuleService } from '../modules/service';
 import type { ChapterService } from '../chapter/service';
 import type { LessonService } from '../lesson/service';
+import type { CapstoneService } from '../capstone/service';
 
 export class CourseContainer {
   public readonly repository: CourseRepository;
@@ -19,18 +20,19 @@ export class CourseContainer {
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
     moduleService?: ModuleService,
     chapterService?: ChapterService,
-    lessonService?: LessonService
+    lessonService?: LessonService,
+    capstoneService?: CapstoneService
   ) {
     this.repository = new CourseRepository(firestore);
     this.service = new CourseService(this.repository);
 
-    // Initialize full generation service if dependencies are provided
     if (moduleService && chapterService && lessonService) {
       this.fullGenerationService = new FullCourseGenerationService(
         this.service,
         moduleService,
         chapterService,
-        lessonService
+        lessonService,
+        capstoneService
       );
     }
 

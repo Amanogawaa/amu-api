@@ -12,6 +12,7 @@ import type { ProgressContainer } from './features/progress/container';
 import type { QuizContainer } from './features/quiz/container';
 import socketTestRoutes from './features/socket/route';
 import type { UserContainer } from './features/user/container';
+import type { CapstoneContainer } from './features/capstone/container';
 
 export class AppRoutes {
   private router: Router;
@@ -27,6 +28,7 @@ export class AppRoutes {
   private quizContainer: QuizContainer;
   private enrollmentContainer: EnrollmentContainer;
   private codePlaygroundContainer: CodePlaygroundContainer;
+  private capstoneContainer: CapstoneContainer;
 
   constructor(
     authContainer: AuthContainer,
@@ -40,7 +42,8 @@ export class AppRoutes {
     userContainer: UserContainer,
     quizContainer: QuizContainer,
     enrollmentContainer: EnrollmentContainer,
-    codePlaygroundContainer: CodePlaygroundContainer
+    codePlaygroundContainer: CodePlaygroundContainer,
+    capstoneContainer: CapstoneContainer
   ) {
     this.router = Router();
     this.authContainer = authContainer;
@@ -55,6 +58,7 @@ export class AppRoutes {
     this.quizContainer = quizContainer;
     this.enrollmentContainer = enrollmentContainer;
     this.codePlaygroundContainer = codePlaygroundContainer;
+    this.capstoneContainer = capstoneContainer;
     this.initializeRoutes();
   }
 
@@ -81,6 +85,7 @@ export class AppRoutes {
     this.router.use('/', this.quizContainer.getRouter());
     this.router.use('/', this.enrollmentContainer.route.getRouter());
     this.router.use('/', this.codePlaygroundContainer.getRouter());
+    this.router.use('/capstone', this.capstoneContainer.getRouter());
   }
 
   public getRouter(): Router {

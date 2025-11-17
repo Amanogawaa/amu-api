@@ -15,38 +15,51 @@ export class CodePlaygroundRoute {
 
   private initializeRoutes(): void {
     this.router.post(
-      'code/execute',
+      '/code/execute',
+      authMiddleware,
       validateExecuteCode,
       this.controller.executeCode
     );
 
     this.router.post(
-      'code/execute-and-save',
+      '/code/execute-and-save',
       validateExecuteCode,
       this.controller.executeAndSave
     );
 
     this.router.post(
-      'code/workspace',
+      '/code/workspace',
       validateSaveWorkspace,
       this.controller.saveWorkspace
     );
 
-    this.router.get('code/workspace/:lessonId', this.controller.getWorkspace);
+    this.router.get('/code/workspace/:lessonId', this.controller.getWorkspace);
 
     this.router.get(
-      'code/workspaces/course/:courseId',
+      '/code/workspaces/course/:courseId',
       this.controller.getWorkspacesByCourse
     );
 
     this.router.delete(
-      'code/workspace/:workspaceId',
+      '/code/workspace/:workspaceId',
       this.controller.deleteWorkspace
+    );
+
+    this.router.get(
+      '/piston/languages',
+      authMiddleware,
+      this.controller.getPistonSupportedLanguages
+    );
+
+    this.router.post(
+      '/piston/execute',
+      authMiddleware,
+      this.controller.pistonExecuteCode
     );
 
     /**
      * @openapi
-     * /languages:
+     * /code/languages:
      *   get:
      *     tags: [Code Playground]
      *     summary: Get supported programming languages
@@ -61,11 +74,7 @@ export class CodePlaygroundRoute {
      *          properties:
      *
      */
-    this.router.get(
-      '/languages',
-      authMiddleware,
-      this.controller.getSupportedLanguages
-    );
+    this.router.get('/code/languages', this.controller.getSupportedLanguages);
   }
 
   public getRouter(): Router {

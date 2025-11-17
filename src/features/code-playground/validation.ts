@@ -35,13 +35,13 @@ export const validateExecuteCode = (
     return;
   }
 
-  if (!lessonId || typeof lessonId !== 'string') {
-    res.status(400).json({
-      success: false,
-      message: 'Lesson ID is required and must be a string',
-    });
-    return;
-  }
+  // if (!lessonId || typeof lessonId !== 'string') {
+  //   res.status(400).json({
+  //     success: false,
+  //     message: 'Lesson ID is required and must be a string',
+  //   });
+  //   return;
+  // }
 
   // Code length validation (max 50KB)
   if (code.length > 50000) {

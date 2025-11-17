@@ -115,6 +115,44 @@ export class CodePlaygroundController {
     }
   };
 
+  getPistonSupportedLanguages = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const languages = await this.codePlaygroundService.pistonGetLanguages();
+
+      res.status(200).json({
+        success: true,
+        data: languages,
+        message: 'Supported languages retrieved successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  pistonExecuteCode = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { language, version, code } = req.body;
+
+      const result = await this.codePlaygroundService.pistonExecuteCode({
+        language: language,
+        version: version,
+        sourceCode: code,
+      });
+
+      res.status(200).send(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   /**
    * Get workspace for lesson
    * GET /api/code/workspace/:lessonId
@@ -226,6 +264,10 @@ export class CodePlaygroundController {
     res: Response
   ): Promise<void> {
     console.log('Received request for supported languages');
+    if (!req.user) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
 
     const { SUPPORTED_LANGUAGES } = await import('./types');
 

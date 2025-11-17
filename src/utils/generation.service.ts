@@ -18,13 +18,15 @@ import type { ChapterService } from '../features/chapter/service';
 import type { LessonService } from '../features/lesson/service';
 import type { GenerateCourseRequest } from '../features/course/types';
 import type { Module } from '../features/modules/types';
+import type { CapstoneService } from '../features/capstone/service';
 
 export class FullCourseGenerationService {
   constructor(
     private courseService: CourseService,
     private moduleService: ModuleService,
     private chapterService: ChapterService,
-    private lessonService: LessonService
+    private lessonService: LessonService,
+    private capstoneService?: CapstoneService
   ) {}
 
   async generateFullCourse(
@@ -88,6 +90,17 @@ export class FullCourseGenerationService {
         course,
         modules
       );
+
+      // Generate capstone guideline (optional, fire and forget)
+      if (this.capstoneService) {
+        this.generateCapstoneGuideline(course).catch((error: any) => {
+          logger.error('Capstone generation failed (non-critical)', {
+            jobId,
+            courseId: course.id,
+            error: error.message,
+          });
+        });
+      }
 
       const result: FullCourseGenerationResult = {
         courseId: course.id,
@@ -355,6 +368,46 @@ export class FullCourseGenerationService {
         error: error.message,
       });
       throw error;
+    }
+  }
+
+  private async generateCapstoneGuideline(course: any): Promise<void> {
+    try {
+      if (!this.capstoneService) {
+        logger.warn(
+          'Capstone service not available, skipping guideline generation'
+        );
+        return;
+      }
+
+      logger.info('Generating capstone guideline', {
+        courseId: course.id,
+        courseName: course.name,
+      });
+
+      const guidelineRequest = {
+        courseId: course.id,
+        courseName: course.name,
+        courseDescription: course.description,
+        learningOutcomes: course.learning_outcomes || [],
+        level: course.level,
+        duration: course.duration,
+        language: course.language,
+        skillsGained: course.skillsGained || [],
+        category: course.category,
+      };
+
+      await this.capstoneService.generateGuideline(guidelineRequest);
+
+      logger.info('Capstone guideline generated successfully', {
+        courseId: course.id,
+      });
+    } catch (error: any) {
+      logger.error('Capstone guideline generation failed', {
+        courseId: course.id,
+        error: error.message,
+      });
+      // Don't throw - this is optional and shouldn't block course generation
     }
   }
 }

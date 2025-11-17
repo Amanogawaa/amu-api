@@ -27,6 +27,7 @@ import { UserContainer } from './features/user/container';
 import { QuizContainer } from './features/quiz/container';
 import { EnrollmentContainer } from './features/enrollment/container';
 import { CodePlaygroundContainer } from './features/code-playground/container';
+import { CapstoneContainer } from './features/capstone/container';
 
 const CORSOPTIONS = {
   origin: ['http://localhost:3000', '*'],
@@ -53,6 +54,7 @@ class App {
   private quizContainer: QuizContainer;
   private enrollmentContainer: EnrollmentContainer;
   private codePlaygroundContainer: CodePlaygroundContainer;
+  private capstoneContainer: CapstoneContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
@@ -83,13 +85,17 @@ class App {
     this.lessonContainer =
       lessonContainer || new LessonContainer(undefined, quizContainer.service);
 
+    this.codePlaygroundContainer = codePlaygroundContainer;
+    this.capstoneContainer = new CapstoneContainer();
+
     this.courseContainer =
       courseContainer ||
       new CourseContainer(
         undefined,
         moduleContainer.service,
         chapterContainer.service,
-        this.lessonContainer.service
+        this.lessonContainer.service,
+        this.capstoneContainer.service
       );
 
     this.progressContainer = progressContainer;
@@ -101,8 +107,6 @@ class App {
       this.courseContainer.repository,
       this.progressContainer.repository
     );
-
-    this.codePlaygroundContainer = codePlaygroundContainer;
 
     this.app.use(express.json());
     this.app.use(helmet());
@@ -140,7 +144,8 @@ class App {
       this.userContainer,
       this.quizContainer,
       this.enrollmentContainer,
-      this.codePlaygroundContainer
+      this.codePlaygroundContainer,
+      this.capstoneContainer
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

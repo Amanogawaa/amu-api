@@ -11,6 +11,7 @@ import type {
 import { LANGUAGE_MAP, SUPPORTED_LANGUAGES } from './types';
 import { CodePlaygroundRepository } from './repository';
 import { AppError } from '../../utils/errors';
+import { logger } from '../../utils/loggers';
 
 export class CodePlaygroundService {
   private repository: CodePlaygroundRepository;
@@ -25,6 +26,51 @@ export class CodePlaygroundService {
 
     if (!this.judge0ApiKey) {
       console.warn('JUDGE0_API_KEY not set. Code execution will not work.');
+    }
+  }
+
+  async pistonGetLanguages(): Promise<string[]> {
+    try {
+      const response = await axios.get<any>(
+        'https://emkc.org/api/v2/piston/runtimes'
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new AppError(`Code execution failed: ${error.message}`, 500);
+      }
+      throw error;
+    }
+  }
+
+  async pistonExecuteCode({
+    language,
+    sourceCode,
+    version,
+  }: {
+    language: string;
+    sourceCode: string;
+    version?: string;
+  }) {
+    try {
+      const response = await axios.post<any>(
+        'https://emkc.org/api/v2/piston/execute',
+        {
+          language,
+          version,
+          files: [
+            {
+              content: sourceCode,
+            },
+          ],
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new AppError(`Code execution failed: ${error.message}`, 500);
+      }
+      throw error;
     }
   }
 
@@ -53,7 +99,7 @@ export class CodePlaygroundService {
         stdin: stdin ? Buffer.from(stdin).toString('base64') : undefined,
       };
 
-      const submitResponse = await axios.post<Judge0SubmissionResponse>(
+      const response = await axios.post<Judge0ResultResponse>(
         `${this.judge0ApiUrl}/submissions?base64_encoded=true&wait=true`,
         submissionData,
         {
@@ -65,19 +111,7 @@ export class CodePlaygroundService {
         }
       );
 
-      const token = submitResponse.data.token;
-
-      const resultResponse = await axios.get<Judge0ResultResponse>(
-        `${this.judge0ApiUrl}/submissions/${token}?base64_encoded=true`,
-        {
-          headers: {
-            'X-RapidAPI-Key': this.judge0ApiKey,
-            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-          },
-        }
-      );
-
-      const result = resultResponse.data;
+      const result = response.data;
 
       const stdout = result.stdout
         ? Buffer.from(result.stdout, 'base64').toString()
