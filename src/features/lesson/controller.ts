@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { LessonService } from './service';
 import { logger } from '../../utils/loggers';
-import { youtubeService } from '../../utils/youtube.service';
-import { youtubeTranscriptService } from '../../utils/youtube-transcript.service';
+import { youtubeService } from '../../utils/service/youtube.service';
+import { youtubeTranscriptService } from '../../utils/service/youtube-transcript.service';
 
 export class LessonController {
   private service: LessonService;
@@ -166,11 +166,12 @@ export class LessonController {
         return;
       }
 
-      // Fetch transcript from YouTube
       const transcript = await youtubeTranscriptService.getTranscript(
         videoId,
         language || 'en'
       );
+
+      console.log('Fetched transcript:', transcript);
 
       if (!transcript) {
         response.status(404).json({
@@ -180,24 +181,24 @@ export class LessonController {
         return;
       }
 
-      // Update lesson with transcript
-      const updatedLesson = await this.service.updateLesson(lessonId!, {
-        selectedVideoId: videoId,
-        videoTranscript: transcript.fullText,
-        transcriptLanguage: transcript.language,
-        transcriptFetchedAt: new Date().toISOString(),
-        content: transcript.fullText, // Store in content field for unified access
-      });
+      // const updatedLesson = await this.service.updateLesson(lessonId!, {
+      //   selectedVideoId: videoId,
+      //   videoTranscript: transcript.fullText,
+      //   transcriptLanguage: transcript.language,
+      //   transcriptFetchedAt: new Date().toISOString(),
+      //   content: transcript.fullText,
+      // });
 
-      // Get transcript stats
       const stats = youtubeTranscriptService.getTranscriptStats(transcript);
+
+      console.log('Transcript stats:', stats);
 
       response.status(200).json({
         message: 'Transcript fetched successfully',
         transcript: transcript.fullText,
         language: transcript.language,
         stats,
-        lesson: updatedLesson,
+        lesson: null,
       });
     } catch (error) {
       logger.error('Error in LessonController.fetchTranscript:', error);

@@ -15,9 +15,8 @@ export const generateCoursePrompt = (args: {
 - Number of Modules: ${args.noOfModules}
 - Language: ${args.language}
 
-**Output Requirements**:
-Return ONLY valid JSON starting with { and ending with }. No markdown blocks, no explanations.
 
+Return valid JSON only:
 {
   "name": "Professional course title",
   "subtitle": "Engaging one-line tagline (optional, max 80 chars)",
@@ -37,12 +36,6 @@ Return ONLY valid JSON starting with { and ending with }. No markdown blocks, no
   "no_of_modules": ${args.noOfModules},
   "target_audience": "Who this course is designed for (1-2 sentences)",
   "skills_gained": ["skill1", "skill2", "skill3"],
-  "banner_url": "/images/banners/${args.topic
-    .toLowerCase()
-    .replace(/\s+/g, '-')}-banner.jpg",
-  "certificate_eligible": ${
-    args.duration.includes('h') && parseInt(args.duration) >= 10
-  }
 }
 
 **Content Guidelines by Level**:
@@ -63,5 +56,4 @@ Return ONLY valid JSON starting with { and ending with }. No markdown blocks, no
 - Prerequisites are realistic for the target level
 - Learning outcomes are specific, not vague (avoid "understand" or "learn about")
 - Target audience is clearly defined
-
-Return only the JSON object.`;
+`;

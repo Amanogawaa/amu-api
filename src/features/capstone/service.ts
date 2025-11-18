@@ -33,7 +33,6 @@ export class CapstoneService {
     request: GenerateCapstoneGuidelineRequest
   ): Promise<CapstoneGuideline> {
     try {
-      // Check if guideline already exists for this course
       const existing = await this.repository.getGuidelineByCourseId(
         request.courseId
       );

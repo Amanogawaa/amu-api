@@ -7,8 +7,8 @@ import {
   type GenerateLessonRequest,
   type Lesson,
 } from './types';
-import { youtubeService } from '../../utils/youtube.service';
-import { youtubeTranscriptService } from '../../utils/youtube-transcript.service';
+import { youtubeService } from '../../utils/service/youtube.service';
+import { youtubeTranscriptService } from '../../utils/service/youtube-transcript.service';
 import type { QuizService } from '../quiz/service';
 
 export class LessonService {
@@ -40,9 +40,8 @@ export class LessonService {
         learningObjectives: request.learningObjectives,
         keyTopics: request.keyTopics,
         estimatedDuration: request.estimatedDuration,
-        estimatedLessonCount: request.estimatedLessonCount,
-        courseName: request.courseName,
         moduleName: request.moduleName,
+        courseName: request.courseName,
         level: request.level,
         language: request.language,
       });

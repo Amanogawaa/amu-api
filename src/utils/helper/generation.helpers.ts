@@ -1,11 +1,8 @@
 import type { Request } from 'express';
-import type { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import type { SocketHandlers } from './socket/socket.handlers';
-import { logger } from './loggers';
+import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
+import type { SocketHandlers } from '../socket/socket.handlers';
+import { logger } from '../loggers';
 
-/**
- * Generation status types
- */
 export enum GenerationStatus {
   PENDING = 'pending',
   IN_PROGRESS = 'in_progress',
@@ -13,9 +10,6 @@ export enum GenerationStatus {
   FAILED = 'failed',
 }
 
-/**
- * Generation step types
- */
 export enum GenerationStep {
   COURSE = 'course',
   MODULES = 'modules',
@@ -23,24 +17,18 @@ export enum GenerationStep {
   LESSONS = 'lessons',
 }
 
-/**
- * Progress data for generation
- */
 export interface GenerationProgress {
   jobId: string;
   userId: string;
   status: GenerationStatus;
   currentStep: GenerationStep;
-  progress: number; // 0-100
+  progress: number;
   message: string;
   data?: any;
   error?: string;
   timestamp: string;
 }
 
-/**
- * Full course generation result
- */
 export interface FullCourseGenerationResult {
   courseId: string;
   modulesCount: number;
@@ -49,16 +37,10 @@ export interface FullCourseGenerationResult {
   totalDuration: string;
 }
 
-/**
- * Get socket handlers from request
- */
 export function getSocketHandlers(req: Request): SocketHandlers | null {
   return req.app.locals.socketHandlers || null;
 }
 
-/**
- * Emit generation progress to specific user
- */
 export function emitGenerationProgress(
   req: AuthenticatedRequest,
   progress: GenerationProgress
@@ -79,9 +61,6 @@ export function emitGenerationProgress(
   }
 }
 
-/**
- * Emit generation started event
- */
 export function emitGenerationStarted(
   req: AuthenticatedRequest,
   jobId: string,
@@ -99,9 +78,6 @@ export function emitGenerationStarted(
   emitGenerationProgress(req, progress);
 }
 
-/**
- * Emit course generation step
- */
 export function emitCourseGenerationProgress(
   req: AuthenticatedRequest,
   jobId: string,
@@ -122,9 +98,6 @@ export function emitCourseGenerationProgress(
   emitGenerationProgress(req, progress);
 }
 
-/**
- * Emit modules generation progress
- */
 export function emitModulesGenerationProgress(
   req: AuthenticatedRequest,
   jobId: string,
@@ -148,9 +121,6 @@ export function emitModulesGenerationProgress(
   emitGenerationProgress(req, progress);
 }
 
-/**
- * Emit chapters generation progress
- */
 export function emitChaptersGenerationProgress(
   req: AuthenticatedRequest,
   jobId: string,
@@ -174,9 +144,6 @@ export function emitChaptersGenerationProgress(
   emitGenerationProgress(req, progress);
 }
 
-/**
- * Emit lessons generation progress
- */
 export function emitLessonsGenerationProgress(
   req: AuthenticatedRequest,
   jobId: string,
@@ -200,9 +167,6 @@ export function emitLessonsGenerationProgress(
   emitGenerationProgress(req, progress);
 }
 
-/**
- * Emit generation completed
- */
 export function emitGenerationCompleted(
   req: AuthenticatedRequest,
   jobId: string,
@@ -222,9 +186,6 @@ export function emitGenerationCompleted(
   emitGenerationProgress(req, progress);
 }
 
-/**
- * Emit generation failed
- */
 export function emitGenerationFailed(
   req: AuthenticatedRequest,
   jobId: string,
@@ -252,9 +213,6 @@ export function emitGenerationFailed(
   });
 }
 
-/**
- * Create a unique job ID for generation tracking
- */
 export function createGenerationJobId(): string {
   return `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }

@@ -589,7 +589,7 @@ export class LessonRoute {
      */
     this.router.post(
       '/lessons/:lessonId/transcript',
-      authMiddleware,
+      // authMiddleware,
       (req, res, next) => this.controller.fetchTranscript(req, res, next)
     );
 

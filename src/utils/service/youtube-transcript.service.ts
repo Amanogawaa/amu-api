@@ -1,5 +1,12 @@
-import { YoutubeTranscript } from 'youtube-transcript';
-import { logger } from './loggers';
+import {
+  YoutubeTranscript,
+  YoutubeTranscriptVideoUnavailableError,
+  YoutubeTranscriptDisabledError,
+  YoutubeTranscriptNotAvailableError,
+  YoutubeTranscriptNotAvailableLanguageError,
+  YoutubeTranscriptTooManyRequestError,
+} from 'youtube-transcript-plus';
+import { logger } from '../loggers';
 
 interface TranscriptSegment {
   text: string;
@@ -25,7 +32,6 @@ export class YouTubeTranscriptService {
     language: string = 'en'
   ): Promise<TranscriptResult | null> {
     try {
-      // Fetch transcript segments
       const transcript = await YoutubeTranscript.fetchTranscript(videoId, {
         lang: language,
       });
@@ -35,10 +41,8 @@ export class YouTubeTranscriptService {
         return null;
       }
 
-      // Combine all segments into full text
       const fullText = transcript.map((segment: any) => segment.text).join(' ');
 
-      // Format segments
       const segments: TranscriptSegment[] = transcript.map((segment: any) => ({
         text: segment.text,
         duration: segment.duration,
@@ -51,12 +55,18 @@ export class YouTubeTranscriptService {
         language,
       };
     } catch (error: any) {
-      if (error.message?.includes('Transcript is disabled')) {
-        logger.warn(`Transcripts disabled for video: ${videoId}`);
-      } else if (error.message?.includes('No transcripts available')) {
+      if (error instanceof YoutubeTranscriptDisabledError) {
+        logger.warn(`Transcripts are disabled for video: ${videoId}`);
+      } else if (error instanceof YoutubeTranscriptNotAvailableError) {
         logger.warn(`No transcripts available for video: ${videoId}`);
-      } else if (error.message?.includes('Could not find')) {
-        logger.warn(`Could not find transcript for video: ${videoId}`);
+      } else if (error instanceof YoutubeTranscriptVideoUnavailableError) {
+        logger.warn(`Video is unavailable: ${videoId}`);
+      } else if (error instanceof YoutubeTranscriptNotAvailableLanguageError) {
+        logger.warn(
+          `Transcript not available in language "${language}" for video: ${videoId}`
+        );
+      } else if (error instanceof YoutubeTranscriptTooManyRequestError) {
+        logger.error(`Too many requests to YouTube API for video: ${videoId}`);
       } else {
         logger.error(`Error fetching transcript for ${videoId}:`, error);
       }
@@ -64,22 +74,16 @@ export class YouTubeTranscriptService {
     }
   }
 
-  /**
-   * Clean transcript text (remove artifacts, fix formatting)
-   */
   private cleanTranscript(text: string): string {
     return text
-      .replace(/\[Music\]/gi, '') // Remove [Music] markers
+      .replace(/\[Music\]/gi, '')
       .replace(/\[Applause\]/gi, '')
       .replace(/\[Laughter\]/gi, '')
-      .replace(/\[.*?\]/g, '') // Remove any other bracketed content
-      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/\[.*?\]/g, '')
+      .replace(/\s+/g, ' ')
       .trim();
   }
 
-  /**
-   * Get transcript with timestamps (useful for interactive features)
-   */
   async getTranscriptWithTimestamps(
     videoId: string,
     language: string = 'en'
@@ -96,17 +100,22 @@ export class YouTubeTranscriptService {
       return transcript.map((segment: any) => ({
         text: this.cleanTranscript(segment.text),
         duration: segment.duration,
-        offset: segment.offset, // Timestamp in seconds
+        offset: segment.offset,
       }));
-    } catch (error) {
-      logger.error('Error fetching transcript with timestamps:', error);
+    } catch (error: any) {
+      if (error instanceof YoutubeTranscriptDisabledError) {
+        logger.warn(`Transcripts disabled for video: ${videoId}`);
+      } else if (error instanceof YoutubeTranscriptNotAvailableError) {
+        logger.warn(`No transcripts available for video: ${videoId}`);
+      } else if (error instanceof YoutubeTranscriptVideoUnavailableError) {
+        logger.warn(`Video unavailable: ${videoId}`);
+      } else {
+        logger.error('Error fetching transcript with timestamps:', error);
+      }
       return null;
     }
   }
 
-  /**
-   * Get transcript in multiple languages (if available)
-   */
   async getTranscriptMultiLang(
     videoId: string,
     languages: string[] = ['en', 'es', 'fr']
@@ -122,18 +131,22 @@ export class YouTubeTranscriptService {
           const fullText = transcript.map((s: any) => s.text).join(' ');
           transcripts[lang] = this.cleanTranscript(fullText);
         }
-      } catch (error) {
-        logger.debug(`No ${lang} transcript for video ${videoId}`);
+      } catch (error: any) {
+        if (error instanceof YoutubeTranscriptNotAvailableLanguageError) {
+          logger.debug(`No ${lang} transcript for video ${videoId}`);
+        } else if (
+          !(error instanceof YoutubeTranscriptDisabledError) &&
+          !(error instanceof YoutubeTranscriptNotAvailableError)
+        ) {
+          // Only log unexpected errors, not common ones
+          logger.debug(`Error fetching ${lang} transcript for ${videoId}`);
+        }
       }
     }
 
     return transcripts;
   }
 
-  /**
-   * Format transcript with timestamps for display
-   * Useful for showing transcript alongside video
-   */
   formatTranscriptWithTime(segments: TranscriptSegment[]): string {
     return segments
       .map((segment) => {
@@ -145,9 +158,6 @@ export class YouTubeTranscriptService {
       .join('\n');
   }
 
-  /**
-   * Get summary statistics about a transcript
-   */
   getTranscriptStats(transcript: TranscriptResult): {
     wordCount: number;
     duration: number;

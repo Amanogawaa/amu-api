@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { logger } from './loggers';
+import { logger } from '../loggers';
 
 interface YouTubeVideo {
   videoId: string;

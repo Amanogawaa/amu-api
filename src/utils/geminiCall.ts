@@ -1,7 +1,7 @@
-import { GoogleGenAI, MediaResolution } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import Bottleneck from 'bottleneck';
-import { logger } from './loggers';
 import { RATE_LIMIT_CONFIG } from '../config/rateLimit';
+import { logger } from './loggers';
 
 interface GeminiConfig {
   responseSchema: any;
@@ -9,8 +9,9 @@ interface GeminiConfig {
   temperature?: number;
 }
 
-// Create a rate limiter for Gemini API
-// This prevents overloading the API with too many requests
+// Counter for unique job IDs
+let jobCounter = 0;
+
 const geminiLimiter = new Bottleneck({
   minTime: RATE_LIMIT_CONFIG.GEMINI.MIN_TIME_BETWEEN_REQUESTS,
   maxConcurrent: RATE_LIMIT_CONFIG.GEMINI.MAX_CONCURRENT,
@@ -19,19 +20,16 @@ const geminiLimiter = new Bottleneck({
   reservoirRefreshInterval: RATE_LIMIT_CONFIG.GEMINI.RESERVOIR_REFRESH_INTERVAL,
 });
 
-// Handle rate limit errors with exponential backoff
 geminiLimiter.on('failed', async (error: any, jobInfo: any) => {
   const id = jobInfo.options.id;
   const retryCount = jobInfo.retryCount || 0;
-  
-  // Check if it's a rate limit error
-  const isRateLimit = 
+
+  const isRateLimit =
     error?.message?.includes('quota') ||
     error?.message?.includes('rate limit') ||
     error?.message?.includes('429') ||
     error?.status === 429;
 
-  // Don't retry on critical errors
   if (
     error?.message?.includes('API key') ||
     error?.message?.includes('billing')
@@ -40,21 +38,21 @@ geminiLimiter.on('failed', async (error: any, jobInfo: any) => {
       error: error.message,
       id,
     });
-    return; // Don't retry
   }
 
-  // Retry up to configured max
   const maxRetries = RATE_LIMIT_CONFIG.GEMINI.MAX_RETRIES;
   if (retryCount < maxRetries) {
-    const baseDelay = isRateLimit 
-      ? RATE_LIMIT_CONFIG.GEMINI.INITIAL_RETRY_WAIT * RATE_LIMIT_CONFIG.GEMINI.RATE_LIMIT_MULTIPLIER
-      : RATE_LIMIT_CONFIG.GEMINI.INITIAL_RETRY_WAIT * RATE_LIMIT_CONFIG.GEMINI.NORMAL_ERROR_MULTIPLIER;
-    
+    const baseDelay = isRateLimit
+      ? RATE_LIMIT_CONFIG.GEMINI.INITIAL_RETRY_WAIT *
+        RATE_LIMIT_CONFIG.GEMINI.RATE_LIMIT_MULTIPLIER
+      : RATE_LIMIT_CONFIG.GEMINI.INITIAL_RETRY_WAIT *
+        RATE_LIMIT_CONFIG.GEMINI.NORMAL_ERROR_MULTIPLIER;
+
     const delay = Math.min(
       baseDelay * Math.pow(2, retryCount),
       RATE_LIMIT_CONFIG.GEMINI.MAX_RETRY_WAIT
     );
-    
+
     logger.warn(`Gemini API failed, retrying in ${delay}ms...`, {
       id,
       attempt: retryCount + 1,
@@ -72,12 +70,12 @@ geminiLimiter.on('failed', async (error: any, jobInfo: any) => {
   });
 });
 
-// Log when jobs are dropped due to reservoir being empty
 geminiLimiter.on('depleted', () => {
-  logger.warn('Gemini API rate limit reservoir depleted - requests will be queued');
+  logger.warn(
+    'Gemini API rate limit reservoir depleted - requests will be queued'
+  );
 });
 
-// Internal function to make the actual API call
 const makeGeminiCall = async (
   prompt: string,
   config: GeminiConfig
@@ -86,7 +84,6 @@ const makeGeminiCall = async (
     apiKey: process.env.GEMINI_API_KEY as string,
   });
 
-  // const model = 'gemini-2.5-pro';
   const model = 'gemini-2.5-flash';
 
   const contents = [
@@ -99,7 +96,8 @@ const makeGeminiCall = async (
   const response = await ai.models.generateContent({
     model,
     config: {
-      temperature: config.temperature || RATE_LIMIT_CONFIG.GEMINI.DEFAULT_TEMPERATURE,
+      temperature:
+        config.temperature || RATE_LIMIT_CONFIG.GEMINI.DEFAULT_TEMPERATURE,
       responseMimeType: 'application/json',
       responseSchema: config.responseSchema,
     },
@@ -128,16 +126,17 @@ const makeGeminiCall = async (
   return parsed;
 };
 
-// Export the rate-limited version
 export const geminiCall = async (
   prompt: string,
   config: GeminiConfig
 ): Promise<any> => {
   try {
-    // Schedule the API call through the rate limiter
-    const result = await geminiLimiter.schedule(
-      { id: `gemini-${Date.now()}` },
-      () => makeGeminiCall(prompt, config)
+    const uniqueId = `gemini-${Date.now()}-${++jobCounter}-${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
+
+    const result = await geminiLimiter.schedule({ id: uniqueId }, () =>
+      makeGeminiCall(prompt, config)
     );
     return result;
   } catch (error: any) {

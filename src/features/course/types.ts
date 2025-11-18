@@ -16,7 +16,6 @@ export interface Course {
   duration: string;
   description: string;
   category: string;
-  banner_url: string;
   likesCount?: number;
   commentsCount?: number;
   enrollmentCount?: number;
@@ -93,7 +92,6 @@ export const courseSchema = {
       type: 'array',
       items: { type: 'string' },
     },
-    bannerUrl: { type: 'string' },
   },
   required: ['name', 'description', 'learning_outcomes', 'prerequisites'],
 };

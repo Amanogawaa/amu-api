@@ -3,7 +3,7 @@ import { CourseRepository } from './repository';
 import { CourseRoute } from './route';
 import { CourseService } from './service';
 import { firebaseFirestore } from '../../config/firebase';
-import { FullCourseGenerationService } from '../../utils/generation.service';
+import { FullCourseGenerationService } from '../../utils/service/generation.service';
 import type { ModuleService } from '../modules/service';
 import type { ChapterService } from '../chapter/service';
 import type { LessonService } from '../lesson/service';
