@@ -36,6 +36,7 @@ Return valid JSON only:
   "no_of_modules": ${args.noOfModules},
   "target_audience": "Who this course is designed for (1-2 sentences)",
   "skills_gained": ["skill1", "skill2", "skill3"],
+  "supports_code_playground": true or false
 }
 
 **Content Guidelines by Level**:
@@ -56,4 +57,21 @@ Return valid JSON only:
 - Prerequisites are realistic for the target level
 - Learning outcomes are specific, not vague (avoid "understand" or "learn about")
 - Target audience is clearly defined
+
+**Code Playground Support**:
+Set "supports_code_playground" to true ONLY if the course:
+- Teaches a vanilla programming language (Python, JavaScript, Java, C++, C, Go, Rust, Ruby, PHP, TypeScript, etc.)
+- Does NOT require frameworks (React, Next.js, Vue, Angular, Django, Flask, Spring Boot, etc.)
+- Does NOT require external packages/libraries beyond standard library
+- Focuses on core programming concepts, algorithms, or data structures
+- Can run code in an isolated environment without dependencies
+
+Set to false if the course involves:
+- Web frameworks (React, Next.js, Vue, Angular)
+- Backend frameworks (Django, Flask, Express, Spring Boot)
+- Mobile development (React Native, Flutter, Swift UI)
+- Package managers or external dependencies
+- Database systems or ORMs
+- UI/UX design without coding
+- DevOps, Cloud, or Infrastructure topics
 `;

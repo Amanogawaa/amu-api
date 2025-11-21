@@ -16,6 +16,7 @@ export interface Course {
   duration: string;
   description: string;
   category: string;
+  supportsCodePlayground?: boolean;
   likesCount?: number;
   commentsCount?: number;
   enrollmentCount?: number;
@@ -92,6 +93,7 @@ export const courseSchema = {
       type: 'array',
       items: { type: 'string' },
     },
+    supportsCodePlayground: { type: 'boolean' },
   },
   required: ['name', 'description', 'learning_outcomes', 'prerequisites'],
 };
