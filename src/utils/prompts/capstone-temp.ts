@@ -19,7 +19,7 @@ Skills: ${args.skillsGained.join(', ')}
 Return valid JSON only:
 {
   "title": "Project-focused title (e.g., 'Build a Task Manager App')",
-  "description": "2-3 paragraphs: what it is, why valuable, skills demonstrated, how it synthesizes course",
+  "description": "1 paragraph: what it is, why valuable, skills demonstrated, how it synthesizes course",
   "objectives": [
     "Specific measurable objective (5-7 total)",
     "Use action verbs: Implement, Build, Create, Apply, Integrate"

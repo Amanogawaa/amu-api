@@ -45,10 +45,7 @@ export class CapstoneController {
 
       const guideline = await this.service.getGuidelineByCourseId(courseId);
 
-      response.status(200).json({
-        data: guideline,
-        message: 'Capstone guideline retrieved successfully',
-      });
+      response.status(200).send(guideline);
     } catch (error) {
       logger.error(
         'Error in CapstoneController.getGuidelineByCourseId:',
@@ -75,10 +72,7 @@ export class CapstoneController {
 
       const guideline = await this.service.getGuidelineById(id);
 
-      response.status(200).json({
-        data: guideline,
-        message: 'Capstone guideline retrieved successfully',
-      });
+      response.status(200).send(guideline);
     } catch (error) {
       logger.error('Error in CapstoneController.getGuidelineById:', error);
       next(error);
