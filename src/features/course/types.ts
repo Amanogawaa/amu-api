@@ -64,6 +64,7 @@ export interface CourseValidationResponse {
     chaptersCount: number;
     hasLessons: boolean;
     lessonsCount: number;
+    capstoneProject?: boolean;
   };
 }
 

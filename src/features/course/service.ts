@@ -114,6 +114,7 @@ export class CourseService {
       chaptersCount: number;
       hasLessons: boolean;
       lessonsCount: number;
+      capstoneProject?: boolean;
     };
   }> {
     try {
@@ -176,13 +177,27 @@ export class CourseService {
         hasLessons = lessonsCount > 0;
       }
 
+      const capstoneProjectSnapshot = await firestore
+        .collection('capstoneGuidelines')
+        .where('courseId', '==', courseId)
+        .limit(1)
+        .get();
+      const capstoneProject = !capstoneProjectSnapshot.empty;
+
+      logger.info(
+        `Capstone validation for course ${courseId}: ${
+          capstoneProject ? 'Found' : 'Not found'
+        }`
+      );
+
       const missingComponents: string[] = [];
       if (!hasModules) missingComponents.push('modules');
       if (!hasChapters) missingComponents.push('chapters');
       if (!hasLessons) missingComponents.push('lessons');
+      if (!capstoneProject) missingComponents.push('capstone project');
 
       return {
-        isComplete: hasModules && hasChapters && hasLessons,
+        isComplete: hasModules && hasChapters && hasLessons && capstoneProject,
         missingComponents,
         details: {
           hasModules,
@@ -191,6 +206,7 @@ export class CourseService {
           chaptersCount,
           hasLessons,
           lessonsCount,
+          capstoneProject,
         },
       };
     } catch (error) {

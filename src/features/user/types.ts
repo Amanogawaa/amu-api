@@ -2,6 +2,9 @@ export interface UpdateUserProfile {
   firstName?: string;
   lastName?: string;
   photoURL?: string;
+  githubUsername?: string;
+  githubId?: string;
+  githubConnectedAt?: Date;
 }
 
 export interface UserProfile {
@@ -10,6 +13,9 @@ export interface UserProfile {
   firstName?: string;
   lastName?: string;
   photoURL?: string;
+  githubUsername?: string;
+  githubId?: string;
+  githubConnectedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

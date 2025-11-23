@@ -7,7 +7,6 @@ import { FullCourseGenerationService } from '../../utils/service/generation.serv
 import type { ModuleService } from '../modules/service';
 import type { ChapterService } from '../chapter/service';
 import type { LessonService } from '../lesson/service';
-import type { CapstoneService } from '../capstone/service';
 
 export class CourseContainer {
   public readonly repository: CourseRepository;
@@ -20,8 +19,7 @@ export class CourseContainer {
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
     moduleService?: ModuleService,
     chapterService?: ChapterService,
-    lessonService?: LessonService,
-    capstoneService?: CapstoneService
+    lessonService?: LessonService
   ) {
     this.repository = new CourseRepository(firestore);
     this.service = new CourseService(this.repository);
@@ -31,8 +29,7 @@ export class CourseContainer {
         this.service,
         moduleService,
         chapterService,
-        lessonService,
-        capstoneService
+        lessonService
       );
     }
 

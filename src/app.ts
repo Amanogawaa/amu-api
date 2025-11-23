@@ -86,7 +86,6 @@ class App {
       lessonContainer || new LessonContainer(undefined, quizContainer.service);
 
     this.codePlaygroundContainer = codePlaygroundContainer;
-    this.capstoneContainer = new CapstoneContainer();
 
     this.courseContainer =
       courseContainer ||
@@ -94,9 +93,17 @@ class App {
         undefined,
         moduleContainer.service,
         chapterContainer.service,
-        this.lessonContainer.service,
-        this.capstoneContainer.service
+        this.lessonContainer.service
       );
+
+    // Initialize capstone container with all required repositories
+    this.capstoneContainer = new CapstoneContainer(
+      undefined,
+      this.courseContainer.repository,
+      moduleContainer.repository,
+      chapterContainer.repository,
+      this.lessonContainer.repository
+    );
 
     this.progressContainer = progressContainer;
     this.likesContainer = likesContainer;

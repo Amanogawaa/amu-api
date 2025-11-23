@@ -1,55 +1,73 @@
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
 import { CapstoneRepository } from './repository';
-import type {
-  CapstoneGuideline,
-  CapstoneSubmission,
-  CapstoneReview,
-  CreateCapstoneSubmissionRequest,
-  UpdateCapstoneSubmissionRequest,
-  CreateCapstoneReviewRequest,
-  UpdateCapstoneReviewRequest,
-  CapstoneSubmissionQueryParams,
-  CapstoneReviewQueryParams,
-  GenerateCapstoneGuidelineRequest,
-  GitHubRepoMetadata,
+import {
+  type CapstoneGuideline,
+  type CapstoneSubmission,
+  type CapstoneReview,
+  type CreateCapstoneSubmissionRequest,
+  type UpdateCapstoneSubmissionRequest,
+  type CreateCapstoneReviewRequest,
+  type UpdateCapstoneReviewRequest,
+  type CapstoneSubmissionQueryParams,
+  type CapstoneReviewQueryParams,
+  type GitHubRepoMetadata,
+  capstoneSchema,
 } from './types';
 import { geminiCall } from '../../utils/geminiCall';
 import { generateCapstonePrompt } from '../../utils/prompts/capstone-temp';
 import type { GitHubService } from '../github/service';
+import type { CourseRepository } from '../course/repository';
+import type { ModuleRepository } from '../modules/repository';
+import type { ChapterRepository } from '../chapter/repository';
+import type { LessonRepository } from '../lesson/repository';
 
 export class CapstoneService {
   private repository: CapstoneRepository;
   private githubService: GitHubService;
+  private courseRepository: CourseRepository;
+  private moduleRepository: ModuleRepository;
+  private chapterRepository: ChapterRepository;
+  private lessonRepository: LessonRepository;
 
-  constructor(repository: CapstoneRepository, githubService: GitHubService) {
+  constructor(
+    repository: CapstoneRepository,
+    githubService: GitHubService,
+    courseRepository: CourseRepository,
+    moduleRepository: ModuleRepository,
+    chapterRepository: ChapterRepository,
+    lessonRepository: LessonRepository
+  ) {
     this.repository = repository;
     this.githubService = githubService;
+    this.courseRepository = courseRepository;
+    this.moduleRepository = moduleRepository;
+    this.chapterRepository = chapterRepository;
+    this.lessonRepository = lessonRepository;
   }
 
   // ==================== CAPSTONE GUIDELINES ====================
 
-  async generateGuideline(
-    request: GenerateCapstoneGuidelineRequest
-  ): Promise<CapstoneGuideline> {
+  async generateGuideline(courseId: string): Promise<CapstoneGuideline> {
     try {
-      const existing = await this.repository.getGuidelineByCourseId(
-        request.courseId
-      );
+      const existing = await this.repository.getGuidelineByCourseId(courseId);
 
       if (existing) {
         logger.info(
-          `Capstone guideline already exists for course: ${request.courseId}`
+          `Capstone guideline already exists for course: ${courseId}`
         );
         return existing;
       }
 
-      const prompt = generateCapstonePrompt(request);
+      logger.info('Fetching course context from database', { courseId });
+      const courseContext = await this.gatherCourseContext(courseId);
 
-      // For capstone generation, we don't use a strict schema
-      // as the response structure is flexible
+      const prompt = generateCapstonePrompt(courseContext);
+
+      logger.info('Generating capstone guideline with AI', { courseId });
+
       const result = await geminiCall(prompt, {
-        responseSchema: {}, // Empty schema for flexible response
+        responseSchema: capstoneSchema,
         temperature: 0.7,
         maxRetries: 3,
       });
@@ -57,7 +75,7 @@ export class CapstoneService {
       logger.info('Capstone guideline generated successfully');
 
       const guidelineData = {
-        courseId: request.courseId,
+        courseId,
         ...result,
       };
 
@@ -70,6 +88,150 @@ export class CapstoneService {
       logger.error('Error in CapstoneService.generateGuideline:', error);
       throw error;
     }
+  }
+
+  private async gatherCourseContext(courseId: string) {
+    try {
+      const course = await this.courseRepository.getCourseById(courseId);
+
+      if (!course) {
+        throw new AppError('Course not found', 404);
+      }
+
+      const modules = await this.moduleRepository.getModules(courseId);
+
+      if (!modules || modules.length === 0) {
+        throw new AppError(
+          'No modules found for this course. Generate course content first.',
+          400
+        );
+      }
+
+      // Collect module summaries
+      const moduleSummaries = modules.map((module) => ({
+        title: module.moduleName,
+        description: module.moduleDescription,
+        learningOutcomes: module.learningObjectives || [],
+        duration: module.estimatedDuration,
+        order: module.moduleOrder,
+      }));
+
+      const allChapters: any[] = [];
+      const allLessons: any[] = [];
+
+      for (const module of modules) {
+        const chapters = await this.chapterRepository.getChapters(module.id);
+        allChapters.push(...chapters);
+
+        for (const chapter of chapters) {
+          const lessons = await this.lessonRepository.getLessons(chapter.id);
+          allLessons.push(
+            ...lessons.map((l) => ({ ...l, moduleId: module.id }))
+          );
+        }
+      }
+
+      const lessonsByModule = modules.map((module) => {
+        const moduleLessons = allLessons
+          .filter((lesson) => lesson.moduleId === module.id)
+          .map((lesson) => ({
+            title: lesson.lessonName,
+            type: lesson.type,
+            duration: lesson.duration,
+          }));
+
+        return {
+          moduleTitle: module.moduleName,
+          lessonCount: moduleLessons.length,
+          lessons: moduleLessons.slice(0, 3),
+        };
+      });
+
+      const skillsGained = course.skillsGained || [];
+      const technologiesUsed = this.extractTechnologies(modules, allLessons);
+
+      return {
+        courseId: course.id,
+        courseName: course.name,
+        courseDescription: course.description,
+        category: course.category,
+        level: course.level,
+        duration: course.duration,
+        language: course.language,
+        learningOutcomes: course.learning_outcomes || [],
+        skillsGained,
+        prerequisites: course.prerequisites
+          ? course.prerequisites.split(',').map((p) => p.trim())
+          : [],
+        totalModules: modules.length,
+        totalLessons: allLessons.length,
+        moduleSummaries,
+        lessonsByModule,
+        technologiesUsed,
+      };
+    } catch (error) {
+      logger.error('Error gathering course context:', error);
+      throw error;
+    }
+  }
+
+  private extractTechnologies(modules: any[], lessons: any[]): string[] {
+    const technologies = new Set<string>();
+
+    modules.forEach((module) => {
+      const text = `${module.title} ${module.description}`.toLowerCase();
+      this.findTechnologiesInText(text, technologies);
+    });
+
+    lessons.forEach((lesson) => {
+      const text = `${lesson.title} ${lesson.description || ''}`.toLowerCase();
+      this.findTechnologiesInText(text, technologies);
+    });
+
+    return Array.from(technologies);
+  }
+
+  private findTechnologiesInText(text: string, technologies: Set<string>) {
+    const techPatterns = [
+      'react',
+      'vue',
+      'angular',
+      'next.js',
+      'express',
+      'django',
+      'flask',
+      'javascript',
+      'typescript',
+      'python',
+      'java',
+      'c#',
+      'ruby',
+      'go',
+      'rust',
+      'mongodb',
+      'postgresql',
+      'mysql',
+      'redis',
+      'firebase',
+      'docker',
+      'kubernetes',
+      'git',
+      'aws',
+      'azure',
+      'gcp',
+      'tailwind',
+      'bootstrap',
+      'jquery',
+      'axios',
+      'pandas',
+      'numpy',
+    ];
+
+    techPatterns.forEach((tech) => {
+      if (text.includes(tech)) {
+        technologies.add(tech);
+      }
+    });
   }
 
   async getGuidelineByCourseId(courseId: string): Promise<CapstoneGuideline> {
@@ -116,10 +278,8 @@ export class CapstoneService {
         throw new AppError('You have already submitted this repository', 400);
       }
 
-      // Extract owner and repo name from URL
       const { owner, repo } = this.parseGitHubUrl(request.githubRepoUrl);
 
-      // Fetch repo metadata from GitHub
       const repoMetadata = await this.githubService.getRepoMetadata(
         owner,
         repo

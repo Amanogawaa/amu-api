@@ -17,6 +17,41 @@ export class CapstoneRoute {
 
     /**
      * @openapi
+     * /capstone/guidelines/generate/{courseId}:
+     *   post:
+     *     tags:
+     *       - Capstone
+     *     summary: Generate capstone guideline for a course
+     *     description: Creates a capstone project guideline based on actual course content from the database. Should be called after course modules and lessons are generated.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: courseId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the course to generate capstone for
+     *     responses:
+     *       201:
+     *         description: Capstone guideline generated successfully
+     *       400:
+     *         description: Course has no modules/lessons yet
+     *       401:
+     *         description: User not authenticated
+     *       404:
+     *         description: Course not found
+     *       409:
+     *         description: Guideline already exists for this course
+     */
+    this.router.post(
+      '/guidelines/generate/:courseId',
+      authMiddleware,
+      this.controller.generateGuideline
+    );
+
+    /**
+     * @openapi
      * /capstone/guidelines/course/{courseId}:
      *   get:
      *     tags:

@@ -28,6 +28,40 @@ export class CapstoneController {
 
   // ==================== CAPSTONE GUIDELINES ====================
 
+  generateGuideline = async (
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { courseId } = request.params;
+      const userId = request.user?.uid;
+
+      if (!userId) {
+        response.status(401).json({
+          message: 'User not authenticated',
+        });
+        return;
+      }
+
+      if (!courseId) {
+        response.status(400).json({
+          message: 'Course ID is required',
+        });
+        return;
+      }
+
+      logger.info('Generating capstone guideline', { courseId, userId });
+
+      const guideline = await this.service.generateGuideline(courseId);
+
+      response.status(201).send(guideline);
+    } catch (error) {
+      logger.error('Error in CapstoneController.generateGuideline:', error);
+      next(error);
+    }
+  };
+
   getGuidelineByCourseId = async (
     request: Request,
     response: Response,

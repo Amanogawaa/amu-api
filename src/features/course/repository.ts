@@ -156,6 +156,9 @@ export class CourseRepository {
         deleteCollection('modules'),
         deleteCollection('chapters'),
         deleteCollection('lessons'),
+        deleteCollection('capstoneGuidelines'),
+        deleteCollection('capstoneSubmissions'),
+        deleteCollection('enrollments'),
       ]);
 
       await this.firebaseStore
