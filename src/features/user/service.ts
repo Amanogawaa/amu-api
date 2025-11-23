@@ -1,7 +1,7 @@
 import { AppError, UserNotFoundError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
 import type { UserRepository } from './repository';
-import type { UpdateUserProfile, UserProfile } from './types';
+import type { UpdateUserProfile, UserProfile, UserAnalytics } from './types';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -105,6 +105,17 @@ export class UserService {
       return photoURL;
     } catch (error) {
       logger.error('Error in UserService.uploadProfilePicture:', error);
+      throw error;
+    }
+  }
+
+  async getUserAnalytics(uid: string): Promise<UserAnalytics> {
+    try {
+      const analytics = await this.userRepository.getUserAnalytics(uid);
+      logger.info(`User analytics retrieved for uid: ${uid}`);
+      return analytics;
+    } catch (error) {
+      logger.error('Error in UserService.getUserAnalytics:', error);
       throw error;
     }
   }

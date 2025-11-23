@@ -131,6 +131,62 @@ export class UserRoute {
       this.upload.single('file'),
       this.userContoller.uploadProfilePicture
     );
+
+    /**
+     * @swagger
+     * /user/analytics:
+     *   get:
+     *     summary: Get user analytics (courses created, likes, enrollments, comments)
+     *     tags: [User]
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: User analytics retrieved successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     totalCoursesCreated:
+     *                       type: number
+     *                     totalLikesReceived:
+     *                       type: number
+     *                     totalEnrollments:
+     *                       type: number
+     *                     totalComments:
+     *                       type: number
+     *                     courses:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         properties:
+     *                           courseId:
+     *                             type: string
+     *                           courseName:
+     *                             type: string
+     *                           likesCount:
+     *                             type: number
+     *                           enrollmentsCount:
+     *                             type: number
+     *                           commentsCount:
+     *                             type: number
+     *                           createdAt:
+     *                             type: string
+     *                             format: date-time
+     *       401:
+     *         description: Unauthorized
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.get(
+      '/user/analytics',
+      authMiddleware,
+      this.userContoller.getUserAnalytics
+    );
   }
 
   getRouter(): Router {

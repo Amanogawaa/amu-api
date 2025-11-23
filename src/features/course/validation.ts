@@ -22,10 +22,9 @@ export const validateGenerateCourse = (
     generateCourseSchema.parse(req.body);
     next();
   } catch (error: unknown) {
-    // Explicitly type as unknown
     if (error instanceof z.ZodError) {
       throw new ValidationError(
-        error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ') // Use `issues` instead of `errors`
+        error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
       );
     }
     next(error);
@@ -45,7 +44,6 @@ export const validateCourseId = (
     courseIdSchema.parse(req.params);
     next();
   } catch (error: unknown) {
-    // Explicitly type as unknown
     if (error instanceof z.ZodError) {
       throw new ValidationError(
         error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')

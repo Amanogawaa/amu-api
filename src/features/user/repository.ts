@@ -2,7 +2,12 @@ import type { Firestore } from 'firebase-admin/firestore';
 import { admin, firebaseAuth, firebaseFirestore } from '../../config/firebase';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
-import type { UpdateUserProfile, UserProfile } from './types';
+import type {
+  UpdateUserProfile,
+  UserProfile,
+  UserAnalytics,
+  CourseAnalytics,
+} from './types';
 
 export class UserRepository {
   private firebaseStore: Firestore;
@@ -108,6 +113,72 @@ export class UserRepository {
     } catch (error) {
       logger.error('Error creating user profile:', error);
       throw new AppError('Failed to create user profile', 500);
+    }
+  }
+
+  async getUserAnalytics(uid: string): Promise<UserAnalytics> {
+    try {
+      // Get all courses created by the user
+      const coursesSnapshot = await this.firebaseStore
+        .collection('courses')
+        .where('uid', '==', uid)
+        .get();
+
+      const courseAnalytics: CourseAnalytics[] = [];
+      let totalLikesReceived = 0;
+      let totalEnrollments = 0;
+      let totalComments = 0;
+
+      for (const courseDoc of coursesSnapshot.docs) {
+        const courseData = courseDoc.data();
+        const courseId = courseDoc.id;
+
+        // Get likes count for this course
+        const likesSnapshot = await this.firebaseStore
+          .collection('likes')
+          .where('courseId', '==', courseId)
+          .get();
+        const likesCount = likesSnapshot.size;
+
+        // Get enrollments count for this course
+        const enrollmentsSnapshot = await this.firebaseStore
+          .collection('enrollments')
+          .where('courseId', '==', courseId)
+          .where('status', '==', 'active')
+          .get();
+        const enrollmentsCount = enrollmentsSnapshot.size;
+
+        // Get comments count for this course
+        const commentsSnapshot = await this.firebaseStore
+          .collection('comments')
+          .where('courseId', '==', courseId)
+          .get();
+        const commentsCount = commentsSnapshot.size;
+
+        courseAnalytics.push({
+          courseId,
+          courseName: courseData.name || 'Untitled Course',
+          likesCount,
+          enrollmentsCount,
+          commentsCount,
+          createdAt: courseData.createdAt?.toDate() || new Date(),
+        });
+
+        totalLikesReceived += likesCount;
+        totalEnrollments += enrollmentsCount;
+        totalComments += commentsCount;
+      }
+
+      return {
+        totalCoursesCreated: coursesSnapshot.size,
+        totalLikesReceived,
+        totalEnrollments,
+        totalComments,
+        courses: courseAnalytics,
+      };
+    } catch (error) {
+      logger.error('Error fetching user analytics:', error);
+      throw new AppError('Failed to fetch user analytics', 500);
     }
   }
 }

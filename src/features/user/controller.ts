@@ -112,4 +112,24 @@ export class UserController {
       next(error);
     }
   };
+
+  getUserAnalytics = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        throw new AppError('Unauthorized', 401);
+      }
+
+      const analytics = await this.userService.getUserAnalytics(uid);
+
+      res.status(200).send(analytics);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

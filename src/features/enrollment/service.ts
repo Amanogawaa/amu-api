@@ -132,7 +132,31 @@ export class EnrollmentService {
         })
       );
 
-      return enrollmentsWithCourses as any;
+      // Get user's own published courses
+      const ownedPublishedCourses = await this.courseRepository.getCourse({
+        uid: userId,
+        publish: true,
+      });
+
+      // Create pseudo-enrollments for owned published courses
+      const ownedCourseEnrollments = ownedPublishedCourses.map(
+        (course: any) => ({
+          id: `${course.id}_${userId}_owner`,
+          courseId: course.id,
+          userId,
+          enrolledAt: course.createdAt || new Date(),
+          status: 'active' as const,
+          course,
+        })
+      );
+
+      // Combine both lists, avoiding duplicates
+      const enrolledCourseIds = new Set(enrollments.map((e) => e.courseId));
+      const uniqueOwnedCourses = ownedCourseEnrollments.filter(
+        (oe: any) => !enrolledCourseIds.has(oe.courseId)
+      );
+
+      return [...enrollmentsWithCourses, ...uniqueOwnedCourses] as any;
     } catch (error) {
       logger.error('Error in EnrollmentService.getUserEnrollments:', error);
       throw error;

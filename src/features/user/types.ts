@@ -18,3 +18,20 @@ export interface UserResponse {
   data: UserProfile;
   message: string;
 }
+
+export interface CourseAnalytics {
+  courseId: string;
+  courseName: string;
+  likesCount: number;
+  enrollmentsCount: number;
+  commentsCount: number;
+  createdAt: Date;
+}
+
+export interface UserAnalytics {
+  totalCoursesCreated: number;
+  totalLikesReceived: number;
+  totalEnrollments: number;
+  totalComments: number;
+  courses: CourseAnalytics[];
+}
