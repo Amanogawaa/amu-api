@@ -67,12 +67,14 @@ export const createCapstoneReviewSchema = z.object({
     .max(2000, 'Feedback must be less than 2000 characters'),
   highlights: z
     .array(z.string().min(1).max(200))
-    .min(1, 'At least one highlight is required')
-    .max(5, 'Maximum 5 highlights allowed'),
+    .max(5, 'Maximum 5 highlights allowed')
+    .optional()
+    .default([]),
   suggestions: z
     .array(z.string().min(1).max(200))
-    .min(1, 'At least one suggestion is required')
-    .max(5, 'Maximum 5 suggestions allowed'),
+    .max(5, 'Maximum 5 suggestions allowed')
+    .optional()
+    .default([]),
   criteriaScores: z
     .array(
       z.object({
@@ -98,14 +100,14 @@ export const updateCapstoneReviewSchema = z.object({
     .optional(),
   highlights: z
     .array(z.string().min(1).max(200))
-    .min(1, 'At least one highlight is required')
     .max(5, 'Maximum 5 highlights allowed')
-    .optional(),
+    .optional()
+    .default([]),
   suggestions: z
     .array(z.string().min(1).max(200))
-    .min(1, 'At least one suggestion is required')
     .max(5, 'Maximum 5 suggestions allowed')
-    .optional(),
+    .optional()
+    .default([]),
   criteriaScores: z
     .array(
       z.object({

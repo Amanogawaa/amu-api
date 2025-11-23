@@ -1,4 +1,5 @@
 import type { Firestore } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
 import { firebaseFirestore } from '../../config/firebase';
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
@@ -68,7 +69,7 @@ export class CapstoneRepository {
       if (!doc) {
         return null;
       }
-      return { id: doc.id, ...doc.data() } as CapstoneGuideline;
+      return this.serializeFirestoreDoc(doc) as CapstoneGuideline;
     } catch (error) {
       logger.error(
         'Error in CapstoneRepository.getGuidelineByCourseId:',
@@ -89,7 +90,7 @@ export class CapstoneRepository {
         throw new AppError('Capstone guideline not found', 404);
       }
 
-      return { id: doc.id, ...doc.data() } as CapstoneGuideline;
+      return this.serializeFirestoreDoc(doc) as CapstoneGuideline;
     } catch (error) {
       logger.error('Error in CapstoneRepository.getGuidelineById:', error);
       throw error;
@@ -208,7 +209,7 @@ export class CapstoneRepository {
 
       const submissions: CapstoneSubmission[] = [];
       snapshot.forEach((doc: any) => {
-        submissions.push({ id: doc.id, ...doc.data() } as CapstoneSubmission);
+        submissions.push(this.serializeFirestoreDoc(doc) as CapstoneSubmission);
       });
 
       return submissions;
@@ -229,7 +230,7 @@ export class CapstoneRepository {
         throw new AppError('Capstone submission not found', 404);
       }
 
-      return { id: doc.id, ...doc.data() } as CapstoneSubmission;
+      return this.serializeFirestoreDoc(doc) as CapstoneSubmission;
     } catch (error) {
       logger.error('Error in CapstoneRepository.getSubmissionById:', error);
       throw error;
@@ -281,7 +282,7 @@ export class CapstoneRepository {
         .doc(id);
 
       await docRef.update({
-        viewCount: (this.firebaseStore as any).FieldValue.increment(1),
+        viewCount: FieldValue.increment(1),
       });
     } catch (error) {
       logger.error('Error in CapstoneRepository.incrementViewCount:', error);
@@ -334,7 +335,10 @@ export class CapstoneRepository {
         helpfulCount: 0,
       };
 
-      await docRef.set(reviewData);
+      // Remove undefined values (Firestore doesn't accept them)
+      const cleanedData = this.removeUndefinedValues(reviewData);
+
+      await docRef.set(cleanedData);
       logger.info(`Capstone review created: ${docRef.id}`);
 
       // Increment review count on submission
@@ -385,7 +389,7 @@ export class CapstoneRepository {
 
       const reviews: CapstoneReview[] = [];
       snapshot.forEach((doc: any) => {
-        reviews.push({ id: doc.id, ...doc.data() } as CapstoneReview);
+        reviews.push(this.serializeFirestoreDoc(doc) as CapstoneReview);
       });
 
       return reviews;
@@ -406,7 +410,7 @@ export class CapstoneRepository {
         throw new AppError('Review not found', 404);
       }
 
-      const review = { id: doc.id, ...doc.data() } as CapstoneReview;
+      const review = this.serializeFirestoreDoc(doc) as CapstoneReview;
 
       if (review.deleted) {
         throw new AppError('Review has been deleted', 404);
@@ -433,7 +437,10 @@ export class CapstoneRepository {
         updatedAt: new Date(),
       };
 
-      await docRef.update(updateData);
+      // Remove undefined values
+      const cleanedData = this.removeUndefinedValues(updateData);
+
+      await docRef.update(cleanedData);
 
       const updated = await this.getReviewById(id);
       return updated;
@@ -492,7 +499,7 @@ export class CapstoneRepository {
         .doc(submissionId);
 
       await docRef.update({
-        reviewCount: (this.firebaseStore as any).FieldValue.increment(1),
+        reviewCount: FieldValue.increment(1),
       });
 
       // Recalculate average rating
@@ -509,7 +516,7 @@ export class CapstoneRepository {
         .doc(submissionId);
 
       await docRef.update({
-        reviewCount: (this.firebaseStore as any).FieldValue.increment(-1),
+        reviewCount: FieldValue.increment(-1),
       });
 
       // Recalculate average rating
@@ -568,13 +575,12 @@ export class CapstoneRepository {
           .collection(this.SUBMISSIONS_COLLECTION)
           .doc(capstoneSubmissionId)
           .update({
-            likeCount: (this.firebaseStore as any).FieldValue.increment(-1),
+            likeCount: FieldValue.increment(-1),
           });
 
         logger.info(`Capstone unliked: ${likeId}`);
         return false;
       } else {
-        // Like
         const likeData: CapstoneLike = {
           id: likeId,
           capstoneSubmissionId,
@@ -591,7 +597,7 @@ export class CapstoneRepository {
           .collection(this.SUBMISSIONS_COLLECTION)
           .doc(capstoneSubmissionId)
           .update({
-            likeCount: (this.firebaseStore as any).FieldValue.increment(1),
+            likeCount: FieldValue.increment(1),
           });
 
         logger.info(`Capstone liked: ${likeId}`);
@@ -629,5 +635,35 @@ export class CapstoneRepository {
       logger.error('Error in CapstoneRepository.getLikeCount:', error);
       throw error;
     }
+  }
+
+  // ==================== HELPER METHODS ====================
+
+  private removeUndefinedValues<T extends Record<string, any>>(obj: T): T {
+    const cleaned: any = {};
+
+    for (const key in obj) {
+      if (obj[key] !== undefined) {
+        cleaned[key] = obj[key];
+      }
+    }
+
+    return cleaned as T;
+  }
+
+  private serializeFirestoreDoc(doc: any): any {
+    const data = doc.data();
+    const serialized: any = { id: doc.id };
+
+    for (const key in data) {
+      const value = data[key];
+      if (value && typeof value === 'object' && value.toDate) {
+        serialized[key] = value.toDate().toISOString();
+      } else {
+        serialized[key] = value;
+      }
+    }
+
+    return serialized;
   }
 }
