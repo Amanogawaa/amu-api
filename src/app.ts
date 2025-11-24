@@ -140,6 +140,10 @@ class App {
       express.static(path.join(process.cwd(), 'uploads'))
     );
 
+    this.app.get('/health', (req, res) => {
+      res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+    });
+
     this.initializeMiddleware();
     this.initializeRouter();
 
