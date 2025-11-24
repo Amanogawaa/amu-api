@@ -48,9 +48,9 @@ export const config = {
 
   // Security configuration
   security: {
-    rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 900000, // 15 minutes
+    rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
     rateLimitMaxRequests: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000,
-    corsOrigins: process.env.CORS_ORIGINS?.split(',') || [
+    corsOrigins: process.env.CORS_ORIGINS?.split(',').map((origin) => origin.trim()) || [
       'http://localhost:5173',
       'http://localhost:3000',
     ],

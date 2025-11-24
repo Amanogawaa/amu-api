@@ -171,8 +171,6 @@ export class LessonController {
         language || 'en'
       );
 
-      console.log('Fetched transcript:', transcript);
-
       if (!transcript) {
         response.status(404).json({
           error:
@@ -190,8 +188,6 @@ export class LessonController {
       // });
 
       const stats = youtubeTranscriptService.getTranscriptStats(transcript);
-
-      console.log('Transcript stats:', stats);
 
       response.status(200).json({
         message: 'Transcript fetched successfully',

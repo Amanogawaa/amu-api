@@ -54,14 +54,10 @@ export class CourseService {
         uid: request.uid,
       };
 
-      console.log('Generated course data:', courseData);
-
       const nameExist = await this.courseRepository.courseNameExists(
         courseData.name,
         courseData.uid
       );
-
-      console.log('Course name exists:', nameExist);
 
       if (nameExist) {
         courseData.name = `${courseData.name} (${Date.now()})`;

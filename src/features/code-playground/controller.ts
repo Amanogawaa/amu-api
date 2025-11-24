@@ -263,15 +263,12 @@ export class CodePlaygroundController {
     req: AuthenticatedRequest,
     res: Response
   ): Promise<void> {
-    console.log('Received request for supported languages');
     if (!req.user) {
       res.status(401).json({ message: 'Unauthorized' });
       return;
     }
 
     const { SUPPORTED_LANGUAGES } = await import('./types');
-
-    console.log('Supported languages requested: ', SUPPORTED_LANGUAGES);
 
     res.status(200).json({
       success: true,

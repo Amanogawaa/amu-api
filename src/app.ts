@@ -28,12 +28,7 @@ import { QuizContainer } from './features/quiz/container';
 import { EnrollmentContainer } from './features/enrollment/container';
 import { CodePlaygroundContainer } from './features/code-playground/container';
 import { CapstoneContainer } from './features/capstone/container';
-
-const CORSOPTIONS = {
-  origin: ['http://localhost:3000', '*'],
-  methods: 'GET,POST,PATCH,PUT,DELETE',
-  credentials: true,
-};
+import { config } from './config/environment';
 
 class App {
   public app: Application;
@@ -118,18 +113,31 @@ class App {
     this.app.use(express.json());
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(cors(CORSOPTIONS));
+    
+    // CORS configuration from environment variables
+    const corsOptions = {
+      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Check if origin is in allowed list
+        if (config.security.corsOrigins.includes(origin) || config.security.corsOrigins.includes('*')) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
+      methods: 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
+      credentials: true,
+      optionsSuccessStatus: 200,
+    };
+    
+    this.app.use(cors(corsOptions));
     this.app.use(cookieParser());
 
     this.app.use(
       '/uploads',
       express.static(path.join(process.cwd(), 'uploads'))
-    );
-
-    this.app.use(
-      cors({
-        origin: process.env.NEXTJS_FRONTEND_URL || 'http://localhost:3000',
-      })
     );
 
     this.initializeMiddleware();

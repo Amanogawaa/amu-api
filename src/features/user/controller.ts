@@ -19,8 +19,6 @@ export class UserController {
     try {
       const uid = req.user?.uid;
 
-      console.log('Authenticated user UID:', uid);
-
       if (!uid) {
         throw new AppError('Unauthorized', 401);
       }
