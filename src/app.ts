@@ -114,17 +114,18 @@ class App {
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
     
-    // CORS configuration from environment variables
     const corsOptions = {
       origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-        
-        // Check if origin is in allowed list
-        if (config.security.corsOrigins.includes(origin) || config.security.corsOrigins.includes('*')) {
+
+        if (config.security.corsOrigins.includes('*')) {
+          return callback(null, true);
+        }
+          
+        if (config.security.corsOrigins.includes(origin)) {
           callback(null, true);
         } else {
-          callback(new Error('Not allowed by CORS'));
+          callback(null, false);
         }
       },
       methods: 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
