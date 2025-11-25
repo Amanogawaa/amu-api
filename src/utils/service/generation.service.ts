@@ -70,7 +70,13 @@ export class FullCourseGenerationService {
       );
 
       currentStep = GenerationStep.MODULES;
-      const modules = await this.generateModules(req, jobId, userId, course);
+      const modules = await this.generateModules(
+        req,
+        jobId,
+        userId,
+        course,
+        request
+      );
 
       currentStep = GenerationStep.CHAPTERS;
       const chaptersCount = await this.generateChapters(
@@ -78,7 +84,8 @@ export class FullCourseGenerationService {
         jobId,
         userId,
         course,
-        modules
+        modules,
+        request
       );
 
       currentStep = GenerationStep.LESSONS;
@@ -87,12 +94,9 @@ export class FullCourseGenerationService {
         jobId,
         userId,
         course,
-        modules
+        modules,
+        request
       );
-
-      // NOTE: Capstone generation is now separated and should be triggered
-      // manually by the course creator after reviewing the generated content.
-      // This prevents token overload and allows for better context from actual DB data.
 
       const result: FullCourseGenerationResult = {
         courseId: course.id,
@@ -128,7 +132,8 @@ export class FullCourseGenerationService {
     req: AuthenticatedRequest,
     jobId: string,
     userId: string,
-    course: any
+    course: any,
+    courseRequest: GenerateCourseRequest
   ): Promise<Module[]> {
     try {
       emitModulesGenerationProgress(
@@ -150,6 +155,8 @@ export class FullCourseGenerationService {
         noOfModules: course.noOfModules || 5,
         language: course.language,
         prerequisites: course.prerequisites,
+        userInstructions: courseRequest.userInstructions,
+        promptMode: courseRequest.promptMode,
       };
 
       await this.moduleService.generateModules(modulesRequest);
@@ -188,98 +195,90 @@ export class FullCourseGenerationService {
     jobId: string,
     userId: string,
     course: any,
-    modules: Module[]
+    modules: Module[],
+    courseRequest: GenerateCourseRequest
   ): Promise<number> {
     let totalChapters = 0;
 
     try {
-      const batchSize = GENERATION_LIMITS.BATCH_SIZE;
+      const concurrency = Math.max(
+        1,
+        GENERATION_LIMITS.CHAPTER_CONCURRENCY || modules.length
+      );
 
-      for (let i = 0; i < modules.length; i += batchSize) {
-        const module = modules[i];
-        const batch = modules.slice(i, i + batchSize);
+      for (let offset = 0; offset < modules.length; offset += concurrency) {
+        const batch = modules.slice(offset, offset + concurrency);
 
-        if (!module) {
-          continue;
-        }
+        const batchResults = await Promise.all(
+          batch.map(async (module, idx) => {
+            const globalIdx = offset + idx;
 
-        const batchPromises = batch.map(async (module, idx) => {
-          const globalIdx = i + idx;
+            emitChaptersGenerationProgress(
+              req,
+              jobId,
+              userId,
+              globalIdx,
+              modules.length,
+              `Generating chapters for module ${globalIdx + 1}/${
+                modules.length
+              }: "${module.moduleName}"...`,
+              { moduleId: module.id, moduleName: module.moduleName }
+            );
 
-          emitChaptersGenerationProgress(
-            req,
-            jobId,
-            userId,
-            i,
-            modules.length,
-            `Generating chapters for module ${i + 1}/${modules.length}: "${
-              module.moduleName
-            }"...`,
-            { moduleId: module.id, moduleName: module.moduleName }
-          );
+            const requestedChapters = module.estimatedChapterCount;
 
-          const requestedChapters = module.estimatedChapterCount;
+            const limitedChapters = enforceLimit(
+              requestedChapters!,
+              GENERATION_LIMITS.MAX_CHAPTERS_PER_MODULE,
+              'chapters'
+            );
 
-          const limitedChapters = enforceLimit(
-            requestedChapters!,
-            GENERATION_LIMITS.MAX_CHAPTERS_PER_MODULE,
-            'chapters'
-          );
-
-          const chaptersRequest = {
-            moduleId: module.id,
-            moduleName: module.moduleName,
-            moduleDescription: module.moduleDescription,
-            moduleLearningObjectives: module.learningObjectives || [],
-            moduleKeySkills: module.keySkills || [],
-            estimatedDuration: module.estimatedDuration,
-            estimatedChapterCount: limitedChapters || 4,
-            courseName: course.name,
-            level: course.level,
-            language: course.language,
-            moduleOrder: module.moduleOrder,
-          };
-
-          await this.chapterService.generateChapters(chaptersRequest);
-
-          const chapters = await this.chapterService.getChapters(module.id);
-          totalChapters += chapters.length;
-
-          logger.info('Chapters generated for module', {
-            jobId,
-            moduleId: module.id,
-            chaptersCount: chapters.length,
-          });
-
-          emitChaptersGenerationProgress(
-            req,
-            jobId,
-            userId,
-            i + 1,
-            modules.length,
-            `Generated ${chapters.length} chapters for "${module.moduleName}"`,
-            {
+            const chaptersRequest = {
               moduleId: module.id,
               moduleName: module.moduleName,
-              chaptersCount: chapters.length,
-            }
-          );
-          return chapters.length;
-        });
+              moduleDescription: module.moduleDescription,
+              moduleLearningObjectives: module.learningObjectives || [],
+              moduleKeySkills: module.keySkills || [],
+              estimatedDuration: module.estimatedDuration,
+              estimatedChapterCount: limitedChapters || 4,
+              courseName: course.name,
+              level: course.level,
+              language: course.language,
+              moduleOrder: module.moduleOrder,
+              userInstructions: courseRequest.userInstructions,
+              promptMode: courseRequest.promptMode,
+            };
 
-        const batchResults = await Promise.all(batchPromises);
+            await this.chapterService.generateChapters(chaptersRequest);
+
+            const chapters = await this.chapterService.getChapters(module.id);
+
+            logger.info('Chapters generated for module', {
+              jobId,
+              moduleId: module.id,
+              chaptersCount: chapters.length,
+            });
+
+            emitChaptersGenerationProgress(
+              req,
+              jobId,
+              userId,
+              globalIdx + 1,
+              modules.length,
+              `Generated ${chapters.length} chapters for "${module.moduleName}"`,
+              {
+                moduleId: module.id,
+                moduleName: module.moduleName,
+                chaptersCount: chapters.length,
+              }
+            );
+            return chapters.length;
+          })
+        );
+
         totalChapters += batchResults.reduce((sum, count) => sum + count, 0);
 
-        if (i + batchSize < modules.length) {
-          logger.info('Batch completed, waiting before next batch', {
-            jobId,
-            i,
-            delay: GENERATION_LIMITS.BATCH_DELAY,
-          });
-          await new Promise((resolve) =>
-            setTimeout(resolve, GENERATION_LIMITS.BATCH_DELAY)
-          );
-        }
+        await this.applyBatchDelay(offset + concurrency, modules.length);
       }
 
       logger.info('All chapters generated successfully', {
@@ -302,104 +301,120 @@ export class FullCourseGenerationService {
     jobId: string,
     userId: string,
     course: any,
-    modules: Module[]
+    modules: Module[],
+    courseRequest: GenerateCourseRequest
   ): Promise<number> {
     let totalLessons = 0;
-    let processedChapters = 0;
 
     try {
-      // Collect all chapters first
-      const allChapters = [];
-      for (const module of modules) {
-        const chapters = await this.chapterService.getChapters(module.id);
-        for (const chapter of chapters) {
-          allChapters.push({ chapter, module });
-        }
+      // Prefetch chapters with limited concurrency to avoid serial waits
+      const prefetchConcurrency = Math.max(
+        1,
+        GENERATION_LIMITS.PREFETCH_CONCURRENCY || modules.length
+      );
+      const allChapters: Array<{ chapter: any; module: Module }> = [];
+
+      for (
+        let offset = 0;
+        offset < modules.length;
+        offset += prefetchConcurrency
+      ) {
+        const batch = modules.slice(offset, offset + prefetchConcurrency);
+        const batchChapters = await Promise.all(
+          batch.map(async (module) => {
+            const chapters = await this.chapterService.getChapters(module.id);
+            return chapters.map((chapter) => ({ chapter, module }));
+          })
+        );
+        allChapters.push(...batchChapters.flat());
       }
 
       const totalChapters = allChapters.length;
-      const batchSize = GENERATION_LIMITS.BATCH_SIZE;
+      if (totalChapters === 0) {
+        return 0;
+      }
 
-      // Process chapters in batches
+      const concurrency = Math.max(
+        1,
+        GENERATION_LIMITS.LESSON_CONCURRENCY || totalChapters
+      );
+
       for (
         let batchStart = 0;
         batchStart < allChapters.length;
-        batchStart += batchSize
+        batchStart += concurrency
       ) {
-        const batch = allChapters.slice(batchStart, batchStart + batchSize);
+        const batch = allChapters.slice(batchStart, batchStart + concurrency);
 
-        const batchPromises = batch.map(async ({ chapter, module }) => {
-          const globalIdx = processedChapters++;
+        const batchResults = await Promise.all(
+          batch.map(async ({ chapter, module }, idx) => {
+            const globalIdx = batchStart + idx;
 
-          emitLessonsGenerationProgress(
-            req,
-            jobId,
-            userId,
-            globalIdx,
-            totalChapters,
-            `Generating lessons for chapter ${
-              globalIdx + 1
-            }/${totalChapters}: "${chapter.chapterName}"...`,
-            {
+            emitLessonsGenerationProgress(
+              req,
+              jobId,
+              userId,
+              globalIdx,
+              totalChapters,
+              `Generating lessons for chapter ${
+                globalIdx + 1
+              }/${totalChapters}: "${chapter.chapterName}"...`,
+              {
+                chapterId: chapter.id,
+                chapterTitle: chapter.chapterName,
+                moduleId: module.id,
+                moduleName: module.moduleName,
+              }
+            );
+
+            const requestedLessons = chapter.estimatedLessonCount || 5;
+            const limitedLessons = enforceLimit(
+              requestedLessons,
+              GENERATION_LIMITS.MAX_LESSONS_PER_CHAPTER,
+              'lessons'
+            );
+
+            const lessonsRequest = {
               chapterId: chapter.id,
-              chapterTitle: chapter.chapterName,
-              moduleId: module.id,
+              chapterName: chapter.chapterName,
+              chapterDescription: chapter.chapterDescription,
+              chapterOrder: chapter.chapterOrder,
+              learningObjectives: chapter.learningObjectives || [],
+              keyTopics: chapter.keyTopics || [],
+              estimatedDuration: chapter.estimatedDuration,
+              estimatedLessonCount: limitedLessons,
+              courseName: course.name,
               moduleName: module.moduleName,
-            }
-          );
+              level: course.level,
+              language: course.language,
+              userInstructions: courseRequest.userInstructions,
+              promptMode: courseRequest.promptMode,
+            };
 
-          // Enforce lesson limit
-          const requestedLessons = chapter.estimatedLessonCount || 5;
-          const limitedLessons = enforceLimit(
-            requestedLessons,
-            GENERATION_LIMITS.MAX_LESSONS_PER_CHAPTER,
-            'lessons'
-          );
+            await this.lessonService.generateLessons(lessonsRequest);
 
-          const lessonsRequest = {
-            chapterId: chapter.id,
-            chapterName: chapter.chapterName,
-            chapterDescription: chapter.chapterDescription,
-            chapterOrder: chapter.chapterOrder,
-            learningObjectives: chapter.learningObjectives || [],
-            keyTopics: chapter.keyTopics || [],
-            estimatedDuration: chapter.estimatedDuration,
-            estimatedLessonCount: limitedLessons,
-            courseName: course.name,
-            moduleName: module.moduleName,
-            level: course.level,
-            language: course.language,
-          };
+            const lessons = await this.lessonService.getLessons(chapter.id);
 
-          await this.lessonService.generateLessons(lessonsRequest);
+            emitLessonsGenerationProgress(
+              req,
+              jobId,
+              userId,
+              globalIdx + 1,
+              totalChapters,
+              `Generated ${lessons.length} lessons for "${chapter.chapterName}"`,
+              {
+                chapterId: chapter.id,
+                chapterTitle: chapter.chapterName,
+                lessonsCount: lessons.length,
+              }
+            );
 
-          const lessons = await this.lessonService.getLessons(chapter.id);
+            return lessons.length;
+          })
+        );
 
-          emitLessonsGenerationProgress(
-            req,
-            jobId,
-            userId,
-            globalIdx + 1,
-            totalChapters,
-            `Generated ${lessons.length} lessons for "${chapter.chapterName}"`,
-            {
-              chapterId: chapter.id,
-              chapterTitle: chapter.chapterName,
-              lessonsCount: lessons.length,
-            }
-          );
-
-          return lessons.length;
-        });
-
-        const batchResults = await Promise.all(batchPromises);
         totalLessons += batchResults.reduce((sum, count) => sum + count, 0);
-
-        if (batchStart + batchSize < allChapters.length) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, GENERATION_LIMITS.BATCH_DELAY)
-          );
-        }
+        await this.applyBatchDelay(batchStart + concurrency, totalChapters);
       }
 
       logger.info('All lessons generated successfully', {
@@ -419,4 +434,14 @@ export class FullCourseGenerationService {
 
   // NOTE: Removed generateCapstoneGuideline method - capstone generation
   // is now handled separately via the capstone service's dedicated endpoint
+
+  private async applyBatchDelay(
+    completed: number,
+    total: number
+  ): Promise<void> {
+    const delayMs = GENERATION_LIMITS.BATCH_DELAY_MS || 0;
+    if (delayMs > 0 && completed < total) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
 }

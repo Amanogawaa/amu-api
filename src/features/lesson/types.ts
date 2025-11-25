@@ -1,3 +1,5 @@
+import type { PromptMode } from '../../utils/prompts/types';
+
 export interface Lesson {
   id: string;
   chapterId: string;
@@ -36,6 +38,8 @@ export interface GenerateLessonRequest {
   moduleName: string;
   level: string;
   language: string;
+  userInstructions?: string;
+  promptMode?: PromptMode;
 }
 
 export interface LessonResponse {

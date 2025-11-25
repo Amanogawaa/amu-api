@@ -1,3 +1,5 @@
+import type { PromptMode } from '../../utils/prompts/types';
+
 export interface Chapter {
   id: string;
   moduleId: string;
@@ -32,10 +34,11 @@ export interface GenerateChaptersRequest {
   level: string;
   language: string;
   moduleOrder: number;
+  userInstructions?: string;
+  promptMode?: PromptMode;
 }
 
 export interface RegenerateChaptersRequest extends GenerateChaptersRequest {
-  userInstructions?: string;
 }
 
 export const chaptersSchema = {

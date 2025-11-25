@@ -139,6 +139,15 @@ export class CourseRoute {
      *               language:
      *                 type: string
      *                 example: English
+     *               userInstructions:
+     *                 type: string
+     *                 example: Emphasize real-world projects
+     *                 description: Optional guidance fed directly to the model
+     *               promptMode:
+     *                 type: string
+     *                 enum: [system, legacy]
+     *                 example: system
+     *                 description: Use legacy to benchmark the previous prompt format
      *     responses:
      *       201:
      *         description: Course generated successfully
@@ -208,6 +217,11 @@ export class CourseRoute {
      *                 type: string
      *                 example: Focus on practical projects
      *                 description: Optional custom instructions for AI
+     *               promptMode:
+     *                 type: string
+     *                 enum: [system, legacy]
+     *                 example: system
+     *                 description: Switch to legacy to compare prompt performance
      *     responses:
      *       202:
      *         description: Generation started, listen to Socket.IO for progress

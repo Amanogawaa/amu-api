@@ -7,6 +7,9 @@ interface GeminiConfig {
   responseSchema: any;
   maxRetries?: number;
   temperature?: number;
+  systemPrompt?: string;
+  benchmarkTag?: string;
+  metadata?: Record<string, unknown>;
 }
 
 // Counter for unique job IDs
@@ -93,7 +96,7 @@ const makeGeminiCall = async (
     },
   ];
 
-  const response = await ai.models.generateContent({
+  const requestPayload: any = {
     model,
     config: {
       temperature:
@@ -102,7 +105,18 @@ const makeGeminiCall = async (
       responseSchema: config.responseSchema,
     },
     contents,
-  });
+  };
+
+  if (config.systemPrompt) {
+    requestPayload.systemInstruction = {
+      role: 'system',
+      parts: [{ text: config.systemPrompt }],
+    };
+  }
+
+  const start = Date.now();
+  const response = await ai.models.generateContent(requestPayload);
+  const durationMs = Date.now() - start;
 
   const text = response.text;
   if (!text || text.trim() === '') {
@@ -121,6 +135,9 @@ const makeGeminiCall = async (
     promptTokens: response.usageMetadata?.promptTokenCount,
     responseTokens: response.usageMetadata?.candidatesTokenCount,
     totalTokens: response.usageMetadata?.totalTokenCount,
+    durationMs,
+    benchmarkTag: config.benchmarkTag ?? 'default',
+    metadata: config.metadata,
   });
 
   return parsed;

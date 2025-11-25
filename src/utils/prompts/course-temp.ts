@@ -1,11 +1,20 @@
-export const generateCoursePrompt = (args: {
+import { SYSTEM_PROMPTS } from './system-prompts';
+import type { PromptMode, PromptPayload } from './types';
+
+export type CoursePromptMode = PromptMode;
+
+interface CoursePromptArgs {
   category: string;
   topic: string;
   level: string;
   duration: string;
   noOfModules: number;
   language: string;
-}) => `You are a course design expert. Generate comprehensive course metadata based on the specifications below.
+  userInstructions?: string;
+}
+
+const legacyCoursePrompt = (args: CoursePromptArgs): string => {
+  const base = `You are a course design expert. Generate comprehensive course metadata based on the specifications below.
 
 **Input Specifications**:
 - Category: ${args.category}
@@ -14,8 +23,13 @@ export const generateCoursePrompt = (args: {
 - Total Duration: ${args.duration}
 - Number of Modules: ${args.noOfModules}
 - Language: ${args.language}
+`;
 
+  const feedback = args.userInstructions
+    ? `\n**IMPORTANT USER FEEDBACK FOR REGENERATION:**\n${args.userInstructions}\n`
+    : '';
 
+  return `${base}${feedback}
 Return valid JSON only:
 {
   "name": "Professional course title",
@@ -75,3 +89,41 @@ Set to false if the course involves:
 - UI/UX design without coding
 - DevOps, Cloud, or Infrastructure topics
 `;
+};
+
+const systemCoursePrompt = (args: CoursePromptArgs): PromptPayload => {
+  const lines = [
+    `Generate complete course metadata for the topic "${args.topic}".`,
+    `Category: ${args.category}`,
+    `Level: ${args.level}`,
+    `Total duration: ${args.duration}`,
+    `Desired modules: ${args.noOfModules}`,
+    `Language: ${args.language}`,
+    `Return JSON that satisfies the schema described in the system prompt.`,
+  ];
+
+  if (args.userInstructions) {
+    lines.push(
+      'User feedback to incorporate (honor without changing the schema):',
+      args.userInstructions
+    );
+  }
+
+  return {
+    userPrompt: lines.join('\n'),
+    systemPrompt: SYSTEM_PROMPTS.COURSE,
+  };
+};
+
+export const buildCoursePrompt = (
+  args: CoursePromptArgs,
+  mode: CoursePromptMode = 'system'
+): PromptPayload => {
+  if (mode === 'legacy') {
+    return {
+      userPrompt: legacyCoursePrompt(args),
+    };
+  }
+
+  return systemCoursePrompt(args);
+};

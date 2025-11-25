@@ -1,12 +1,16 @@
 import { geminiCall } from '../../utils/geminiCall';
 import { logger } from '../../utils/loggers';
-import { generateLessonsPrompt } from '../../utils/prompts/lesson-temp';
+import {
+  buildLessonsPrompt,
+  type LessonPromptMode,
+} from '../../utils/prompts/lesson-temp';
 import { LessonRepository } from './repository';
 import {
   lessonsSchema,
   type GenerateLessonRequest,
   type Lesson,
 } from './types';
+import { backgroundJobService } from '../../utils/service/background-job.service';
 import { youtubeService } from '../../utils/service/youtube.service';
 import { youtubeTranscriptService } from '../../utils/service/youtube-transcript.service';
 import type { QuizService } from '../quiz/service';
@@ -32,27 +36,42 @@ export class LessonService {
 
   public async generateLessons(request: GenerateLessonRequest) {
     try {
-      const prompt = generateLessonsPrompt({
-        chapterId: request.chapterId,
-        chapterName: request.chapterName,
-        chapterDescription: request.chapterDescription,
-        chapterOrder: request.chapterOrder,
-        learningObjectives: request.learningObjectives,
-        keyTopics: request.keyTopics,
-        estimatedDuration: request.estimatedDuration,
-        moduleName: request.moduleName,
-        courseName: request.courseName,
-        level: request.level,
-        language: request.language,
-      });
+      const promptMode: LessonPromptMode = request.promptMode ?? 'system';
+      const { userPrompt, systemPrompt } = buildLessonsPrompt(
+        {
+          chapterId: request.chapterId,
+          chapterName: request.chapterName,
+          chapterDescription: request.chapterDescription,
+          chapterOrder: request.chapterOrder,
+          learningObjectives: request.learningObjectives,
+          keyTopics: request.keyTopics,
+          estimatedDuration: request.estimatedDuration,
+          moduleName: request.moduleName,
+          courseName: request.courseName,
+          level: request.level,
+          language: request.language,
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode }
+      );
 
-      const result = await geminiCall(prompt, {
+      const result = await geminiCall(userPrompt, {
         responseSchema: lessonsSchema,
         temperature: 0.7,
         maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `lessons:${promptMode}`,
+        metadata: {
+          chapterId: request.chapterId,
+          courseName: request.courseName,
+        },
       });
 
-      logger.info('Raw Gemini response:', result);
+      logger.info('Lessons generated via Gemini', {
+        chapterId: request.chapterId,
+        mode: promptMode,
+        lessonCount: result?.lessons?.length ?? 0,
+      });
 
       if (!result.lessons || !Array.isArray(result.lessons)) {
         throw new Error('Invalid response from Gemini: missing lessons array');
@@ -65,12 +84,14 @@ export class LessonService {
 
       logger.info(`Successfully created ${createdLessons.length} lessons`);
 
-      this.autoFetchTranscriptsForVideoLessons(createdLessons).catch((error) =>
-        logger.error('Error auto-fetching transcripts:', error)
+      backgroundJobService.enqueue(
+        `lesson:${request.chapterId}:transcripts`,
+        () => this.autoFetchTranscriptsForVideoLessons(createdLessons)
       );
 
-      this.autoGenerateQuizzes(createdLessons, request.chapterId).catch(
-        (error) => logger.error('Error auto-generating quizzes:', error)
+      backgroundJobService.enqueue(
+        `lesson:${request.chapterId}:quizzes`,
+        () => this.autoGenerateQuizzes(createdLessons, request.chapterId)
       );
 
       return createdLessons;

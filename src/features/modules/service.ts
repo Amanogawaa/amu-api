@@ -1,7 +1,10 @@
 import { AppError } from '../../utils/errors';
 import { geminiCall } from '../../utils/geminiCall';
 import { logger } from '../../utils/loggers';
-import { generateModulesPrompt } from '../../utils/prompts/module-temp';
+import {
+  buildModulesPrompt,
+  type ModulePromptMode,
+} from '../../utils/prompts/module-temp';
 import type { ModuleRepository } from './repository';
 import {
   modulesSchema,
@@ -39,7 +42,9 @@ export class ModuleService {
 
   public async generateModules(request: GenerateModulesRequest) {
     try {
-      const prompt = generateModulesPrompt({
+      const promptMode: ModulePromptMode = request.promptMode ?? 'system';
+      const { userPrompt, systemPrompt } = buildModulesPrompt(
+        {
         courseId: request.courseId,
         courseName: request.courseName,
         courseDescription: request.courseDescription,
@@ -49,15 +54,28 @@ export class ModuleService {
         noOfModules: request.noOfModules,
         language: request.language,
         prerequisites: request.prerequisites,
-      });
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode, intent: 'generate' }
+      );
 
-      const result = await geminiCall(prompt, {
+      const result = await geminiCall(userPrompt, {
         responseSchema: modulesSchema,
         temperature: 0.7,
         maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `modules:${promptMode}`,
+        metadata: {
+          courseId: request.courseId,
+          level: request.level,
+        },
       });
 
-      logger.info('Raw Gemini response:', result);
+      logger.info('Modules generated via Gemini', {
+        courseId: request.courseId,
+        mode: promptMode,
+        moduleCount: result?.modules?.length ?? 0,
+      });
 
       if (!result.modules || !Array.isArray(result.modules)) {
         throw new Error('Invalid response from Gemini: missing modules array');
@@ -98,12 +116,49 @@ export class ModuleService {
 
       existingModules.sort((a, b) => a.moduleOrder - b.moduleOrder);
 
-      const enhancedPrompt = this.buildRegenerationPrompt(request);
+      const promptMode: ModulePromptMode = request.promptMode ?? 'system';
+      const fallbackLearningOutcomes =
+        request.learningOutcomes && request.learningOutcomes.length > 0
+          ? request.learningOutcomes
+          : existingModules
+              .flatMap((module) => module.learningObjectives.slice(0, 1))
+              .slice(0, 5);
 
-      const result = await geminiCall(enhancedPrompt, {
+      const { userPrompt, systemPrompt } = buildModulesPrompt(
+        {
+          courseId: request.courseId,
+          courseName: request.courseName || existingModules[0]?.courseName || 'Untitled Course',
+          courseDescription:
+            request.courseDescription ||
+            'Refresh the existing module blueprint with improved clarity.',
+          learningOutcomes:
+            fallbackLearningOutcomes.length > 0
+              ? fallbackLearningOutcomes
+              : ['Deliver structured, outcome-focused modules.'],
+          level: request.level || existingModules[0]?.level || 'intermediate',
+          duration:
+            request.duration ||
+            existingModules[0]?.estimatedDuration ||
+            'Match previous pacing',
+          noOfModules: request.noOfModules || existingModules.length,
+          language: request.language || existingModules[0]?.language || 'English',
+          prerequisites: request.prerequisites || '',
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode, intent: 'regenerate' }
+      );
+
+      const result = await geminiCall(userPrompt, {
         responseSchema: modulesSchema,
         temperature: 0.8,
         maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `modules:${promptMode}`,
+        metadata: {
+          courseId: request.courseId,
+          intent: 'regenerate',
+          mode: promptMode,
+        },
       });
 
       if (!result.modules || !Array.isArray(result.modules)) {
@@ -154,26 +209,6 @@ export class ModuleService {
       logger.error('Error in ModuleService.regenerateModules:', error);
       throw error;
     }
-  }
-
-  private buildRegenerationPrompt(request: UpdateModuleRequest): string {
-    const basePrompt = generateModulesPrompt({
-      courseId: request.courseId,
-      courseName: request.courseName,
-      courseDescription: request.courseDescription,
-      learningOutcomes: request.learningOutcomes,
-      level: request.level,
-      duration: request.duration,
-      noOfModules: request.noOfModules,
-      language: request.language,
-      prerequisites: request.prerequisites,
-    });
-
-    if (request.userInstructions) {
-      return `${basePrompt}\n\n**IMPORTANT USER FEEDBACK FOR REGENERATION:**\n${request.userInstructions}\n\nPlease adjust the content based on the above feedback while maintaining the same structure and number of modules.`;
-    }
-
-    return `${basePrompt}\n\n**NOTE:** This is a regeneration request. Please provide fresh, alternative content while maintaining educational quality and structure.`;
   }
 
   public async deleteModulesByCourseId(courseId: string): Promise<void> {

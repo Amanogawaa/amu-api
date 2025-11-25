@@ -1,4 +1,9 @@
-export const generateLessonsPrompt = (args: {
+import { SYSTEM_PROMPTS } from './system-prompts';
+import type { PromptMode, PromptPayload } from './types';
+
+export type LessonPromptMode = PromptMode;
+
+interface LessonPromptArgs {
   chapterId: string;
   chapterName: string;
   chapterDescription: string;
@@ -10,13 +15,29 @@ export const generateLessonsPrompt = (args: {
   courseName: string;
   level: string;
   language: string;
-}) => `Create exactly 4 lessons for Chapter ${args.chapterOrder}: ${
-  args.chapterName
+  userInstructions?: string;
 }
 
+interface BuildLessonsPromptOptions {
+  mode?: LessonPromptMode;
+}
+
+const legacyLessonsPrompt = (args: LessonPromptArgs): string => {
+  const feedback = args.userInstructions
+    ? `\n**USER FEEDBACK:**\n${args.userInstructions}`
+    : '';
+
+  return `Create exactly 4 lessons for Chapter ${args.chapterOrder}: ${
+    args.chapterName
+  }
+
+Course: ${args.courseName} (${args.level})
+Module: ${args.moduleName}
 Context: ${args.chapterDescription}
 Topics: ${args.keyTopics.join(', ')}
 Duration: ${args.estimatedDuration}
+Language: ${args.language}
+${feedback}
 
 Return valid JSON only:
 {
@@ -102,5 +123,41 @@ RULES:
 
 Level adjustments:
 - Beginner: More examples, step-by-step, simpler language
-- Intermediate: Balance theory/practice, real-world scenarios  
+- Intermediate: Balance theory/practice, real-world scenarios
 - Advanced: Dense content, best practices, edge cases`;
+};
+
+const systemLessonsPrompt = (args: LessonPromptArgs): PromptPayload => {
+  const lines = [
+    `Create four lessons for chapter "${args.chapterName}" (order ${args.chapterOrder}) within ${args.estimatedDuration}.`,
+    `Course: ${args.courseName} | Module: ${args.moduleName} | Level: ${args.level} | Language: ${args.language}`,
+    `Chapter summary: ${args.chapterDescription}`,
+    `Learning objectives: ${args.learningObjectives.join(' | ')}`,
+    `Key topics: ${args.keyTopics.join(', ')}`,
+    'Follow the Video + Article + Article + Quiz structure and keep durations in range.',
+  ];
+
+  if (args.userInstructions) {
+    lines.push('User feedback to apply:', args.userInstructions);
+  }
+
+  return {
+    userPrompt: lines.join('\n'),
+    systemPrompt: SYSTEM_PROMPTS.LESSON,
+  };
+};
+
+export const buildLessonsPrompt = (
+  args: LessonPromptArgs,
+  options: BuildLessonsPromptOptions = {}
+): PromptPayload => {
+  const mode = options.mode ?? 'system';
+
+  if (mode === 'legacy') {
+    return {
+      userPrompt: legacyLessonsPrompt(args),
+    };
+  }
+
+  return systemLessonsPrompt(args);
+};

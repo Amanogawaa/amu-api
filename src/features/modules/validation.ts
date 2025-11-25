@@ -14,6 +14,8 @@ export const generateModulesSchema = z.object({
   language: z.string().min(2).max(30),
   noOfModules: z.number().int().min(2).max(10).optional().default(5),
   prerequisites: z.string().max(500).optional().default(''),
+  userInstructions: z.string().max(1000).optional(),
+  promptMode: z.enum(['system', 'legacy']).optional(),
 });
 
 export const updateModuleSchema = z.object({
@@ -31,6 +33,7 @@ export const updateModuleSchema = z.object({
   noOfModules: z.number().int().min(3).max(10).optional(),
   prerequisites: z.string().max(500).optional(),
   userInstructions: z.string().max(1000).optional(),
+  promptMode: z.enum(['system', 'legacy']).optional(),
   keepExistingIds: z.boolean().optional(),
 });
 

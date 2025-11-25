@@ -16,6 +16,8 @@ export interface Module {
   updatedAt?: Date;
 }
 
+import type { PromptMode } from '../../utils/prompts/types';
+
 export interface GenerateModulesRequest {
   courseId: string;
   courseName: string;
@@ -26,10 +28,11 @@ export interface GenerateModulesRequest {
   noOfModules: number;
   language: string;
   prerequisites: string;
+  userInstructions?: string;
+  promptMode?: PromptMode;
 }
 
 export interface UpdateModuleRequest extends GenerateModulesRequest {
-  userInstructions?: string;
   keepExistingIds?: boolean;
 }
 

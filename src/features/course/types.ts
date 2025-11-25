@@ -25,6 +25,10 @@ export interface Course {
   updatedAt?: Date;
 }
 
+import type { PromptMode } from '../../utils/prompts/types';
+
+export type CoursePromptMode = PromptMode;
+
 export interface GenerateCourseRequest {
   uid: string;
   category: string;
@@ -34,6 +38,7 @@ export interface GenerateCourseRequest {
   noOfModules: number;
   language: string;
   userInstructions?: string;
+  promptMode?: CoursePromptMode;
 }
 
 export interface CourseQueryParams {

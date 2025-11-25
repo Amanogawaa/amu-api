@@ -11,6 +11,8 @@ export const generateCourseSchema = z.object({
   }),
   noOfModules: z.number().int().min(1).max(20),
   language: z.string().min(2).max(50),
+  userInstructions: z.string().min(5).max(1000).optional(),
+  promptMode: z.enum(['system', 'legacy']).optional(),
 });
 
 export const validateGenerateCourse = (

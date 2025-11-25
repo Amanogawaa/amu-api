@@ -1,4 +1,9 @@
-export const generateModulesPrompt = (args: {
+import { SYSTEM_PROMPTS } from './system-prompts';
+import type { PromptIntent, PromptMode, PromptPayload } from './types';
+
+export type ModulePromptMode = PromptMode;
+
+interface ModulePromptArgs {
   courseId: string;
   courseName: string;
   courseDescription: string;
@@ -7,11 +12,37 @@ export const generateModulesPrompt = (args: {
   duration: string;
   noOfModules: number;
   language: string;
-}) => `Create ${args.noOfModules} modules for: ${args.courseName}
+  prerequisites?: string;
+  userInstructions?: string;
+}
+
+interface BuildModulesPromptOptions {
+  mode?: ModulePromptMode;
+  intent?: PromptIntent;
+}
+
+const legacyModulesPrompt = (
+  args: ModulePromptArgs,
+  intent: PromptIntent
+): string => {
+  const intro = `Create ${args.noOfModules} modules for: ${args.courseName}
 
 Course: ${args.courseDescription}
 Level: ${args.level} | Duration: ${args.duration} | Language: ${args.language}
 Learning Outcomes: ${args.learningOutcomes.join('; ')}
+Prerequisites: ${args.prerequisites || 'None specified'}
+`;
+
+  const regenNote =
+    intent === 'regenerate'
+      ? '\n**NOTE:** This is a regeneration request. Keep the same module count/order but refresh the narratives and learning objectives.'
+      : '';
+
+  const feedback = args.userInstructions
+    ? `\n**USER FEEDBACK:**\n${args.userInstructions}`
+    : '';
+
+  return `${intro}${feedback}${regenNote}
 
 Return valid JSON only:
 {
@@ -45,3 +76,51 @@ Level guidance:
 - Beginner: 3-4 modules, foundational focus, gentle curve
 - Intermediate: 4-6 modules, theory + practice balance
 - Advanced: 5-7 modules, dense technical content, assume prior knowledge`;
+};
+
+const systemModulesPrompt = (
+  args: ModulePromptArgs,
+  intent: PromptIntent
+): PromptPayload => {
+  const lines = [
+    `Generate ${args.noOfModules} modules for the course "${args.courseName}".`,
+    `Course summary: ${args.courseDescription}`,
+    `Level: ${args.level}`,
+    `Total duration: ${args.duration}`,
+    `Learning outcomes: ${args.learningOutcomes.join(' | ')}`,
+    `Language: ${args.language}`,
+    `Prerequisites: ${args.prerequisites || 'None'}`,
+    `Ensure total module duration stays within ±10% of ${args.duration}.`,
+  ];
+
+  if (intent === 'regenerate') {
+    lines.push(
+      'This is a regeneration request: keep the same module count and order but refresh descriptions, objectives, and skills.'
+    );
+  }
+
+  if (args.userInstructions) {
+    lines.push('User feedback to honor:', args.userInstructions);
+  }
+
+  return {
+    userPrompt: lines.join('\n'),
+    systemPrompt: SYSTEM_PROMPTS.MODULE,
+  };
+};
+
+export const buildModulesPrompt = (
+  args: ModulePromptArgs,
+  options: BuildModulesPromptOptions = {}
+): PromptPayload => {
+  const mode = options.mode ?? 'system';
+  const intent = options.intent ?? 'generate';
+
+  if (mode === 'legacy') {
+    return {
+      userPrompt: legacyModulesPrompt(args, intent),
+    };
+  }
+
+  return systemModulesPrompt(args, intent);
+};

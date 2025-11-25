@@ -1,6 +1,9 @@
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
-import { generateCoursePrompt } from '../../utils/prompts/course-temp';
+import {
+  buildCoursePrompt,
+  type CoursePromptMode,
+} from '../../utils/prompts/course-temp';
 import { CourseRepository } from './repository';
 
 import { geminiCall } from '../../utils/geminiCall';
@@ -40,14 +43,38 @@ export class CourseService {
 
   public async generateCourse(request: GenerateCourseRequest) {
     try {
-      const prompt = this.customInstructions(request);
-      const result = await geminiCall(prompt, {
+      const promptMode: CoursePromptMode = request.promptMode ?? 'system';
+      const { userPrompt, systemPrompt } = buildCoursePrompt(
+        {
+          category: request.category,
+          topic: request.topic,
+          level: request.level,
+          duration: request.duration,
+          noOfModules: request.noOfModules,
+          language: request.language,
+          userInstructions: request.userInstructions,
+        },
+        promptMode
+      );
+
+      const result = await geminiCall(userPrompt, {
         responseSchema: courseSchema,
         temperature: 0.7,
         maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `course:${promptMode}`,
+        metadata: {
+          topic: request.topic,
+          level: request.level,
+        },
       });
 
-      logger.info('Course generated successfully', result);
+      logger.info('Course generated successfully', {
+        mode: promptMode,
+        topic: request.topic,
+        uid: request.uid,
+        name: result?.name,
+      });
 
       const courseData: Course = {
         ...result,
@@ -72,23 +99,6 @@ export class CourseService {
       logger.error('Error in CoursesService.generateCourse:', error);
       throw error;
     }
-  }
-
-  private customInstructions(request: GenerateCourseRequest): string {
-    const basePrompt = generateCoursePrompt({
-      category: request.category,
-      topic: request.topic,
-      level: request.level,
-      duration: request.duration,
-      noOfModules: request.noOfModules,
-      language: request.language,
-    });
-
-    if (request.userInstructions) {
-      return `${basePrompt}\n\n**IMPORTANT USER FEEDBACK FOR REGENERATION:**\n${request.userInstructions}\n\nPlease adjust the content based on the above feedback while maintaining the same structure.`;
-    }
-
-    return basePrompt;
   }
 
   public async deleteCourse(courseId: string): Promise<void> {

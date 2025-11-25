@@ -158,11 +158,14 @@ class CourseContainer {
 The API uses **Google Gemini AI** with structured prompts and schema validation:
 
 ```typescript
-// Example: Course generation
-const result = await geminiCall(generateCoursePrompt(params), {
+// Example: Course generation with system prompt benchmark support
+const { userPrompt, systemPrompt } = buildCoursePrompt(params, 'system');
+const result = await geminiCall(userPrompt, {
   responseSchema: courseSchema, // Zod schema for type safety
   temperature: 0.7,
   maxRetries: 3,
+  systemPrompt,
+  benchmarkTag: 'course:system',
 });
 ```
 

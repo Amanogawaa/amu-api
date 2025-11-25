@@ -1,7 +1,10 @@
 import { AppError } from '../../utils/errors';
 import { geminiCall } from '../../utils/geminiCall';
 import { logger } from '../../utils/loggers';
-import { generateChaptersPrompt } from '../../utils/prompts/chapter-temp';
+import {
+  buildChaptersPrompt,
+  type ChapterPromptMode,
+} from '../../utils/prompts/chapter-temp';
 import { ChapterRepository } from './repository';
 import {
   type GenerateChaptersRequest,
@@ -39,27 +42,42 @@ export class ChapterService {
 
   public async generateChapters(request: GenerateChaptersRequest) {
     try {
-      const prompt = generateChaptersPrompt({
-        moduleId: request.moduleId,
-        moduleName: request.moduleName,
-        moduleDescription: request.moduleDescription,
-        moduleLearningObjectives: request.moduleLearningObjectives,
-        moduleKeySkills: request.moduleKeySkills,
-        courseName: request.courseName,
-        moduleOrder: request.moduleOrder,
-        estimatedChapterCount: request.estimatedChapterCount,
-        estimatedDuration: request.estimatedDuration,
-        level: request.level,
-        language: request.language,
-      });
+      const promptMode: ChapterPromptMode = request.promptMode ?? 'system';
+      const { userPrompt, systemPrompt } = buildChaptersPrompt(
+        {
+          moduleId: request.moduleId,
+          moduleName: request.moduleName,
+          moduleDescription: request.moduleDescription,
+          moduleLearningObjectives: request.moduleLearningObjectives,
+          moduleKeySkills: request.moduleKeySkills,
+          courseName: request.courseName,
+          moduleOrder: request.moduleOrder,
+          estimatedChapterCount: request.estimatedChapterCount,
+          estimatedDuration: request.estimatedDuration,
+          level: request.level,
+          language: request.language,
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode, intent: 'generate' }
+      );
 
-      const result = await geminiCall(prompt, {
+      const result = await geminiCall(userPrompt, {
         responseSchema: chaptersSchema,
         temperature: 0.7,
         maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `chapters:${promptMode}`,
+        metadata: {
+          moduleId: request.moduleId,
+          courseName: request.courseName,
+        },
       });
 
-      logger.info('Raw Gemini response:', result);
+      logger.info('Chapters generated via Gemini', {
+        moduleId: request.moduleId,
+        mode: promptMode,
+        chapterCount: result?.chapters?.length ?? 0,
+      });
 
       if (!result.chapters || !Array.isArray(result.chapters)) {
         throw new Error('Invalid response from Gemini: missing chapters array');
@@ -98,12 +116,53 @@ export class ChapterService {
 
       existingChapters.sort((a, b) => a.chapterOrder - b.chapterOrder);
 
-      const enhancedPrompt = this.buildRegenerationPrompt(request);
+      const promptMode: ChapterPromptMode = request.promptMode ?? 'system';
+      const { userPrompt, systemPrompt } = buildChaptersPrompt(
+        {
+          moduleId: request.moduleId,
+          moduleName: request.moduleName || existingChapters[0]?.moduleName || 'Module Overview',
+          moduleDescription:
+            request.moduleDescription ||
+            'Refresh these chapters for clarity while keeping structure intact.',
+          moduleLearningObjectives:
+            request.moduleLearningObjectives?.length &&
+            request.moduleLearningObjectives.length > 0
+              ? request.moduleLearningObjectives
+              : existingChapters
+                  .flatMap((chapter) => chapter.learningObjectives.slice(0, 1))
+                  .slice(0, 3),
+          moduleKeySkills:
+            request.moduleKeySkills?.length && request.moduleKeySkills.length > 0
+              ? request.moduleKeySkills
+              : existingChapters.flatMap((chapter) => chapter.keyTopics.slice(0, 1)).slice(0, 3),
+          courseName: request.courseName,
+          moduleOrder: request.moduleOrder,
+          estimatedChapterCount: request.estimatedChapterCount || existingChapters.length,
+          estimatedDuration:
+            request.estimatedDuration ||
+            existingChapters
+              .map((chapter) => chapter.estimatedDuration)
+              .filter(Boolean)
+              .join(' + ') ||
+            'Match previous pacing',
+          level: request.level,
+          language: request.language,
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode, intent: 'regenerate' }
+      );
 
-      const result = await geminiCall(enhancedPrompt, {
+      const result = await geminiCall(userPrompt, {
         responseSchema: chaptersSchema,
         temperature: 0.8,
         maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `chapters:${promptMode}`,
+        metadata: {
+          moduleId: request.moduleId,
+          intent: 'regenerate',
+          mode: promptMode,
+        },
       });
 
       if (!result.chapters || !Array.isArray(result.chapters)) {
@@ -149,28 +208,6 @@ export class ChapterService {
       logger.error('Error in ChapterService.regenerateChapters:', error);
       throw error;
     }
-  }
-
-  private buildRegenerationPrompt(request: RegenerateChaptersRequest): string {
-    const basePrompt = generateChaptersPrompt({
-      moduleId: request.moduleId,
-      moduleName: request.moduleName,
-      moduleDescription: request.moduleDescription,
-      moduleLearningObjectives: request.moduleLearningObjectives,
-      moduleKeySkills: request.moduleKeySkills,
-      courseName: request.courseName,
-      moduleOrder: request.moduleOrder,
-      estimatedChapterCount: request.estimatedChapterCount,
-      estimatedDuration: request.estimatedDuration,
-      level: request.level,
-      language: request.language,
-    });
-
-    if (request.userInstructions) {
-      return `${basePrompt}\n\n**IMPORTANT USER FEEDBACK FOR REGENERATION:**\n${request.userInstructions}\n\nPlease adjust the content based on the above feedback while maintaining the same structure and number of chapters.`;
-    }
-
-    return `${basePrompt}\n\n**NOTE:** This is a regeneration request. Please provide fresh, alternative content while maintaining educational quality and structure.`;
   }
 
   public async deleteChaptersByModuleId(moduleId: string) {
