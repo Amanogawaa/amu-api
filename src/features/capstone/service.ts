@@ -1,6 +1,8 @@
 import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/loggers';
 import { CapstoneRepository } from './repository';
+import fs from 'fs/promises';
+import path from 'path';
 import {
   type CapstoneGuideline,
   type CapstoneSubmission,
@@ -265,10 +267,8 @@ export class CapstoneService {
     request: CreateCapstoneSubmissionRequest
   ): Promise<CapstoneSubmission> {
     try {
-      // Validate guideline exists
       await this.repository.getGuidelineById(request.guidelineId);
 
-      // Check if user already submitted this repo
       const exists = await this.repository.submissionExistsByRepo(
         userId,
         request.githubRepoUrl
@@ -285,12 +285,6 @@ export class CapstoneService {
         repo
       );
 
-      // Verify repo owner matches the submitting user's GitHub account
-      // This is optional - you can skip this check if you don't want to enforce it
-      // const githubConnection = await this.githubService.getConnection(userId);
-      // if (githubConnection && githubConnection.githubUsername !== owner) {
-      //   throw new AppError('You can only submit your own repositories', 403);
-      // }
 
       const submissionData = {
         userId,
@@ -308,6 +302,7 @@ export class CapstoneService {
           lastUpdated: new Date(repoMetadata.updated_at),
           isPrivate: repoMetadata.private,
         },
+        screenshots: [],
       };
 
       const submission = await this.repository.createSubmission(submissionData);
@@ -360,7 +355,6 @@ export class CapstoneService {
     try {
       const submission = await this.repository.getSubmissionById(id);
 
-      // Check ownership
       if (submission.userId !== userId) {
         throw new AppError('You can only update your own submissions', 403);
       }
@@ -407,7 +401,6 @@ export class CapstoneService {
     try {
       const submission = await this.repository.getSubmissionById(id);
 
-      // Check ownership
       if (submission.userId !== userId) {
         throw new AppError('You can only delete your own submissions', 403);
       }
@@ -428,37 +421,45 @@ export class CapstoneService {
     request: CreateCapstoneReviewRequest
   ): Promise<CapstoneReview> {
     try {
-      // Validate submission exists
       const submission = await this.repository.getSubmissionById(
         request.capstoneSubmissionId
       );
 
-      // Prevent reviewing own submission
-      if (submission.userId === userId) {
-        throw new AppError('You cannot review your own submission', 400);
+      if (request.parentReviewId) {
+        const parentReview = await this.repository.getReviewById(
+          request.parentReviewId
+        );
+        if (parentReview.capstoneSubmissionId !== request.capstoneSubmissionId) {
+          throw new AppError(
+            'Parent review does not belong to this submission',
+            400
+          );
+        }
+      } else {
+        if (submission.userId === userId) {
+          throw new AppError('You cannot create a top-level review for your own submission', 400);
+        }
       }
 
-      // Check if user already reviewed this submission
-      const alreadyReviewed = await this.repository.reviewExists(
-        userId,
-        request.capstoneSubmissionId
-      );
-
-      if (alreadyReviewed) {
-        throw new AppError('You have already reviewed this submission', 400);
-      }
 
       const reviewData = {
         capstoneSubmissionId: request.capstoneSubmissionId,
         reviewerId: userId,
         reviewerName: userName,
         reviewerEmail: userEmail,
-        rating: request.rating,
+        parentReviewId: request.parentReviewId,
+        rating: request.rating, 
         feedback: request.feedback,
-        highlights: request.highlights,
-        suggestions: request.suggestions,
+        highlights: request.highlights || [],
+        suggestions: request.suggestions || [],
         criteriaScores: request.criteriaScores,
+        images: [],
       };
+
+
+      if (request.parentReviewId) {
+        await this.repository.incrementReplyCount(request.parentReviewId);
+      }
 
       const review = await this.repository.createReview(reviewData);
 
@@ -480,7 +481,7 @@ export class CapstoneService {
       let averageRating: number | undefined;
 
       if (reviews.length > 0) {
-        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+        const totalRating = reviews.reduce((sum, r) => sum + (r?.rating || 0), 0);
         averageRating = Math.round((totalRating / reviews.length) * 10) / 10;
       }
 
@@ -512,7 +513,6 @@ export class CapstoneService {
     try {
       const review = await this.repository.getReviewById(id);
 
-      // Check ownership
       if (review.reviewerId !== userId) {
         throw new AppError('You can only update your own reviews', 403);
       }
@@ -530,7 +530,6 @@ export class CapstoneService {
     try {
       const review = await this.repository.getReviewById(id);
 
-      // Check ownership
       if (review.reviewerId !== userId) {
         throw new AppError('You can only delete your own reviews', 403);
       }
@@ -549,7 +548,6 @@ export class CapstoneService {
     capstoneSubmissionId: string
   ): Promise<{ liked: boolean; likeCount: number }> {
     try {
-      // Validate submission exists
       await this.repository.getSubmissionById(capstoneSubmissionId);
 
       const liked = await this.repository.toggleLike(
@@ -587,6 +585,206 @@ export class CapstoneService {
     }
   }
 
+  // ==================== CAPSTONE SCREENSHOTS ====================
+
+  async uploadScreenshot(
+    submissionId: string,
+    userId: string,
+    file: any
+  ): Promise<string> {
+    try {
+      const submission = await this.repository.getSubmissionById(submissionId);
+
+      if (submission.userId !== userId) {
+        throw new AppError(
+          'You can only upload screenshots to your own submissions',
+          403
+        );
+      }
+
+      const fileExtension = path.extname(file.originalname);
+      const filename = `${submissionId}_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(7)}${fileExtension}`;
+      const uploadDir = path.join(
+        process.cwd(),
+        'uploads',
+        'capstone-submissions'
+      );
+      const filePath = path.join(uploadDir, filename);
+      await fs.mkdir(uploadDir, { recursive: true });
+
+      await fs.writeFile(filePath, file.buffer);
+
+      const screenshotUrl = `/uploads/capstone-submissions/${filename}`;
+
+      const currentScreenshots = submission.screenshots || [];
+      const updatedScreenshots = [...currentScreenshots, screenshotUrl];
+
+      await this.repository.updateSubmission(submissionId, {
+        screenshots: updatedScreenshots,
+      });
+
+      logger.info(
+        `Screenshot uploaded for submission: ${submissionId}, filename: ${filename}`
+      );
+      return screenshotUrl;
+    } catch (error) {
+      logger.error('Error in CapstoneService.uploadScreenshot:', error);
+      throw error;
+    }
+  }
+
+  async deleteScreenshot(
+    submissionId: string,
+    userId: string,
+    screenshotUrl: string
+  ): Promise<void> {
+    try {
+      const submission = await this.repository.getSubmissionById(submissionId);
+
+      if (submission.userId !== userId) {
+        throw new AppError(
+          'You can only delete screenshots from your own submissions',
+          403
+        );
+      }
+
+      const currentScreenshots = submission.screenshots || [];
+      const updatedScreenshots = currentScreenshots.filter(
+        (url) => url !== screenshotUrl
+      );
+
+      await this.repository.updateSubmission(submissionId, {
+        screenshots: updatedScreenshots,
+      });
+
+      if (screenshotUrl.includes('/uploads/capstone-submissions/')) {
+        const filename = screenshotUrl.split('/').pop();
+        if (filename) {
+          const filePath = path.join(
+            process.cwd(),
+            'uploads',
+            'capstone-submissions',
+            filename
+          );
+          try {
+            await fs.unlink(filePath);
+            logger.info(`Screenshot file deleted: ${filename}`);
+          } catch (error) {
+            logger.warn(`Failed to delete screenshot file: ${filePath}`, error);
+          }
+        }
+      }
+
+      logger.info(
+        `Screenshot deleted from submission: ${submissionId}, URL: ${screenshotUrl}`
+      );
+    } catch (error) {
+      logger.error('Error in CapstoneService.deleteScreenshot:', error);
+      throw error;
+    }
+  }
+
+  // ==================== CAPSTONE REVIEW IMAGES ====================
+
+  async uploadReviewImage(
+    reviewId: string,
+    userId: string,
+    file: any
+  ): Promise<string> {
+    try {
+      const review = await this.repository.getReviewById(reviewId);
+
+      if (review.reviewerId !== userId) {
+        throw new AppError(
+          'You can only upload images to your own reviews',
+          403
+        );
+      }
+
+      const fileExtension = path.extname(file.originalname);
+      const filename = `${reviewId}_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(7)}${fileExtension}`;
+      const uploadDir = path.join(
+        process.cwd(),
+        'uploads',
+        'capstone-reviews'
+      );
+      const filePath = path.join(uploadDir, filename);
+
+      await fs.mkdir(uploadDir, { recursive: true });
+
+      await fs.writeFile(filePath, file.buffer);
+
+      const imageUrl = `/uploads/capstone-reviews/${filename}`;
+      const currentImages = review.images || [];
+      const updatedImages = [...currentImages, imageUrl];
+
+      await this.repository.updateReview(reviewId, {
+        images: updatedImages,
+      });
+
+      logger.info(
+        `Review image uploaded for review: ${reviewId}, filename: ${filename}`
+      );
+      return imageUrl;
+    } catch (error) {
+      logger.error('Error in CapstoneService.uploadReviewImage:', error);
+      throw error;
+    }
+  }
+
+  async deleteReviewImage(
+    reviewId: string,
+    userId: string,
+    imageUrl: string
+  ): Promise<void> {
+    try {
+      const review = await this.repository.getReviewById(reviewId);
+
+      if (review.reviewerId !== userId) {
+        throw new AppError(
+          'You can only delete images from your own reviews',
+          403
+        );
+      }
+      // Remove image from array
+      const currentImages = review.images || [];
+      const updatedImages = currentImages.filter((url) => url !== imageUrl);
+
+      await this.repository.updateReview(reviewId, {
+        images: updatedImages,
+      });
+
+      if (imageUrl.includes('/uploads/capstone-reviews/')) {
+        const filename = imageUrl.split('/').pop();
+        if (filename) {
+          const filePath = path.join(
+            process.cwd(),
+            'uploads',
+            'capstone-reviews',
+            filename
+          );
+          try {
+            await fs.unlink(filePath);
+            logger.info(`Review image file deleted: ${filename}`);
+          } catch (error) {
+            logger.warn(`Failed to delete review image file: ${filePath}`, error);
+          }
+        }
+      }
+
+      logger.info(
+        `Review image deleted from review: ${reviewId}, URL: ${imageUrl}`
+      );
+    } catch (error) {
+      logger.error('Error in CapstoneService.deleteReviewImage:', error);
+      throw error;
+    }
+  }
+
   // ==================== HELPER METHODS ====================
 
   private parseGitHubUrl(url: string): { owner: string; repo: string } {
@@ -594,8 +792,7 @@ export class CapstoneService {
       // Remove trailing slash if present
       const cleanUrl = url.replace(/\/$/, '');
 
-      // Extract owner and repo from URL
-      // Format: https://github.com/owner/repo
+   
       const match = cleanUrl.match(
         /^https:\/\/github\.com\/([\w-]+)\/([\w.-]+)$/
       );
@@ -603,7 +800,6 @@ export class CapstoneService {
       if (!match) {
         throw new AppError('Invalid GitHub repository URL format', 400);
       }
-
       const [, owner, repo] = match;
 
       if (!owner || !repo) {

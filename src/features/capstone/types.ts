@@ -48,7 +48,6 @@ export interface CapstoneGuideline {
   updatedAt: Date;
 }
 
-// Capstone Submission (user's project)
 export interface CapstoneSubmission {
   id: string;
   userId: string;
@@ -72,40 +71,41 @@ export interface CapstoneSubmission {
   reviewCount: number;
   likeCount: number;
   averageRating?: number;
+  screenshots: string[]; 
 }
 
-// Peer Review
 export interface CapstoneReview {
   id: string;
   capstoneSubmissionId: string;
   reviewerId: string;
   reviewerName?: string;
   reviewerEmail?: string;
-  rating: number; // 1-5 stars
+  parentReviewId?: string; 
+  rating?: number; 
   feedback: string;
-  highlights: string[]; // What worked well
-  suggestions: string[]; // What could be improved
+  highlights?: string[]; 
+  suggestions?: string[]; 
   criteriaScores?: Array<{
     criteriaName: string;
     score: number;
     comment?: string;
   }>;
-  isHelpful?: boolean; // For tracking review quality
-  helpfulCount: number; // How many found this review helpful
+  isHelpful?: boolean; 
+  helpfulCount: number;
+  images: string[]; 
+  replyCount: number;
   createdAt: Date;
   updatedAt: Date;
   deleted: boolean;
 }
 
-// Capstone Like
 export interface CapstoneLike {
-  id: string; // composite: capstoneSubmissionId_userId
+  id: string; 
   capstoneSubmissionId: string;
   userId: string;
   createdAt: Date;
 }
 
-// GitHub Connection
 export interface GitHubConnection {
   userId: string;
   githubUsername: string;
@@ -132,10 +132,11 @@ export interface UpdateCapstoneSubmissionRequest {
 
 export interface CreateCapstoneReviewRequest {
   capstoneSubmissionId: string;
-  rating: number;
+  parentReviewId?: string; 
+  rating?: number; 
   feedback: string;
-  highlights: string[];
-  suggestions: string[];
+  highlights?: string[];
+  suggestions?: string[];
   criteriaScores?: Array<{
     criteriaName: string;
     score: number;
@@ -155,6 +156,10 @@ export interface UpdateCapstoneReviewRequest {
   }>;
 }
 
+export interface CapstoneReviewReplyParams {
+  parentReviewId?: string; 
+}
+
 export interface CapstoneSubmissionQueryParams {
   courseId?: string;
   userId?: string;
@@ -166,6 +171,7 @@ export interface CapstoneSubmissionQueryParams {
 export interface CapstoneReviewQueryParams {
   capstoneSubmissionId?: string;
   reviewerId?: string;
+  parentReviewId?: string | null; 
   limit?: number;
   offset?: number;
 }

@@ -148,6 +148,7 @@ export class CapstoneRepository {
         viewCount: 0,
         reviewCount: 0,
         likeCount: 0,
+        screenshots: submission.screenshots || [],
       };
 
       await docRef.set(submissionData);
@@ -317,7 +318,7 @@ export class CapstoneRepository {
   async createReview(
     review: Omit<
       CapstoneReview,
-      'id' | 'createdAt' | 'updatedAt' | 'deleted' | 'helpfulCount'
+      'id' | 'createdAt' | 'updatedAt' | 'deleted' | 'helpfulCount' | 'replyCount'
     >
   ): Promise<CapstoneReview> {
     try {
@@ -333,16 +334,21 @@ export class CapstoneRepository {
         updatedAt: now,
         deleted: false,
         helpfulCount: 0,
+        replyCount: 0,
+        images: review.images || [],
+        rating: review.rating,
+        highlights: review.highlights || [],
+        suggestions: review.suggestions || [],
       };
 
-      // Remove undefined values (Firestore doesn't accept them)
       const cleanedData = this.removeUndefinedValues(reviewData);
 
       await docRef.set(cleanedData);
       logger.info(`Capstone review created: ${docRef.id}`);
 
-      // Increment review count on submission
-      await this.incrementReviewCount(review.capstoneSubmissionId);
+      if (!review.parentReviewId) {
+        await this.incrementReviewCount(review.capstoneSubmissionId);
+      }
 
       return reviewData;
     } catch (error) {
@@ -369,6 +375,14 @@ export class CapstoneRepository {
 
       if (params?.reviewerId) {
         query = query.where('reviewerId', '==', params.reviewerId);
+      }
+
+      if (params?.parentReviewId !== undefined) {
+        if (params.parentReviewId === null || params.parentReviewId === '') {
+          query = query.where('parentReviewId', '==', null);
+        } else {
+          query = query.where('parentReviewId', '==', params.parentReviewId);
+        }
       }
 
       query = query.orderBy('createdAt', 'desc');
@@ -492,6 +506,34 @@ export class CapstoneRepository {
     }
   }
 
+  async incrementReplyCount(reviewId: string): Promise<void> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.REVIEWS_COLLECTION)
+        .doc(reviewId);
+
+      await docRef.update({
+        replyCount: FieldValue.increment(1),
+      });
+    } catch (error) {
+      logger.error('Error incrementing reply count:', error);
+    }
+  }
+
+  async decrementReplyCount(reviewId: string): Promise<void> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.REVIEWS_COLLECTION)
+        .doc(reviewId);
+
+      await docRef.update({
+        replyCount: FieldValue.increment(-1),
+      });
+    } catch (error) {
+      logger.error('Error decrementing reply count:', error);
+    }
+  }
+
   private async incrementReviewCount(submissionId: string): Promise<void> {
     try {
       const docRef = this.firebaseStore
@@ -502,7 +544,6 @@ export class CapstoneRepository {
         reviewCount: FieldValue.increment(1),
       });
 
-      // Recalculate average rating
       await this.updateAverageRating(submissionId);
     } catch (error) {
       logger.error('Error incrementing review count:', error);
@@ -519,7 +560,6 @@ export class CapstoneRepository {
         reviewCount: FieldValue.increment(-1),
       });
 
-      // Recalculate average rating
       await this.updateAverageRating(submissionId);
     } catch (error) {
       logger.error('Error decrementing review count:', error);
@@ -530,18 +570,23 @@ export class CapstoneRepository {
     try {
       const reviews = await this.getReviews({
         capstoneSubmissionId: submissionId,
+        parentReviewId: null, 
       });
 
-      if (reviews.length === 0) {
+      const reviewsWithRatings = reviews.filter(
+        (review) => review.rating !== undefined && review.rating !== null
+      );
+
+      if (reviewsWithRatings.length === 0) {
         await this.updateSubmission(submissionId, { averageRating: undefined });
         return;
       }
 
-      const totalRating = reviews.reduce(
-        (sum, review) => sum + review.rating,
+      const totalRating = reviewsWithRatings.reduce(
+        (sum, review) => sum + (review.rating || 0),
         0
       );
-      const averageRating = totalRating / reviews.length;
+      const averageRating = totalRating / reviewsWithRatings.length;
 
       await this.updateSubmission(submissionId, {
         averageRating: Math.round(averageRating * 10) / 10,

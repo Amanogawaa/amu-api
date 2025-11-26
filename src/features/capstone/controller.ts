@@ -338,6 +338,7 @@ export class CapstoneController {
       const queryParams: CapstoneReviewQueryParams = {
         capstoneSubmissionId: validatedQuery.capstoneSubmissionId,
         reviewerId: validatedQuery.reviewerId,
+        parentReviewId: validatedQuery.parentReviewId,
         limit: validatedQuery.limit,
         offset: validatedQuery.offset,
       };
@@ -522,6 +523,234 @@ export class CapstoneController {
       });
     } catch (error) {
       logger.error('Error in CapstoneController.getLikeStatus:', error);
+      next(error);
+    }
+  };
+
+  // ==================== CAPSTONE SCREENSHOTS ====================
+
+  uploadScreenshot = async (
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id } = request.params;
+      const userId = request.user?.uid;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Submission ID is required',
+        });
+        return;
+      }
+
+      if (!userId) {
+        response.status(401).json({
+          message: 'User not authenticated',
+        });
+        return;
+      }
+
+      if (!request.file) {
+        response.status(400).json({
+          message: 'No file uploaded',
+        });
+        return;
+      }
+
+      // Validate file type
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/webp',
+      ];
+      if (!allowedMimeTypes.includes(request.file.mimetype)) {
+        response.status(400).json({
+          message:
+            'Invalid file type. Only JPEG, PNG, and WebP images are allowed',
+        });
+        return;
+      }
+
+      // Validate file size (10MB max for screenshots)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (request.file.size > maxSize) {
+        response.status(400).json({
+          message: 'File size too large. Maximum size is 10MB',
+        });
+        return;
+      }
+
+      const screenshotUrl = await this.service.uploadScreenshot(
+        id,
+        userId,
+        request.file
+      );
+
+      response.status(200).json({
+        data: { screenshotUrl },
+        message: 'Screenshot uploaded successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CapstoneController.uploadScreenshot:', error);
+      next(error);
+    }
+  };
+
+  deleteScreenshot = async (
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id } = request.params;
+      const userId = request.user?.uid;
+      const { screenshotUrl } = request.body;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Submission ID is required',
+        });
+        return;
+      }
+
+      if (!userId) {
+        response.status(401).json({
+          message: 'User not authenticated',
+        });
+        return;
+      }
+
+      if (!screenshotUrl) {
+        response.status(400).json({
+          message: 'Screenshot URL is required',
+        });
+        return;
+      }
+
+      await this.service.deleteScreenshot(id, userId, screenshotUrl);
+
+      response.status(200).json({
+        message: 'Screenshot deleted successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CapstoneController.deleteScreenshot:', error);
+      next(error);
+    }
+  };
+
+  // ==================== CAPSTONE REVIEW IMAGES ====================
+
+  uploadReviewImage = async (
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id } = request.params;
+      const userId = request.user?.uid;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Review ID is required',
+        });
+        return;
+      }
+
+      if (!userId) {
+        response.status(401).json({
+          message: 'User not authenticated',
+        });
+        return;
+      }
+
+      if (!request.file) {
+        response.status(400).json({
+          message: 'No file uploaded',
+        });
+        return;
+      }
+
+      // Validate file type
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/webp',
+      ];
+      if (!allowedMimeTypes.includes(request.file.mimetype)) {
+        response.status(400).json({
+          message:
+            'Invalid file type. Only JPEG, PNG, and WebP images are allowed',
+        });
+        return;
+      }
+
+      // Validate file size (5MB max for review images)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (request.file.size > maxSize) {
+        response.status(400).json({
+          message: 'File size too large. Maximum size is 5MB',
+        });
+        return;
+      }
+
+      const imageUrl = await this.service.uploadReviewImage(
+        id,
+        userId,
+        request.file
+      );
+
+      response.status(200).json({
+        data: { imageUrl },
+        message: 'Review image uploaded successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CapstoneController.uploadReviewImage:', error);
+      next(error);
+    }
+  };
+
+  deleteReviewImage = async (
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { id } = request.params;
+      const userId = request.user?.uid;
+      const { imageUrl } = request.body;
+
+      if (!id) {
+        response.status(400).json({
+          message: 'Review ID is required',
+        });
+        return;
+      }
+
+      if (!userId) {
+        response.status(401).json({
+          message: 'User not authenticated',
+        });
+        return;
+      }
+
+      if (!imageUrl) {
+        response.status(400).json({
+          message: 'Image URL is required',
+        });
+        return;
+      }
+
+      await this.service.deleteReviewImage(id, userId, imageUrl);
+
+      response.status(200).json({
+        message: 'Review image deleted successfully',
+      });
+    } catch (error) {
+      logger.error('Error in CapstoneController.deleteReviewImage:', error);
       next(error);
     }
   };

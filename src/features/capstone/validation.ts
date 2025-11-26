@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Capstone Submission Validation
 export const createCapstoneSubmissionSchema = z.object({
   courseId: z.string().min(1, 'Course ID is required'),
   guidelineId: z.string().min(1, 'Guideline ID is required'),
@@ -53,17 +52,18 @@ export const capstoneSubmissionQuerySchema = z.object({
   offset: z.coerce.number().int().nonnegative().optional().default(0),
 });
 
-// Capstone Review Validation
 export const createCapstoneReviewSchema = z.object({
   capstoneSubmissionId: z.string().min(1, 'Capstone submission ID is required'),
+  parentReviewId: z.string().optional(),
   rating: z
     .number()
     .int()
     .min(1, 'Rating must be at least 1')
-    .max(5, 'Rating must be at most 5'),
+    .max(5, 'Rating must be at most 5')
+    .optional(),
   feedback: z
     .string()
-    .min(20, 'Feedback must be at least 20 characters')
+    .min(10, 'Feedback must be at least 10 characters') 
     .max(2000, 'Feedback must be less than 2000 characters'),
   highlights: z
     .array(z.string().min(1).max(200))
@@ -122,6 +122,7 @@ export const updateCapstoneReviewSchema = z.object({
 export const capstoneReviewQuerySchema = z.object({
   capstoneSubmissionId: z.string().optional(),
   reviewerId: z.string().optional(),
+  parentReviewId: z.string().optional(),
   limit: z.coerce.number().int().positive().max(50).optional().default(10),
   offset: z.coerce.number().int().nonnegative().optional().default(0),
 });
@@ -166,7 +167,6 @@ export type CapstoneReviewQueryInput = z.infer<
 export type GitHubRepoUrlInput = z.infer<typeof githubRepoUrlSchema>;
 export type GitHubCallbackInput = z.infer<typeof githubCallbackSchema>;
 
-// Validation middleware helpers
 export const validateCreateCapstoneSubmission = (data: unknown) => {
   return createCapstoneSubmissionSchema.parse(data);
 };

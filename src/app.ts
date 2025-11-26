@@ -28,6 +28,7 @@ import { QuizContainer } from './features/quiz/container';
 import { EnrollmentContainer } from './features/enrollment/container';
 import { CodePlaygroundContainer } from './features/code-playground/container';
 import { CapstoneContainer } from './features/capstone/container';
+import { GitHubContainer } from './features/github/container';
 import { config } from './config/environment';
 
 class App {
@@ -50,6 +51,7 @@ class App {
   private enrollmentContainer: EnrollmentContainer;
   private codePlaygroundContainer: CodePlaygroundContainer;
   private capstoneContainer: CapstoneContainer;
+  private githubContainer: GitHubContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
@@ -99,6 +101,8 @@ class App {
       chapterContainer.repository,
       this.lessonContainer.repository
     );
+
+    this.githubContainer = new GitHubContainer();
 
     this.progressContainer = progressContainer;
     this.likesContainer = likesContainer;
@@ -165,7 +169,8 @@ class App {
       this.quizContainer,
       this.enrollmentContainer,
       this.codePlaygroundContainer,
-      this.capstoneContainer
+      this.capstoneContainer,
+      this.githubContainer
     );
 
     this.app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

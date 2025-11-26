@@ -1,10 +1,34 @@
 import { Router } from 'express';
 import type { CapstoneController } from './controller';
 import { authMiddleware } from '../../middlewares/auth.middleware';
+import multer from 'multer';
 
 export class CapstoneRoute {
   public router: Router;
   private controller: CapstoneController;
+  public upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/webp',
+      ];
+      if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(
+          new Error(
+            'Invalid file type. Only JPEG, PNG, and WebP images are allowed'
+          )
+        );
+      }
+    },
+  });
 
   constructor(controller: CapstoneController) {
     this.controller = controller;
@@ -511,6 +535,192 @@ export class CapstoneRoute {
       '/submissions/:id/like-status',
       authMiddleware,
       this.controller.getLikeStatus
+    );
+
+    // ==================== CAPSTONE REVIEW IMAGES ====================
+
+    /**
+     * @openapi
+     * /capstone/reviews/{id}/images:
+     *   post:
+     *     tags:
+     *       - Capstone
+     *     summary: Upload an image for a capstone review
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the capstone review
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         multipart/form-data:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               file:
+     *                 type: string
+     *                 format: binary
+     *     responses:
+     *       200:
+     *         description: Review image uploaded successfully
+     *       400:
+     *         description: Invalid file or request
+     *       401:
+     *         description: Unauthorized
+     *       403:
+     *         description: Forbidden - can only upload to own reviews
+     *       404:
+     *         description: Review not found
+     */
+    this.router.post(
+      '/reviews/:id/images',
+      authMiddleware,
+      this.upload.single('file'),
+      this.controller.uploadReviewImage
+    );
+
+    /**
+     * @openapi
+     * /capstone/reviews/{id}/images:
+     *   delete:
+     *     tags:
+     *       - Capstone
+     *     summary: Delete an image from a capstone review
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the capstone review
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - imageUrl
+     *             properties:
+     *               imageUrl:
+     *                 type: string
+     *                 description: The URL of the image to delete
+     *     responses:
+     *       200:
+     *         description: Review image deleted successfully
+     *       400:
+     *         description: Invalid request
+     *       401:
+     *         description: Unauthorized
+     *       403:
+     *         description: Forbidden - can only delete from own reviews
+     *       404:
+     *         description: Review not found
+     */
+    this.router.delete(
+      '/reviews/:id/images',
+      authMiddleware,
+      this.controller.deleteReviewImage
+    );
+
+    // ==================== CAPSTONE SCREENSHOTS ====================
+
+    /**
+     * @openapi
+     * /capstone/submissions/{id}/screenshots:
+     *   post:
+     *     tags:
+     *       - Capstone
+     *     summary: Upload a screenshot for a capstone submission
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the capstone submission
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         multipart/form-data:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               file:
+     *                 type: string
+     *                 format: binary
+     *     responses:
+     *       200:
+     *         description: Screenshot uploaded successfully
+     *       400:
+     *         description: Invalid file or request
+     *       401:
+     *         description: Unauthorized
+     *       403:
+     *         description: Forbidden - can only upload to own submissions
+     *       404:
+     *         description: Submission not found
+     */
+    this.router.post(
+      '/submissions/:id/screenshots',
+      authMiddleware,
+      this.upload.single('file'),
+      this.controller.uploadScreenshot
+    );
+
+    /**
+     * @openapi
+     * /capstone/submissions/{id}/screenshots:
+     *   delete:
+     *     tags:
+     *       - Capstone
+     *     summary: Delete a screenshot from a capstone submission
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The ID of the capstone submission
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - screenshotUrl
+     *             properties:
+     *               screenshotUrl:
+     *                 type: string
+     *                 description: The URL of the screenshot to delete
+     *     responses:
+     *       200:
+     *         description: Screenshot deleted successfully
+     *       400:
+     *         description: Invalid request
+     *       401:
+     *         description: Unauthorized
+     *       403:
+     *         description: Forbidden - can only delete from own submissions
+     *       404:
+     *         description: Submission not found
+     */
+    this.router.delete(
+      '/submissions/:id/screenshots',
+      authMiddleware,
+      this.controller.deleteScreenshot
     );
   }
 
