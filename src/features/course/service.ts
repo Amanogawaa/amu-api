@@ -52,7 +52,7 @@ export class CourseService {
           duration: request.duration,
           noOfModules: request.noOfModules,
           language: request.language,
-          userInstructions: request.userInstructions,
+          userInstructions: request.userInstructions ?? '',
         },
         promptMode
       );
@@ -260,7 +260,6 @@ export class CourseService {
     try {
       await this.courseRepository.updateCourse(courseId, {
         archive: true,
-        publish: false,
       });
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {

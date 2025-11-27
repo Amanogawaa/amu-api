@@ -4,7 +4,7 @@ import type { CourseService } from './service';
 import type { CourseQueryParams } from './types';
 import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
 import { notifyCourseCreated } from '../../utils/socket/socket.helpers';
-import type { FullCourseGenerationService } from '../../utils/generation.service';
+import type { FullCourseGenerationService } from '../../utils/service/generation.service';
 
 export class CourseController {
   private service: CourseService;
@@ -27,10 +27,10 @@ export class CourseController {
       const queryParams: CourseQueryParams = {
         level: request.query.level as any,
         uid: request.user?.uid as string,
-        archive:
-          request.query.archive === 'true'
+        draft:
+          request.query.draft === 'true'
             ? true
-            : request.query.archive === 'false'
+            : request.query.draft === 'false'
             ? false
             : undefined,
         publish:

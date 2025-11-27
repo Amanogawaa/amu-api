@@ -36,7 +36,7 @@ export class LessonService {
 
   public async generateLessons(request: GenerateLessonRequest) {
     try {
-      const promptMode: LessonPromptMode = request.promptMode ?? 'system';
+      const promptMode: LessonPromptMode = request.promptMode ?? 'legacy';
       const { userPrompt, systemPrompt } = buildLessonsPrompt(
         {
           chapterId: request.chapterId,

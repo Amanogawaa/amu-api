@@ -30,8 +30,8 @@ export class CourseRepository {
         query = query.where('publish', '==', params.publish) as any;
       }
 
-      if (params?.archive !== undefined) {
-        query = query.where('archive', '==', params.archive) as any;
+      if (params?.draft !== undefined) {
+        query = query.where('draft', '==', params.draft) as any;
       }
 
       if (params?.level) {

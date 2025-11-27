@@ -7,9 +7,73 @@ import type {
 } from './types';
 import { firebaseFirestore } from '../../config/firebase';
 import { logger } from '../../utils/loggers';
+import type { QuizService } from '../quiz/service';
+import type { LessonService } from '../lesson/service';
 
 export class ProgressService {
-  constructor(private repository: ProgressRepository) {}
+  constructor(
+    private repository: ProgressRepository,
+    private quizService?: QuizService,
+    private lessonService?: LessonService
+  ) {}
+
+  /**
+   * Validate that user has passed the quiz if lesson is a quiz type
+   */
+  private async validateQuizCompletion(
+    userId: string,
+    lessonId: string
+  ): Promise<void> {
+    // If services are not available, skip validation (for backward compatibility)
+    if (!this.lessonService || !this.quizService) {
+      logger.warn(
+        'Quiz and Lesson services not available, skipping quiz validation'
+      );
+      return;
+    }
+
+    try {
+      // Get lesson to check its type
+      const lesson = await this.lessonService.getLessonById(lessonId);
+      
+      // If lesson doesn't exist or is not a quiz type, no validation needed
+      if (!lesson || lesson.type !== 'quiz') {
+        return;
+      }
+
+      // Check if quiz exists for this lesson
+      const quiz = await this.quizService.getQuiz(lessonId);
+      if (!quiz) {
+        // If no quiz exists yet, allow completion (quiz might be generated later)
+        logger.info(`No quiz found for lesson ${lessonId}, allowing completion`);
+        return;
+      }
+
+      // Get user's attempts for this quiz
+      const attempts = await this.quizService.getUserAttempts(userId, quiz.id);
+      
+      // Check if user has at least one passed attempt
+      const hasPassed = attempts.some((attempt) => attempt.passed);
+      
+      if (!hasPassed) {
+        throw new AppError(
+          'You must pass the quiz before marking this lesson as complete',
+          403
+        );
+      }
+
+      logger.info(
+        `Quiz validation passed for user ${userId} on lesson ${lessonId}`
+      );
+    } catch (error) {
+      // If it's an AppError, re-throw it
+      if (error instanceof AppError) {
+        throw error;
+      }
+      // For other errors, log and allow (fail open for backward compatibility)
+      logger.error('Error validating quiz completion:', error);
+    }
+  }
 
   /**
    * Check if user is enrolled in a course or is the course owner
@@ -74,6 +138,11 @@ export class ProgressService {
 
     // Check enrollment or ownership before allowing progress tracking
     await this.checkEnrollmentOrOwnership(courseId, userId);
+
+    // If marking as complete, validate quiz requirement
+    if (completed) {
+      await this.validateQuizCompletion(userId, lessonId);
+    }
 
     // Get existing progress or create new
     let progress = await this.repository.getProgressByCourse(courseId, userId);

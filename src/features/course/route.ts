@@ -540,7 +540,7 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.patch(
-      '/courses/:id/archive',
+      '/courses/:id/draft',
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
@@ -569,7 +569,7 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.patch(
-      '/courses/:id/unarchive',
+      '/courses/:id/undraft',
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,

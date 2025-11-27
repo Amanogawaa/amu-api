@@ -45,7 +45,7 @@ export interface CourseQueryParams {
   level?: 'beginner' | 'intermediate' | 'advanced';
   uid?: string;
   publish?: boolean;
-  archive?: boolean;
+  draft?: boolean;
   search?: string;
   category?: string;
   language?: string;

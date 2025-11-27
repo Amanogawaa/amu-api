@@ -104,7 +104,15 @@ class App {
 
     this.githubContainer = new GitHubContainer();
 
-    this.progressContainer = progressContainer;
+    // Initialize progress container with quiz and lesson services
+    // Must be after lessonContainer is initialized
+    this.progressContainer =
+      progressContainer ||
+      new ProgressContainer(
+        undefined,
+        quizContainer.service,
+        this.lessonContainer.service
+      );
     this.likesContainer = likesContainer;
     this.commentsContainer = commentsContainer;
     this.userContainer = userContainer;

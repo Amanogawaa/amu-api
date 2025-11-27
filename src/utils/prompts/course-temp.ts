@@ -45,7 +45,7 @@ Return valid JSON only:
     "5-8 outcomes total, each starting with an action verb"
   ],
   "publish": false,
-  "archive": false,
+  "draft": false,
   "duration": "${args.duration}",
   "no_of_modules": ${args.noOfModules},
   "target_audience": "Who this course is designed for (1-2 sentences)",
