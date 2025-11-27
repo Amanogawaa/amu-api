@@ -122,7 +122,10 @@ export const updateCapstoneReviewSchema = z.object({
 export const capstoneReviewQuerySchema = z.object({
   capstoneSubmissionId: z.string().optional(),
   reviewerId: z.string().optional(),
-  parentReviewId: z.string().optional(),
+  parentReviewId: z
+    .string()
+    .optional()
+    .transform((val) => (val === '' ? null : val)),
   limit: z.coerce.number().int().positive().max(50).optional().default(10),
   offset: z.coerce.number().int().nonnegative().optional().default(0),
 });

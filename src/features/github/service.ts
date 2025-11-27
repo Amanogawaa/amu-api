@@ -237,7 +237,43 @@ export class GitHubService {
       }
 
       if (error.response?.status === 403) {
-        throw new AppError('Access denied. Repository may be private.', 403);
+        // Check if it's a rate limit issue
+        const rateLimitRemaining = error.response?.headers?.['x-ratelimit-remaining'];
+        const rateLimitReset = error.response?.headers?.['x-ratelimit-reset'];
+        
+        if (rateLimitRemaining === '0' || error.response?.data?.message?.includes('rate limit')) {
+          const resetTime = rateLimitReset 
+            ? new Date(parseInt(rateLimitReset) * 1000).toLocaleTimeString()
+            : 'soon';
+          throw new AppError(
+            `GitHub API rate limit exceeded. Please try again after ${resetTime}. For public repositories, you can view them directly on GitHub.`,
+            429
+          );
+        }
+        
+        // If we have an access token but still get 403, try without it for public repos
+        // This handles cases where the token is invalid, expired, or the repo is public
+        if (accessToken) {
+          try {
+            logger.info(`Got 403 with access token, retrying without token for ${owner}/${repo}`);
+            return await this.getRepoTree(owner, repo, ref, undefined);
+          } catch (retryError: any) {
+            // If retry also fails with 403, it might be a private repo or other issue
+            if (retryError.response?.status === 403) {
+              throw new AppError(
+                'Access denied. Repository may be private or you may not have permission. If this is a public repository, please try again later.',
+                403
+              );
+            }
+            // If retry fails with different error, throw that
+            throw retryError;
+          }
+        }
+        
+        throw new AppError(
+          'Access denied. Repository may be private or you may not have permission.',
+          403
+        );
       }
 
       throw new AppError('Failed to fetch repository tree', 500);
@@ -283,7 +319,43 @@ export class GitHubService {
       }
 
       if (error.response?.status === 403) {
-        throw new AppError('Access denied. Repository may be private.', 403);
+        // Check if it's a rate limit issue
+        const rateLimitRemaining = error.response?.headers?.['x-ratelimit-remaining'];
+        const rateLimitReset = error.response?.headers?.['x-ratelimit-reset'];
+        
+        if (rateLimitRemaining === '0' || error.response?.data?.message?.includes('rate limit')) {
+          const resetTime = rateLimitReset 
+            ? new Date(parseInt(rateLimitReset) * 1000).toLocaleTimeString()
+            : 'soon';
+          throw new AppError(
+            `GitHub API rate limit exceeded. Please try again after ${resetTime}. For public repositories, you can view them directly on GitHub.`,
+            429
+          );
+        }
+        
+        // If we have an access token but still get 403, try without it for public repos
+        // This handles cases where the token is invalid, expired, or the repo is public
+        if (accessToken) {
+          try {
+            logger.info(`Got 403 with access token, retrying without token for ${owner}/${repo}`);
+            return await this.getRepoContents(owner, repo, path, ref, undefined);
+          } catch (retryError: any) {
+            // If retry also fails with 403, it might be a private repo or other issue
+            if (retryError.response?.status === 403) {
+              throw new AppError(
+                'Access denied. Repository may be private or you may not have permission. If this is a public repository, please try again later.',
+                403
+              );
+            }
+            // If retry fails with different error, throw that
+            throw retryError;
+          }
+        }
+        
+        throw new AppError(
+          'Access denied. Repository may be private or you may not have permission.',
+          403
+        );
       }
 
       throw new AppError('Failed to fetch repository contents', 500);
@@ -324,7 +396,11 @@ export class GitHubService {
       };
     } catch (error: any) {
       logger.error('Error fetching file content:', error);
-      throw error;
+      // Re-throw AppError as-is, wrap others
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to fetch file content', 500);
     }
   }
 

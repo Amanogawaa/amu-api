@@ -338,7 +338,12 @@ export class CapstoneController {
       const queryParams: CapstoneReviewQueryParams = {
         capstoneSubmissionId: validatedQuery.capstoneSubmissionId,
         reviewerId: validatedQuery.reviewerId,
-        parentReviewId: validatedQuery.parentReviewId,
+        parentReviewId:
+          validatedQuery.parentReviewId === undefined
+            ? undefined
+            : validatedQuery.parentReviewId === null || validatedQuery.parentReviewId === ''
+            ? null
+            : validatedQuery.parentReviewId,
         limit: validatedQuery.limit,
         offset: validatedQuery.offset,
       };
