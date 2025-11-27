@@ -341,6 +341,12 @@ export class CapstoneRepository {
         suggestions: review.suggestions || [],
       };
 
+      // Ensure parentReviewId is explicitly set to null for top-level reviews
+      // This is important for Firestore queries to work correctly
+      if (!reviewData.parentReviewId) {
+        reviewData.parentReviewId = null;
+      }
+
       const cleanedData = this.removeUndefinedValues(reviewData);
 
       await docRef.set(cleanedData);
@@ -377,35 +383,118 @@ export class CapstoneRepository {
         query = query.where('reviewerId', '==', params.reviewerId);
       }
 
+      // Handle parentReviewId filtering
+      // For null: get top-level reviews (where parentReviewId is null or doesn't exist)
+      // For a value: get replies to that review
+      // Note: Firestore's where('parentReviewId', '==', null) only matches documents where
+      // the field exists and is explicitly null. If the field doesn't exist, it won't match.
+      // So for top-level reviews, we query all reviews and filter in memory.
+      let shouldFilterInMemory = false;
+      
       if (params?.parentReviewId !== undefined) {
         if (params.parentReviewId === null || params.parentReviewId === '') {
-          query = query.where('parentReviewId', '==', null);
+          // For top-level reviews, query all reviews and filter in memory
+          // This handles both cases: field is null OR field doesn't exist
+          shouldFilterInMemory = true;
+          logger.info('Querying for top-level reviews - will filter in memory');
         } else {
           query = query.where('parentReviewId', '==', params.parentReviewId);
         }
       }
 
-      query = query.orderBy('createdAt', 'desc');
-
-      if (params?.limit) {
-        query = query.limit(params.limit);
+      // Order by createdAt - note: this requires a composite index if combined with where clauses
+      try {
+        query = query.orderBy('createdAt', 'desc');
+      } catch (orderError: any) {
+        // If ordering fails (e.g., missing index), log and continue without ordering
+        logger.warn('Failed to order reviews by createdAt, continuing without order:', orderError);
       }
 
-      if (params?.offset) {
+      if (params?.limit && !shouldFilterInMemory) {
+        query = query.limit(params.limit);
+      } else if (params?.limit && shouldFilterInMemory) {
+        // Get more results to account for filtering
+        query = query.limit(params.limit * 3);
+      }
+
+      if (params?.offset && !shouldFilterInMemory) {
         query = query.offset(params.offset);
       }
 
-      const snapshot = await query.get();
+      let snapshot;
+      try {
+        snapshot = await query.get();
+      } catch (queryError: any) {
+        // If query fails (e.g., missing composite index), try without ordering
+        logger.warn('Query failed, trying without ordering:', queryError);
+        let altQuery = this.firebaseStore
+          .collection(this.REVIEWS_COLLECTION)
+          .where('deleted', '==', false) as any;
+
+        if (params?.capstoneSubmissionId) {
+          altQuery = altQuery.where(
+            'capstoneSubmissionId',
+            '==',
+            params.capstoneSubmissionId
+          );
+        }
+
+        if (params?.reviewerId) {
+          altQuery = altQuery.where('reviewerId', '==', params.reviewerId);
+        }
+
+        if (params?.parentReviewId && params.parentReviewId !== null) {
+          altQuery = altQuery.where('parentReviewId', '==', params.parentReviewId);
+        } else if (params?.parentReviewId === null) {
+          shouldFilterInMemory = true;
+        }
+
+        if (params?.limit) {
+          altQuery = altQuery.limit(shouldFilterInMemory ? params.limit * 3 : params.limit);
+        }
+
+        snapshot = await altQuery.get();
+      }
 
       if (snapshot.empty) {
+        logger.info('No reviews found for query:', params);
         return [];
       }
 
       const reviews: CapstoneReview[] = [];
       snapshot.forEach((doc: any) => {
-        reviews.push(this.serializeFirestoreDoc(doc) as CapstoneReview);
+        const review = this.serializeFirestoreDoc(doc) as CapstoneReview;
+        
+        // For top-level reviews, filter in memory to handle both null and missing field
+        if (shouldFilterInMemory) {
+          // Include reviews where parentReviewId is null, undefined, or doesn't exist
+          // Exclude reviews that have a parentReviewId value
+          if (!review.parentReviewId || review.parentReviewId === null) {
+            reviews.push(review);
+          }
+        } else {
+          reviews.push(review);
+        }
       });
 
+      // Sort by createdAt if we filtered in memory (since we might have skipped ordering)
+      if (shouldFilterInMemory) {
+        reviews.sort((a, b) => {
+          const aDate = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+          const bDate = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+          return bDate.getTime() - aDate.getTime();
+        });
+        
+        // Apply limit and offset after filtering
+        const start = params?.offset || 0;
+        const end = start + (params?.limit || reviews.length);
+        const paginatedReviews = reviews.slice(start, end);
+        
+        logger.info(`Found ${reviews.length} total reviews, returning ${paginatedReviews.length} after filtering and pagination:`, params);
+        return paginatedReviews;
+      }
+
+      logger.info(`Found ${reviews.length} reviews for query:`, params);
       return reviews;
     } catch (error) {
       logger.error('Error in CapstoneRepository.getReviews:', error);

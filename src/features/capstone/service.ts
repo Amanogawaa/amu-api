@@ -447,7 +447,9 @@ export class CapstoneService {
         reviewerId: userId,
         reviewerName: userName,
         reviewerEmail: userEmail,
-        parentReviewId: request.parentReviewId,
+        // Ensure parentReviewId is null (not undefined) for top-level reviews
+        // This is important for Firestore queries to work correctly
+        parentReviewId: request.parentReviewId || null,
         rating: request.rating, 
         feedback: request.feedback,
         highlights: request.highlights || [],
