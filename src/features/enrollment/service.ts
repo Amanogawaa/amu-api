@@ -20,8 +20,8 @@ export class EnrollmentService {
         throw new AppError('Cannot enroll in unpublished courses', 403);
       }
 
-      if (course.archive) {
-        throw new AppError('Cannot enroll in archived courses', 403);
+      if (course.draft) {
+        throw new AppError('Cannot enroll in draft courses', 403);
       }
 
       if (course.uid === userId) {

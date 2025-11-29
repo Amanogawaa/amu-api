@@ -6,7 +6,7 @@ export interface Course {
   topic: string;
   subtitle?: string;
   publish: boolean;
-  archive: boolean;
+  draft: boolean;
   prerequisites: string;
   noOfModules: number;
   name: string;
@@ -91,7 +91,7 @@ export const courseSchema = {
       maxItems: 8,
     },
     publish: { type: 'boolean' },
-    archive: { type: 'boolean' },
+    draft: { type: 'boolean' },
     duration: { type: 'string' },
     noOfModules: { type: 'integer' },
     targetAudience: { type: 'string' },

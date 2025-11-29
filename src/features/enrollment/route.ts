@@ -60,7 +60,7 @@ export class EnrollmentRoute {
      *       401:
      *         description: Unauthorized
      *       403:
-     *         description: Course is not published or is archived
+     *         description: Course is not published or is in draft
      *       409:
      *         description: Already enrolled in this course
      */

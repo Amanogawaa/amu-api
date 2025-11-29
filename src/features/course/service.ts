@@ -1,18 +1,18 @@
-import { AppError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
+import { AppError } from "../../utils/errors";
+import { logger } from "../../utils/loggers";
 import {
   buildCoursePrompt,
   type CoursePromptMode,
-} from '../../utils/prompts/course-temp';
-import { CourseRepository } from './repository';
+} from "../../utils/prompts/course-temp";
+import { CourseRepository } from "./repository";
 
-import { geminiCall } from '../../utils/geminiCall';
+import { geminiCall } from "../../utils/geminiCall";
 import {
   type Course,
   type CourseQueryParams,
   type GenerateCourseRequest,
   courseSchema,
-} from './types';
+} from "./types";
 
 export class CourseService {
   private courseRepository: CourseRepository;
@@ -26,7 +26,7 @@ export class CourseService {
       const courses = await this.courseRepository.getCourse(params);
       return courses;
     } catch (error) {
-      logger.error('Error in CoursesService.getCourses:', error);
+      logger.error("Error in CoursesService.getCourses:", error);
       throw error;
     }
   }
@@ -36,14 +36,14 @@ export class CourseService {
       const course = await this.courseRepository.getCourseById(slug);
       return course;
     } catch (error) {
-      logger.error('Error in CoursesService.getCourseById:', error);
+      logger.error("Error in CoursesService.getCourseById:", error);
       throw error;
     }
   }
 
   public async generateCourse(request: GenerateCourseRequest) {
     try {
-      const promptMode: CoursePromptMode = request.promptMode ?? 'system';
+      const promptMode: CoursePromptMode = request.promptMode ?? "system";
       const { userPrompt, systemPrompt } = buildCoursePrompt(
         {
           category: request.category,
@@ -69,7 +69,7 @@ export class CourseService {
         },
       });
 
-      logger.info('Course generated successfully', {
+      logger.info("Course generated successfully", {
         mode: promptMode,
         topic: request.topic,
         uid: request.uid,
@@ -79,6 +79,8 @@ export class CourseService {
       const courseData: Course = {
         ...result,
         uid: request.uid,
+        publish: false,
+        draft: true,
       };
 
       const nameExist = await this.courseRepository.courseNameExists(
@@ -96,7 +98,7 @@ export class CourseService {
 
       return createdCourse;
     } catch (error) {
-      logger.error('Error in CoursesService.generateCourse:', error);
+      logger.error("Error in CoursesService.generateCourse:", error);
       throw error;
     }
   }
@@ -105,7 +107,7 @@ export class CourseService {
     try {
       await this.courseRepository.deleteCourse(courseId);
     } catch (error) {
-      logger.error('Error in CoursesService.deleteCourse:', error);
+      logger.error("Error in CoursesService.deleteCourse:", error);
       throw error;
     }
   }
@@ -124,11 +126,11 @@ export class CourseService {
     };
   }> {
     try {
-      const firestore = this.courseRepository['firebaseStore'];
+      const firestore = this.courseRepository["firebaseStore"];
 
       const modulesSnapshot = await firestore
-        .collection('modules')
-        .where('courseId', '==', courseId)
+        .collection("modules")
+        .where("courseId", "==", courseId)
         .get();
       const hasModules = !modulesSnapshot.empty;
       const modulesCount = modulesSnapshot.size;
@@ -145,8 +147,8 @@ export class CourseService {
           const batch = moduleIds.slice(i, i + 10);
           chapterPromises.push(
             firestore
-              .collection('chapters')
-              .where('moduleId', 'in', batch)
+              .collection("chapters")
+              .where("moduleId", "in", batch)
               .get()
           );
         }
@@ -169,8 +171,8 @@ export class CourseService {
           const batch = chapterIds.slice(i, i + 10);
           lessonPromises.push(
             firestore
-              .collection('lessons')
-              .where('chapterId', 'in', batch)
+              .collection("lessons")
+              .where("chapterId", "in", batch)
               .get()
           );
         }
@@ -184,23 +186,23 @@ export class CourseService {
       }
 
       const capstoneProjectSnapshot = await firestore
-        .collection('capstoneGuidelines')
-        .where('courseId', '==', courseId)
+        .collection("capstoneGuidelines")
+        .where("courseId", "==", courseId)
         .limit(1)
         .get();
       const capstoneProject = !capstoneProjectSnapshot.empty;
 
       logger.info(
         `Capstone validation for course ${courseId}: ${
-          capstoneProject ? 'Found' : 'Not found'
+          capstoneProject ? "Found" : "Not found"
         }`
       );
 
       const missingComponents: string[] = [];
-      if (!hasModules) missingComponents.push('modules');
-      if (!hasChapters) missingComponents.push('chapters');
-      if (!hasLessons) missingComponents.push('lessons');
-      if (!capstoneProject) missingComponents.push('capstone project');
+      if (!hasModules) missingComponents.push("modules");
+      if (!hasChapters) missingComponents.push("chapters");
+      if (!hasLessons) missingComponents.push("lessons");
+      if (!capstoneProject) missingComponents.push("capstone project");
 
       return {
         isComplete: hasModules && hasChapters && hasLessons && capstoneProject,
@@ -216,7 +218,7 @@ export class CourseService {
         },
       };
     } catch (error) {
-      logger.error('Error in CourseService.validateCourseCompleteness:', error);
+      logger.error("Error in CourseService.validateCourseCompleteness:", error);
       throw error;
     }
   }
@@ -228,7 +230,7 @@ export class CourseService {
       if (!validation.isComplete) {
         throw new AppError(
           `Cannot publish course. Missing: ${validation.missingComponents.join(
-            ', '
+            ", "
           )}`,
           400
         );
@@ -236,12 +238,12 @@ export class CourseService {
 
       await this.courseRepository.updateCourse(courseId, {
         publish: true,
-        archive: false,
+        draft: false,
       });
 
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {
-      logger.error('Error in CourseService.publishCourse:', error);
+      logger.error("Error in CourseService.publishCourse:", error);
       throw error;
     }
   }
@@ -251,29 +253,30 @@ export class CourseService {
       await this.courseRepository.updateCourse(courseId, { publish: false });
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {
-      logger.error('Error in CourseService.unpublishCourse:', error);
+      logger.error("Error in CourseService.unpublishCourse:", error);
       throw error;
     }
   }
 
-  public async archiveCourse(courseId: string): Promise<Course> {
+  public async draftCourse(courseId: string): Promise<Course> {
     try {
       await this.courseRepository.updateCourse(courseId, {
-        archive: true,
+        draft: true,
+        publish: false,
       });
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {
-      logger.error('Error in CourseService.archiveCourse:', error);
+      logger.error("Error in CourseService.draftCourse:", error);
       throw error;
     }
   }
 
-  public async unarchiveCourse(courseId: string): Promise<Course> {
+  public async undraftCourse(courseId: string): Promise<Course> {
     try {
-      await this.courseRepository.updateCourse(courseId, { archive: false });
+      await this.courseRepository.updateCourse(courseId, { draft: false });
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {
-      logger.error('Error in CourseService.unarchiveCourse:', error);
+      logger.error("Error in CourseService.undraftCourse:", error);
       throw error;
     }
   }

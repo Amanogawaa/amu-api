@@ -227,7 +227,7 @@ export class CourseController {
     }
   }
 
-  async archiveCourse(
+  async draftCourse(
     request: Request,
     response: Response,
     next: NextFunction
@@ -242,19 +242,19 @@ export class CourseController {
         return;
       }
 
-      const course = await this.service.archiveCourse(id);
+      const course = await this.service.draftCourse(id);
 
       response.status(200).json({
         data: course,
-        message: 'Course archived successfully',
+        message: 'Course moved to draft successfully',
       });
     } catch (error) {
-      logger.error('Error in CourseController.archiveCourse:', error);
+      logger.error('Error in CourseController.draftCourse:', error);
       next(error);
     }
   }
 
-  async unarchiveCourse(
+  async undraftCourse(
     request: Request,
     response: Response,
     next: NextFunction
@@ -269,14 +269,14 @@ export class CourseController {
         return;
       }
 
-      const course = await this.service.unarchiveCourse(id);
+      const course = await this.service.undraftCourse(id);
 
       response.status(200).json({
         data: course,
-        message: 'Course unarchived successfully',
+        message: 'Course restored from draft successfully',
       });
     } catch (error) {
-      logger.error('Error in CourseController.unarchiveCourse:', error);
+      logger.error('Error in CourseController.undraftCourse:', error);
       next(error);
     }
   }

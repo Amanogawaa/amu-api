@@ -324,10 +324,10 @@ export class CourseRoute {
      *           enum: [beginner, intermediate, advanced]
      *         description: Filter by difficulty level
      *       - in: query
-     *         name: archive
+     *         name: draft
      *         schema:
      *           type: boolean
-     *         description: Filter by archive status
+     *         description: Filter by draft status
      *       - in: query
      *         name: publish
      *         schema:
@@ -520,12 +520,12 @@ export class CourseRoute {
 
     /**
      * @openapi
-     * /courses/{id}/archive:
+     * /courses/{id}/draft:
      *   patch:
      *     tags:
      *       - My Courses
-     *     summary: Archive a course
-     *     description: Archive a course (makes it private and unpublished)
+     *     summary: Move a course to draft
+     *     description: Moves a course to draft (makes it private and unpublished)
      *     parameters:
      *       - in: path
      *         name: id
@@ -535,7 +535,7 @@ export class CourseRoute {
      *         description: Course ID
      *     responses:
      *       200:
-     *         description: Course archived successfully
+     *         description: Course moved to draft successfully
      *       404:
      *         description: Course not found
      */
@@ -544,17 +544,17 @@ export class CourseRoute {
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
-      this.controller.archiveCourse.bind(this.controller)
+      this.controller.draftCourse.bind(this.controller)
     );
 
     /**
      * @openapi
-     * /courses/{id}/unarchive:
+     * /courses/{id}/undraft:
      *   patch:
      *     tags:
      *       - My Courses
-     *     summary: Unarchive a course
-     *     description: Remove archive status from a course
+     *     summary: Restore a course from draft
+     *     description: Remove draft status from a course
      *     parameters:
      *       - in: path
      *         name: id
@@ -564,7 +564,7 @@ export class CourseRoute {
      *         description: Course ID
      *     responses:
      *       200:
-     *         description: Course unarchived successfully
+     *         description: Course restored from draft successfully
      *       404:
      *         description: Course not found
      */
@@ -573,7 +573,7 @@ export class CourseRoute {
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
-      this.controller.unarchiveCourse.bind(this.controller)
+      this.controller.undraftCourse.bind(this.controller)
     );
   }
 
