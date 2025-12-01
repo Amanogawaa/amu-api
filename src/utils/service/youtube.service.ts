@@ -1,5 +1,6 @@
-import axios from 'axios';
-import { logger } from '../loggers';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from "axios";
+import { logger } from "../loggers";
 
 interface YouTubeVideo {
   videoId: string;
@@ -19,12 +20,12 @@ interface YouTubeSearchResponse {
 
 export class YouTubeService {
   private apiKey: string;
-  private baseUrl = 'https://www.googleapis.com/youtube/v3';
+  private baseUrl = "https://www.googleapis.com/youtube/v3";
 
   constructor() {
-    this.apiKey = process.env.YOUTUBE_API_KEY || '';
+    this.apiKey = process.env.YOUTUBE_API_KEY || "";
     if (!this.apiKey) {
-      logger.warn('YouTube API key not configured');
+      logger.warn("YouTube API key not configured");
     }
   }
 
@@ -36,31 +37,31 @@ export class YouTubeService {
    */
   async searchVideos(
     searchQuery: string,
-    maxResults: number = 5
+    maxResults: number = 5,
   ): Promise<YouTubeSearchResponse> {
     try {
       if (!this.apiKey) {
-        throw new Error('YouTube API key not configured');
+        throw new Error("YouTube API key not configured");
       }
 
       // Step 1: Search for videos
       const searchResponse = await axios.get(`${this.baseUrl}/search`, {
         params: {
-          part: 'snippet',
+          part: "snippet",
           q: searchQuery,
-          type: 'video',
+          type: "video",
           maxResults,
           key: this.apiKey,
-          videoEmbeddable: 'true', // Only embeddable videos
-          videoSyndicated: 'true',
-          order: 'relevance', // or 'viewCount', 'rating'
-          relevanceLanguage: 'en', // Adjust based on course language
+          videoEmbeddable: "true", // Only embeddable videos
+          videoSyndicated: "true",
+          order: "relevance", // or 'viewCount', 'rating'
+          relevanceLanguage: "en", // Adjust based on course language
         },
       });
 
       const videoIds = searchResponse.data.items
         .map((item: any) => item.id.videoId)
-        .join(',');
+        .join(",");
 
       if (!videoIds) {
         return { videos: [], totalResults: 0 };
@@ -69,7 +70,7 @@ export class YouTubeService {
       // Step 2: Get detailed video information (duration, views, etc.)
       const detailsResponse = await axios.get(`${this.baseUrl}/videos`, {
         params: {
-          part: 'snippet,contentDetails,statistics',
+          part: "snippet,contentDetails,statistics",
           id: videoIds,
           key: this.apiKey,
         },
@@ -85,7 +86,7 @@ export class YouTubeService {
           publishedAt: item.snippet.publishedAt,
           duration: this.parseDuration(item.contentDetails.duration),
           viewCount: item.statistics.viewCount,
-        })
+        }),
       );
 
       return {
@@ -93,8 +94,8 @@ export class YouTubeService {
         totalResults: searchResponse.data.pageInfo.totalResults,
       };
     } catch (error) {
-      logger.error('YouTube API error:', error);
-      throw new Error('Failed to search YouTube videos');
+      logger.error("YouTube API error:", error);
+      throw new Error("Failed to search YouTube videos");
     }
   }
 
@@ -104,12 +105,12 @@ export class YouTubeService {
   async getVideoById(videoId: string): Promise<YouTubeVideo | null> {
     try {
       if (!this.apiKey) {
-        throw new Error('YouTube API key not configured');
+        throw new Error("YouTube API key not configured");
       }
 
       const response = await axios.get(`${this.baseUrl}/videos`, {
         params: {
-          part: 'snippet,contentDetails,statistics',
+          part: "snippet,contentDetails,statistics",
           id: videoId,
           key: this.apiKey,
         },
@@ -129,7 +130,7 @@ export class YouTubeService {
         viewCount: item.statistics.viewCount,
       };
     } catch (error) {
-      logger.error('YouTube API error:', error);
+      logger.error("YouTube API error:", error);
       return null;
     }
   }
@@ -141,18 +142,18 @@ export class YouTubeService {
    */
   private parseDuration(duration: string): string {
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-    if (!match) return '0:00';
+    if (!match) return "0:00";
 
-    const hours = parseInt(match[1] || '0');
-    const minutes = parseInt(match[2] || '0');
-    const seconds = parseInt(match[3] || '0');
+    const hours = parseInt(match[1] || "0");
+    const minutes = parseInt(match[2] || "0");
+    const seconds = parseInt(match[3] || "0");
 
     if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
         .toString()
-        .padStart(2, '0')}`;
+        .padStart(2, "0")}`;
     }
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   }
 
   /**
@@ -162,10 +163,10 @@ export class YouTubeService {
   filterByDuration(
     videos: YouTubeVideo[],
     minMinutes: number,
-    maxMinutes: number
+    maxMinutes: number,
   ): YouTubeVideo[] {
     return videos.filter((video) => {
-      const parts = video.duration.split(':').map(Number);
+      const parts = video.duration.split(":").map(Number);
       let totalMinutes = 0;
 
       if (parts.length === 3) {

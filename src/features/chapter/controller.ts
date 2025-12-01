@@ -1,7 +1,7 @@
-import type { NextFunction, Request, Response } from 'express';
-import { logger } from '../../utils/loggers';
-import { notifyChapterCreated } from '../../utils/socket/socket.helpers';
-import type { ChapterService } from './service';
+import type { NextFunction, Request, Response } from "express";
+import { logger } from "../../utils/loggers";
+import { notifyChapterCreated } from "../../utils/socket/socket.helpers";
+import type { ChapterService } from "./service";
 
 export class ChapterController {
   private service: ChapterService;
@@ -13,13 +13,13 @@ export class ChapterController {
   async getChapters(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { moduleId } = request.params;
       if (!moduleId) {
         response.status(400).json({
-          message: 'Module ID is required',
+          message: "Module ID is required",
         });
         return;
       }
@@ -28,7 +28,7 @@ export class ChapterController {
 
       response.status(200).send(chapters);
     } catch (error) {
-      logger.error('Error in ChapterController.getChapters:', error);
+      logger.error("Error in ChapterController.getChapters:", error);
       next(error);
     }
   }
@@ -36,13 +36,13 @@ export class ChapterController {
   async getChapter(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { chapterId } = request.params;
       if (!chapterId) {
         response.status(400).json({
-          message: 'Chapter ID is required',
+          message: "Chapter ID is required",
         });
         return;
       }
@@ -50,7 +50,7 @@ export class ChapterController {
       const chapter = await this.service.getChapter(chapterId);
       response.status(200).json(chapter);
     } catch (error) {
-      logger.error('Error in ChapterController.getChapter:', error);
+      logger.error("Error in ChapterController.getChapter:", error);
       next(error);
     }
   }
@@ -58,22 +58,21 @@ export class ChapterController {
   async generateChapter(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const chapterRequest = request.body;
-      const createdChapter = await this.service.generateChapters(
-        chapterRequest
-      );
+      const createdChapter =
+        await this.service.generateChapters(chapterRequest);
 
       notifyChapterCreated(request, chapterRequest.moduleId, createdChapter);
 
       response.status(201).json({
         data: createdChapter,
-        message: 'Chapter generated successfully',
+        message: "Chapter generated successfully",
       });
     } catch (error) {
-      logger.error('Error in ChapterController.generateChapter:', error);
+      logger.error("Error in ChapterController.generateChapter:", error);
       next(error);
     }
   }
@@ -81,14 +80,14 @@ export class ChapterController {
   async regenerateChapters(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { moduleId } = request.params;
 
       if (!moduleId) {
         response.status(400).json({
-          message: 'Module ID is required',
+          message: "Module ID is required",
         });
         return;
       }
@@ -102,12 +101,12 @@ export class ChapterController {
 
       response.status(200).json({
         data: result.chapters,
-        message: 'Chapters regenerated successfully',
+        message: "Chapters regenerated successfully",
         updated: result.updated,
         errors: result.errors.length > 0 ? result.errors : undefined,
       });
     } catch (error) {
-      logger.error('Error in ChapterController.regenerateChapters:', error);
+      logger.error("Error in ChapterController.regenerateChapters:", error);
       next(error);
     }
   }
@@ -115,13 +114,13 @@ export class ChapterController {
   async deleteChaptersByModuleId(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { moduleId } = request.params;
       if (!moduleId) {
         response.status(400).json({
-          message: 'Module ID is required',
+          message: "Module ID is required",
         });
         return;
       }
@@ -129,12 +128,12 @@ export class ChapterController {
       await this.service.deleteChaptersByModuleId(moduleId);
 
       response.status(200).json({
-        message: 'Chapters deleted successfully',
+        message: "Chapters deleted successfully",
       });
     } catch (error) {
       logger.error(
-        'Error in ChapterController.deleteChaptersByModuleId:',
-        error
+        "Error in ChapterController.deleteChaptersByModuleId:",
+        error,
       );
       next(error);
     }

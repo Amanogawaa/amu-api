@@ -1,7 +1,7 @@
-import { CodePlaygroundRepository } from './repository';
-import { CodePlaygroundService } from './service';
-import { CodePlaygroundController } from './controller';
-import { CodePlaygroundRoute } from './route';
+import { CodePlaygroundRepository } from "./repository";
+import { CodePlaygroundService } from "./service";
+import { CodePlaygroundController } from "./controller";
+import { CodePlaygroundRoute } from "./route";
 
 export class CodePlaygroundContainer {
   public readonly repository: CodePlaygroundRepository;

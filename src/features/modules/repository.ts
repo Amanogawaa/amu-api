@@ -1,11 +1,12 @@
-import { Firestore } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
-import { logger } from '../../utils/loggers';
-import type { Module } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Firestore } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
+import { logger } from "../../utils/loggers";
+import type { Module } from "./types";
 
 export class ModuleRepository {
   private firebaseStore: Firestore;
-  private readonly COLLECTION_NAME = 'modules';
+  private readonly COLLECTION_NAME = "modules";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -15,11 +16,11 @@ export class ModuleRepository {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where('courseId', '==', courseId)
+        .where("courseId", "==", courseId)
         .get();
 
       if (querySnapshot.empty) {
-        logger.info('No matching modules found.');
+        logger.info("No matching modules found.");
         return [];
       }
 
@@ -28,7 +29,7 @@ export class ModuleRepository {
         ...doc.data(),
       })) as Module[];
     } catch (error) {
-      logger.error('Error in ChapterRepository.getChapter:', error);
+      logger.error("Error in ChapterRepository.getChapter:", error);
       throw error;
     }
   }
@@ -41,13 +42,13 @@ export class ModuleRepository {
         .get();
 
       if (!docRef.exists) {
-        logger.info('No matching module found.');
+        logger.info("No matching module found.");
         return null;
       }
 
       return { id: docRef.id, ...docRef.data() } as Module;
     } catch (error) {
-      logger.error('Error in ModuleRepository.getModule:', error);
+      logger.error("Error in ModuleRepository.getModule:", error);
       throw error;
     }
   }
@@ -55,20 +56,20 @@ export class ModuleRepository {
   async createModules(
     courseId: string,
     courseName: string,
-    level: 'beginner' | 'intermediate' | 'advanced',
+    level: "beginner" | "intermediate" | "advanced",
     language: string,
     modules: Array<
       Omit<
         Module,
-        | 'id'
-        | 'courseId'
-        | 'courseName'
-        | 'level'
-        | 'language'
-        | 'createdAt'
-        | 'updatedAt'
+        | "id"
+        | "courseId"
+        | "courseName"
+        | "level"
+        | "language"
+        | "createdAt"
+        | "updatedAt"
       >
-    >
+    >,
   ): Promise<Module[]> {
     const batch = this.firebaseStore.batch();
     const createdModules: Module[] = [];
@@ -97,13 +98,13 @@ export class ModuleRepository {
 
       return createdModules;
     } catch (error) {
-      logger.error('Error creating modules:', error);
+      logger.error("Error creating modules:", error);
       throw error;
     }
   }
 
   async updateModulesBatch(
-    modules: Module[]
+    modules: Module[],
   ): Promise<{ updated: number; errors: any[] }> {
     const batch = this.firebaseStore.batch();
     const errors: any[] = [];
@@ -112,7 +113,7 @@ export class ModuleRepository {
     try {
       for (const module of modules) {
         if (!module.id) {
-          errors.push({ module, error: 'Module ID is required for update' });
+          errors.push({ module, error: "Module ID is required for update" });
           continue;
         }
 
@@ -122,7 +123,7 @@ export class ModuleRepository {
 
         const doc = await docRef.get();
         if (!doc.exists) {
-          errors.push({ module, error: 'Module not found' });
+          errors.push({ module, error: "Module not found" });
           continue;
         }
 
@@ -151,7 +152,7 @@ export class ModuleRepository {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where('courseId', '==', courseId)
+        .where("courseId", "==", courseId)
         .get();
 
       const batch = this.firebaseStore.batch();
@@ -163,7 +164,7 @@ export class ModuleRepository {
       await batch.commit();
       logger.info(`Deleted modules for courseId: ${courseId}`);
     } catch (error) {
-      logger.error('Error deleting modules by courseId:', error);
+      logger.error("Error deleting modules by courseId:", error);
       throw error;
     }
   }

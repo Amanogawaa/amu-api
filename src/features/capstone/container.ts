@@ -1,14 +1,14 @@
-import { CapstoneController } from './controller';
-import { CapstoneRepository } from './repository';
-import { CapstoneRoute } from './route';
-import { CapstoneService } from './service';
-import { GitHubService } from '../github/service';
-import { firebaseFirestore } from '../../config/firebase';
-import type { Firestore } from 'firebase-admin/firestore';
-import type { CourseRepository } from '../course/repository';
-import type { ModuleRepository } from '../modules/repository';
-import type { ChapterRepository } from '../chapter/repository';
-import type { LessonRepository } from '../lesson/repository';
+import { CapstoneController } from "./controller";
+import { CapstoneRepository } from "./repository";
+import { CapstoneRoute } from "./route";
+import { CapstoneService } from "./service";
+import { GitHubService } from "../github/service";
+import { firebaseFirestore } from "../../config/firebase";
+import type { Firestore } from "firebase-admin/firestore";
+import type { CourseRepository } from "../course/repository";
+import type { ModuleRepository } from "../modules/repository";
+import type { ChapterRepository } from "../chapter/repository";
+import type { LessonRepository } from "../lesson/repository";
 
 export class CapstoneContainer {
   public readonly repository: CapstoneRepository;
@@ -22,7 +22,7 @@ export class CapstoneContainer {
     courseRepository?: CourseRepository,
     moduleRepository?: ModuleRepository,
     chapterRepository?: ChapterRepository,
-    lessonRepository?: LessonRepository
+    lessonRepository?: LessonRepository,
   ) {
     this.repository = new CapstoneRepository(firestore);
     this.githubService = new GitHubService();
@@ -39,11 +39,11 @@ export class CapstoneContainer {
         courseRepository,
         moduleRepository,
         chapterRepository,
-        lessonRepository
+        lessonRepository,
       );
     } else {
       throw new Error(
-        'CapstoneContainer requires all repository dependencies for generation features'
+        "CapstoneContainer requires all repository dependencies for generation features",
       );
     }
 

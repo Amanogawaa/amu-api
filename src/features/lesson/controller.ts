@@ -1,8 +1,8 @@
-import type { Request, Response, NextFunction } from 'express';
-import type { LessonService } from './service';
-import { logger } from '../../utils/loggers';
-import { youtubeService } from '../../utils/service/youtube.service';
-import { youtubeTranscriptService } from '../../utils/service/youtube-transcript.service';
+import type { Request, Response, NextFunction } from "express";
+import type { LessonService } from "./service";
+import { logger } from "../../utils/loggers";
+import { youtubeService } from "../../utils/service/youtube.service";
+import { youtubeTranscriptService } from "../../utils/service/youtube-transcript.service";
 
 export class LessonController {
   private service: LessonService;
@@ -14,7 +14,7 @@ export class LessonController {
   async getLessons(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { chapterId } = request.params;
@@ -22,7 +22,7 @@ export class LessonController {
 
       response.status(200).send(lessons);
     } catch (error) {
-      logger.error('Error in LessonController.getLessons:', error);
+      logger.error("Error in LessonController.getLessons:", error);
       next(error);
     }
   }
@@ -30,7 +30,7 @@ export class LessonController {
   async generateLessons(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const lessonRequest = request.body;
@@ -38,10 +38,10 @@ export class LessonController {
 
       response.status(201).json({
         data: createdLessons,
-        message: 'Lessons generated successfully',
+        message: "Lessons generated successfully",
       });
     } catch (error) {
-      logger.error('Error in LessonController.generateLessons:', error);
+      logger.error("Error in LessonController.generateLessons:", error);
       next(error);
     }
   }
@@ -49,7 +49,7 @@ export class LessonController {
   async getLessonById(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { lessonId } = request.params;
@@ -57,7 +57,7 @@ export class LessonController {
 
       response.status(200).send(lesson);
     } catch (error) {
-      logger.error('Error in LessonController.getLessonById:', error);
+      logger.error("Error in LessonController.getLessonById:", error);
       next(error);
     }
   }
@@ -65,22 +65,22 @@ export class LessonController {
   async updateLesson(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { lessonId } = request.params;
       const lessonData = request.body;
       const updatedLesson = await this.service.updateLesson(
         lessonId!,
-        lessonData
+        lessonData,
       );
 
       response.status(200).json({
         data: updatedLesson,
-        message: 'Lesson updated successfully',
+        message: "Lesson updated successfully",
       });
     } catch (error) {
-      logger.error('Error in LessonController.updateLesson:', error);
+      logger.error("Error in LessonController.updateLesson:", error);
       next(error);
     }
   }
@@ -88,17 +88,17 @@ export class LessonController {
   async deleteLesson(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { lessonId } = request.params;
       await this.service.deleteLesson(lessonId!);
 
       response.status(200).json({
-        message: 'Lesson deleted successfully',
+        message: "Lesson deleted successfully",
       });
     } catch (error) {
-      logger.error('Error in LessonController.deleteLesson:', error);
+      logger.error("Error in LessonController.deleteLesson:", error);
       next(error);
     }
   }
@@ -106,7 +106,7 @@ export class LessonController {
   async getLessonVideos(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { lessonId } = request.params;
@@ -115,25 +115,25 @@ export class LessonController {
       const lesson = await this.service.getLessonById(lessonId!);
 
       if (!lesson) {
-        response.status(404).json({ error: 'Lesson not found' });
+        response.status(404).json({ error: "Lesson not found" });
         return;
       }
 
-      if (lesson.type !== 'video' || !lesson.videoSearchQuery) {
+      if (lesson.type !== "video" || !lesson.videoSearchQuery) {
         response.status(400).json({
-          error: 'This lesson does not have a video search query',
+          error: "This lesson does not have a video search query",
         });
         return;
       }
 
       const videos = await youtubeService.searchVideos(
         lesson.videoSearchQuery,
-        maxResults
+        maxResults,
       );
 
       response.status(200).json(videos);
     } catch (error) {
-      logger.error('Error in LessonController.getLessonVideos:', error);
+      logger.error("Error in LessonController.getLessonVideos:", error);
       next(error);
     }
   }
@@ -141,40 +141,40 @@ export class LessonController {
   async fetchTranscript(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { lessonId } = request.params;
       const { videoId, language } = request.body;
 
       if (!videoId) {
-        response.status(400).json({ error: 'videoId is required' });
+        response.status(400).json({ error: "videoId is required" });
         return;
       }
 
       const lesson = await this.service.getLessonById(lessonId!);
 
       if (!lesson) {
-        response.status(404).json({ error: 'Lesson not found' });
+        response.status(404).json({ error: "Lesson not found" });
         return;
       }
 
-      if (lesson.type !== 'video') {
+      if (lesson.type !== "video") {
         response.status(400).json({
-          error: 'Transcript can only be fetched for video lessons',
+          error: "Transcript can only be fetched for video lessons",
         });
         return;
       }
 
       const transcript = await youtubeTranscriptService.getTranscript(
         videoId,
-        language || 'en'
+        language || "en",
       );
 
       if (!transcript) {
         response.status(404).json({
           error:
-            'No transcript available for this video. The video may not have captions enabled.',
+            "No transcript available for this video. The video may not have captions enabled.",
         });
         return;
       }
@@ -190,14 +190,14 @@ export class LessonController {
       const stats = youtubeTranscriptService.getTranscriptStats(transcript);
 
       response.status(200).json({
-        message: 'Transcript fetched successfully',
+        message: "Transcript fetched successfully",
         transcript: transcript.fullText,
         language: transcript.language,
         stats,
         lesson: null,
       });
     } catch (error) {
-      logger.error('Error in LessonController.fetchTranscript:', error);
+      logger.error("Error in LessonController.fetchTranscript:", error);
       next(error);
     }
   }
@@ -205,7 +205,7 @@ export class LessonController {
   async getTranscript(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { lessonId } = request.params;
@@ -214,13 +214,13 @@ export class LessonController {
       const lesson = await this.service.getLessonById(lessonId!);
 
       if (!lesson) {
-        response.status(404).json({ error: 'Lesson not found' });
+        response.status(404).json({ error: "Lesson not found" });
         return;
       }
 
-      if (lesson.type !== 'video') {
+      if (lesson.type !== "video") {
         response.status(400).json({
-          error: 'Transcript is only available for video lessons',
+          error: "Transcript is only available for video lessons",
         });
         return;
       }
@@ -229,7 +229,7 @@ export class LessonController {
       if (lesson.videoTranscript) {
         response.status(200).json({
           transcript: lesson.videoTranscript,
-          language: lesson.transcriptLanguage || 'en',
+          language: lesson.transcriptLanguage || "en",
           fetchedAt: lesson.transcriptFetchedAt,
         });
         return;
@@ -238,7 +238,7 @@ export class LessonController {
       // If no stored transcript but has selectedVideoId, try to fetch it
       if (lesson.selectedVideoId) {
         const transcript = await youtubeTranscriptService.getTranscript(
-          lesson.selectedVideoId
+          lesson.selectedVideoId,
         );
 
         if (transcript) {
@@ -260,10 +260,10 @@ export class LessonController {
       }
 
       response.status(404).json({
-        error: 'No transcript available for this lesson',
+        error: "No transcript available for this lesson",
       });
     } catch (error) {
-      logger.error('Error in LessonController.getTranscript:', error);
+      logger.error("Error in LessonController.getTranscript:", error);
       next(error);
     }
   }

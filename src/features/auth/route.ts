@@ -38,7 +38,7 @@ export class AuthRoute {
      */
     this.router.post(
       "/auth/signup",
-      this.controller.signUp.bind(this.controller)
+      this.controller.signUp.bind(this.controller),
     );
   }
 

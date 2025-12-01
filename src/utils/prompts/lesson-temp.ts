@@ -1,5 +1,5 @@
-import { SYSTEM_PROMPTS } from './system-prompts';
-import type { PromptMode, PromptPayload } from './types';
+import { SYSTEM_PROMPTS } from "./system-prompts";
+import type { PromptMode, PromptPayload } from "./types";
 
 export type LessonPromptMode = PromptMode;
 
@@ -25,7 +25,7 @@ interface BuildLessonsPromptOptions {
 const legacyLessonsPrompt = (args: LessonPromptArgs): string => {
   const feedback = args.userInstructions
     ? `\n**USER FEEDBACK:**\n${args.userInstructions}`
-    : '';
+    : "";
 
   return `Create exactly 4 lessons for Chapter ${args.chapterOrder}: ${
     args.chapterName
@@ -34,7 +34,7 @@ const legacyLessonsPrompt = (args: LessonPromptArgs): string => {
 Course: ${args.courseName} (${args.level})
 Module: ${args.moduleName}
 Context: ${args.chapterDescription}
-Topics: ${args.keyTopics.join(', ')}
+Topics: ${args.keyTopics.join(", ")}
 Duration: ${args.estimatedDuration}
 Language: ${args.language}
 ${feedback}
@@ -111,7 +111,7 @@ QUIZ LESSON (Lesson 4):
 - Duration: 5-10m
 - Content: null
 - VideoSearchQuery: null
-- Description: "Test your understanding of ${args.keyTopics.join(', ')}"
+- Description: "Test your understanding of ${args.keyTopics.join(", ")}"
 - Resources: Link to lessons 1-3 for review, if lesson 1 has no transcription, link to lesson 2-3 instead
 
 RULES:
@@ -132,28 +132,28 @@ const systemLessonsPrompt = (args: LessonPromptArgs): PromptPayload => {
     `Create four lessons for chapter "${args.chapterName}" (order ${args.chapterOrder}) within ${args.estimatedDuration}.`,
     `Course: ${args.courseName} | Module: ${args.moduleName} | Level: ${args.level} | Language: ${args.language}`,
     `Chapter summary: ${args.chapterDescription}`,
-    `Learning objectives: ${args.learningObjectives.join(' | ')}`,
-    `Key topics: ${args.keyTopics.join(', ')}`,
-    'Follow the Video + Article + Article + Quiz structure and keep durations in range.',
+    `Learning objectives: ${args.learningObjectives.join(" | ")}`,
+    `Key topics: ${args.keyTopics.join(", ")}`,
+    "Follow the Video + Article + Article + Quiz structure and keep durations in range.",
   ];
 
   if (args.userInstructions) {
-    lines.push('User feedback to apply:', args.userInstructions);
+    lines.push("User feedback to apply:", args.userInstructions);
   }
 
   return {
-    userPrompt: lines.join('\n'),
+    userPrompt: lines.join("\n"),
     systemPrompt: SYSTEM_PROMPTS.LESSON,
   };
 };
 
 export const buildLessonsPrompt = (
   args: LessonPromptArgs,
-  options: BuildLessonsPromptOptions = {}
+  options: BuildLessonsPromptOptions = {},
 ): PromptPayload => {
-  const mode = options.mode ?? 'system';
+  const mode = options.mode ?? "system";
 
-  if (mode === 'legacy') {
+  if (mode === "legacy") {
     return {
       userPrompt: legacyLessonsPrompt(args),
     };

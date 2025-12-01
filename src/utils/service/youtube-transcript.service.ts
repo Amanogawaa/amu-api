@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   YoutubeTranscript,
   YoutubeTranscriptVideoUnavailableError,
@@ -5,8 +6,8 @@ import {
   YoutubeTranscriptNotAvailableError,
   YoutubeTranscriptNotAvailableLanguageError,
   YoutubeTranscriptTooManyRequestError,
-} from 'youtube-transcript-plus';
-import { logger } from '../loggers';
+} from "youtube-transcript-plus";
+import { logger } from "../loggers";
 
 interface TranscriptSegment {
   text: string;
@@ -29,7 +30,7 @@ export class YouTubeTranscriptService {
    */
   async getTranscript(
     videoId: string,
-    language: string = 'en'
+    language: string = "en",
   ): Promise<TranscriptResult | null> {
     try {
       const transcript = await YoutubeTranscript.fetchTranscript(videoId, {
@@ -41,7 +42,7 @@ export class YouTubeTranscriptService {
         return null;
       }
 
-      const fullText = transcript.map((segment: any) => segment.text).join(' ');
+      const fullText = transcript.map((segment: any) => segment.text).join(" ");
 
       const segments: TranscriptSegment[] = transcript.map((segment: any) => ({
         text: segment.text,
@@ -63,7 +64,7 @@ export class YouTubeTranscriptService {
         logger.warn(`Video is unavailable: ${videoId}`);
       } else if (error instanceof YoutubeTranscriptNotAvailableLanguageError) {
         logger.warn(
-          `Transcript not available in language "${language}" for video: ${videoId}`
+          `Transcript not available in language "${language}" for video: ${videoId}`,
         );
       } else if (error instanceof YoutubeTranscriptTooManyRequestError) {
         logger.error(`Too many requests to YouTube API for video: ${videoId}`);
@@ -76,17 +77,17 @@ export class YouTubeTranscriptService {
 
   private cleanTranscript(text: string): string {
     return text
-      .replace(/\[Music\]/gi, '')
-      .replace(/\[Applause\]/gi, '')
-      .replace(/\[Laughter\]/gi, '')
-      .replace(/\[.*?\]/g, '')
-      .replace(/\s+/g, ' ')
+      .replace(/\[Music\]/gi, "")
+      .replace(/\[Applause\]/gi, "")
+      .replace(/\[Laughter\]/gi, "")
+      .replace(/\[.*?\]/g, "")
+      .replace(/\s+/g, " ")
       .trim();
   }
 
   async getTranscriptWithTimestamps(
     videoId: string,
-    language: string = 'en'
+    language: string = "en",
   ): Promise<TranscriptSegment[] | null> {
     try {
       const transcript = await YoutubeTranscript.fetchTranscript(videoId, {
@@ -110,7 +111,7 @@ export class YouTubeTranscriptService {
       } else if (error instanceof YoutubeTranscriptVideoUnavailableError) {
         logger.warn(`Video unavailable: ${videoId}`);
       } else {
-        logger.error('Error fetching transcript with timestamps:', error);
+        logger.error("Error fetching transcript with timestamps:", error);
       }
       return null;
     }
@@ -118,7 +119,7 @@ export class YouTubeTranscriptService {
 
   async getTranscriptMultiLang(
     videoId: string,
-    languages: string[] = ['en', 'es', 'fr']
+    languages: string[] = ["en", "es", "fr"],
   ): Promise<Record<string, string>> {
     const transcripts: Record<string, string> = {};
 
@@ -128,7 +129,7 @@ export class YouTubeTranscriptService {
           lang,
         });
         if (transcript && transcript.length > 0) {
-          const fullText = transcript.map((s: any) => s.text).join(' ');
+          const fullText = transcript.map((s: any) => s.text).join(" ");
           transcripts[lang] = this.cleanTranscript(fullText);
         }
       } catch (error: any) {
@@ -152,10 +153,10 @@ export class YouTubeTranscriptService {
       .map((segment) => {
         const minutes = Math.floor(segment.offset / 60);
         const seconds = Math.floor(segment.offset % 60);
-        const timestamp = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        const timestamp = `${minutes}:${seconds.toString().padStart(2, "0")}`;
         return `[${timestamp}] ${segment.text}`;
       })
-      .join('\n');
+      .join("\n");
   }
 
   getTranscriptStats(transcript: TranscriptResult): {

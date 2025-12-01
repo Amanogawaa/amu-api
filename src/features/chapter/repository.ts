@@ -1,11 +1,12 @@
-import { Firestore } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
-import { logger } from '../../utils/loggers';
-import type { Chapter } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Firestore } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
+import { logger } from "../../utils/loggers";
+import type { Chapter } from "./types";
 
 export class ChapterRepository {
   private firebaseStore: Firestore;
-  private readonly COLLECTION_NAME = 'chapters';
+  private readonly COLLECTION_NAME = "chapters";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -15,11 +16,11 @@ export class ChapterRepository {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where('moduleId', '==', moduleId)
+        .where("moduleId", "==", moduleId)
         .get();
 
       if (querySnapshot.empty) {
-        logger.info('No matching chapters found.');
+        logger.info("No matching chapters found.");
         return [];
       }
 
@@ -28,7 +29,7 @@ export class ChapterRepository {
         ...doc.data(),
       })) as Chapter[];
     } catch (error) {
-      logger.error('Error in ChapterRepository.getChapter:', error);
+      logger.error("Error in ChapterRepository.getChapter:", error);
       throw error;
     }
   }
@@ -50,7 +51,7 @@ export class ChapterRepository {
         ...doc.data(),
       } as Chapter;
     } catch (error) {
-      logger.error('Error in ChapterRepository.getChapter:', error);
+      logger.error("Error in ChapterRepository.getChapter:", error);
       throw error;
     }
   }
@@ -61,9 +62,9 @@ export class ChapterRepository {
     chapters: Array<
       Omit<
         Chapter,
-        'id' | 'moduleId' | 'moduleName' | 'createdAt' | 'updatedAt'
+        "id" | "moduleId" | "moduleName" | "createdAt" | "updatedAt"
       >
-    >
+    >,
   ): Promise<Chapter[]> {
     try {
       const batch = this.firebaseStore.batch();
@@ -90,18 +91,18 @@ export class ChapterRepository {
 
       await batch.commit();
       logger.info(
-        `Created ${createdChapters.length} chapters for module ${moduleId}`
+        `Created ${createdChapters.length} chapters for module ${moduleId}`,
       );
 
       return createdChapters;
     } catch (error) {
-      logger.error('Error in ChapterRepository.createChapters:', error);
+      logger.error("Error in ChapterRepository.createChapters:", error);
       throw error;
     }
   }
 
   async updateChaptersBatch(
-    chapters: Chapter[]
+    chapters: Chapter[],
   ): Promise<{ updated: number; errors: any[] }> {
     const batch = this.firebaseStore.batch();
     const errors: any[] = [];
@@ -110,7 +111,7 @@ export class ChapterRepository {
     try {
       for (const chapter of chapters) {
         if (!chapter.id) {
-          errors.push({ chapter, error: 'Chapter ID is required for update' });
+          errors.push({ chapter, error: "Chapter ID is required for update" });
           continue;
         }
 
@@ -120,13 +121,14 @@ export class ChapterRepository {
 
         const doc = await docRef.get();
         if (!doc.exists) {
-          errors.push({ chapter, error: 'Chapter not found' });
+          errors.push({ chapter, error: "Chapter not found" });
           continue;
         }
 
         const { id, ...chapterDataWithoutId } = chapter;
 
         const chapterData = {
+          id,
           ...chapterDataWithoutId,
           updatedAt: new Date(),
         };
@@ -138,7 +140,7 @@ export class ChapterRepository {
       await batch.commit();
       return { updated, errors };
     } catch (error) {
-      logger.error('Error in ChapterRepository.updateChaptersBatch:', error);
+      logger.error("Error in ChapterRepository.updateChaptersBatch:", error);
       throw error;
     }
   }
@@ -147,11 +149,11 @@ export class ChapterRepository {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where('moduleId', '==', moduleId)
+        .where("moduleId", "==", moduleId)
         .get();
 
       if (querySnapshot.empty) {
-        logger.info('No chapters found to delete for moduleId:', moduleId);
+        logger.info("No chapters found to delete for moduleId:", moduleId);
         return;
       }
 
@@ -163,12 +165,12 @@ export class ChapterRepository {
 
       await batch.commit();
       logger.info(
-        `Deleted ${querySnapshot.size} chapters for moduleId: ${moduleId}`
+        `Deleted ${querySnapshot.size} chapters for moduleId: ${moduleId}`,
       );
     } catch (error) {
       logger.error(
-        'Error in ChapterRepository.deleteChaptersByModuleId:',
-        error
+        "Error in ChapterRepository.deleteChaptersByModuleId:",
+        error,
       );
       throw error;
     }

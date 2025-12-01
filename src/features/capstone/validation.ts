@@ -1,43 +1,43 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const createCapstoneSubmissionSchema = z.object({
-  courseId: z.string().min(1, 'Course ID is required'),
-  guidelineId: z.string().min(1, 'Guideline ID is required'),
+  courseId: z.string().min(1, "Course ID is required"),
+  guidelineId: z.string().min(1, "Guideline ID is required"),
   githubRepoUrl: z
     .string()
-    .url('Invalid GitHub URL')
+    .url("Invalid GitHub URL")
     .regex(
       /^https:\/\/github\.com\/[\w-]+\/[\w.-]+\/?$/,
-      'Must be a valid GitHub repository URL (e.g., https://github.com/username/repo)'
+      "Must be a valid GitHub repository URL (e.g., https://github.com/username/repo)",
     ),
   title: z
     .string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(100, 'Title must be less than 100 characters'),
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must be less than 100 characters"),
   description: z
     .string()
-    .min(10, 'Description must be at least 10 characters')
-    .max(1000, 'Description must be less than 1000 characters'),
+    .min(10, "Description must be at least 10 characters")
+    .max(1000, "Description must be less than 1000 characters"),
 });
 
 export const updateCapstoneSubmissionSchema = z.object({
   githubRepoUrl: z
     .string()
-    .url('Invalid GitHub URL')
+    .url("Invalid GitHub URL")
     .regex(
       /^https:\/\/github\.com\/[\w-]+\/[\w.-]+\/?$/,
-      'Must be a valid GitHub repository URL'
+      "Must be a valid GitHub repository URL",
     )
     .optional(),
   title: z
     .string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(100, 'Title must be less than 100 characters')
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must be less than 100 characters")
     .optional(),
   description: z
     .string()
-    .min(10, 'Description must be at least 10 characters')
-    .max(1000, 'Description must be less than 1000 characters')
+    .min(10, "Description must be at least 10 characters")
+    .max(1000, "Description must be less than 1000 characters")
     .optional(),
 });
 
@@ -45,34 +45,34 @@ export const capstoneSubmissionQuerySchema = z.object({
   courseId: z.string().optional(),
   userId: z.string().optional(),
   sortBy: z
-    .enum(['recent', 'popular', 'mostReviewed', 'topRated'])
+    .enum(["recent", "popular", "mostReviewed", "topRated"])
     .optional()
-    .default('recent'),
+    .default("recent"),
   limit: z.coerce.number().int().positive().max(50).optional().default(10),
   offset: z.coerce.number().int().nonnegative().optional().default(0),
 });
 
 export const createCapstoneReviewSchema = z.object({
-  capstoneSubmissionId: z.string().min(1, 'Capstone submission ID is required'),
+  capstoneSubmissionId: z.string().min(1, "Capstone submission ID is required"),
   parentReviewId: z.string().optional(),
   rating: z
     .number()
     .int()
-    .min(1, 'Rating must be at least 1')
-    .max(5, 'Rating must be at most 5')
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating must be at most 5")
     .optional(),
   feedback: z
     .string()
-    .min(10, 'Feedback must be at least 10 characters') 
-    .max(2000, 'Feedback must be less than 2000 characters'),
+    .min(10, "Feedback must be at least 10 characters")
+    .max(2000, "Feedback must be less than 2000 characters"),
   highlights: z
     .array(z.string().min(1).max(200))
-    .max(5, 'Maximum 5 highlights allowed')
+    .max(5, "Maximum 5 highlights allowed")
     .optional()
     .default([]),
   suggestions: z
     .array(z.string().min(1).max(200))
-    .max(5, 'Maximum 5 suggestions allowed')
+    .max(5, "Maximum 5 suggestions allowed")
     .optional()
     .default([]),
   criteriaScores: z
@@ -81,7 +81,7 @@ export const createCapstoneReviewSchema = z.object({
         criteriaName: z.string().min(1),
         score: z.number().min(0).max(100),
         comment: z.string().max(500).optional(),
-      })
+      }),
     )
     .optional(),
 });
@@ -90,22 +90,22 @@ export const updateCapstoneReviewSchema = z.object({
   rating: z
     .number()
     .int()
-    .min(1, 'Rating must be at least 1')
-    .max(5, 'Rating must be at most 5')
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating must be at most 5")
     .optional(),
   feedback: z
     .string()
-    .min(20, 'Feedback must be at least 20 characters')
-    .max(2000, 'Feedback must be less than 2000 characters')
+    .min(20, "Feedback must be at least 20 characters")
+    .max(2000, "Feedback must be less than 2000 characters")
     .optional(),
   highlights: z
     .array(z.string().min(1).max(200))
-    .max(5, 'Maximum 5 highlights allowed')
+    .max(5, "Maximum 5 highlights allowed")
     .optional()
     .default([]),
   suggestions: z
     .array(z.string().min(1).max(200))
-    .max(5, 'Maximum 5 suggestions allowed')
+    .max(5, "Maximum 5 suggestions allowed")
     .optional()
     .default([]),
   criteriaScores: z
@@ -114,7 +114,7 @@ export const updateCapstoneReviewSchema = z.object({
         criteriaName: z.string().min(1),
         score: z.number().min(0).max(100),
         comment: z.string().max(500).optional(),
-      })
+      }),
     )
     .optional(),
 });
@@ -125,7 +125,7 @@ export const capstoneReviewQuerySchema = z.object({
   parentReviewId: z
     .string()
     .optional()
-    .transform((val) => (val === '' ? null : val)),
+    .transform((val) => (val === "" ? null : val)),
   limit: z.coerce.number().int().positive().max(50).optional().default(10),
   offset: z.coerce.number().int().nonnegative().optional().default(0),
 });
@@ -134,15 +134,15 @@ export const capstoneReviewQuerySchema = z.object({
 export const githubRepoUrlSchema = z.object({
   repoUrl: z
     .string()
-    .url('Invalid URL')
+    .url("Invalid URL")
     .regex(
       /^https:\/\/github\.com\/[\w-]+\/[\w.-]+\/?$/,
-      'Must be a valid GitHub repository URL'
+      "Must be a valid GitHub repository URL",
     ),
 });
 
 export const githubCallbackSchema = z.object({
-  code: z.string().min(1, 'Authorization code is required'),
+  code: z.string().min(1, "Authorization code is required"),
   state: z.string().optional(),
 });
 

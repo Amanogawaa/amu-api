@@ -10,7 +10,7 @@ export interface CodeWorkspace {
     output: string;
     error?: string;
     executionTime: number;
-    status: 'success' | 'error' | 'timeout';
+    status: "success" | "error" | "timeout";
   };
   createdAt: Date;
   updatedAt: Date;

@@ -1,20 +1,21 @@
-import type { Request } from 'express';
-import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
-import type { SocketHandlers } from '../socket/socket.handlers';
-import { logger } from '../loggers';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Request } from "express";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { SocketHandlers } from "../socket/socket.handlers";
+import { logger } from "../loggers";
 
 export enum GenerationStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
+  PENDING = "pending",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
 
 export enum GenerationStep {
-  COURSE = 'course',
-  MODULES = 'modules',
-  CHAPTERS = 'chapters',
-  LESSONS = 'lessons',
+  COURSE = "course",
+  MODULES = "modules",
+  CHAPTERS = "chapters",
+  LESSONS = "lessons",
 }
 
 export interface GenerationProgress {
@@ -43,16 +44,16 @@ export function getSocketHandlers(req: Request): SocketHandlers | null {
 
 export function emitGenerationProgress(
   req: AuthenticatedRequest,
-  progress: GenerationProgress
+  progress: GenerationProgress,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
     socketHandlers.emitToUser(
       req.user?.uid || progress.userId,
-      'generation:progress',
-      progress
+      "generation:progress",
+      progress,
     );
-    logger.info('Generation progress emitted', {
+    logger.info("Generation progress emitted", {
       jobId: progress.jobId,
       step: progress.currentStep,
       progress: progress.progress,
@@ -64,7 +65,7 @@ export function emitGenerationProgress(
 export function emitGenerationStarted(
   req: AuthenticatedRequest,
   jobId: string,
-  userId: string
+  userId: string,
 ): void {
   const progress: GenerationProgress = {
     jobId,
@@ -72,7 +73,7 @@ export function emitGenerationStarted(
     status: GenerationStatus.IN_PROGRESS,
     currentStep: GenerationStep.COURSE,
     progress: 0,
-    message: 'Starting course generation...',
+    message: "Starting course generation...",
     timestamp: new Date().toISOString(),
   };
   emitGenerationProgress(req, progress);
@@ -83,7 +84,7 @@ export function emitCourseGenerationProgress(
   jobId: string,
   userId: string,
   message: string,
-  data?: any
+  data?: any,
 ): void {
   const progress: GenerationProgress = {
     jobId,
@@ -105,7 +106,7 @@ export function emitModulesGenerationProgress(
   completed: number,
   total: number,
   message: string,
-  data?: any
+  data?: any,
 ): void {
   const stepProgress = 10 + Math.floor((completed / total) * 30);
   const progress: GenerationProgress = {
@@ -128,7 +129,7 @@ export function emitChaptersGenerationProgress(
   completed: number,
   total: number,
   message: string,
-  data?: any
+  data?: any,
 ): void {
   const stepProgress = 40 + Math.floor((completed / total) * 30);
   const progress: GenerationProgress = {
@@ -151,7 +152,7 @@ export function emitLessonsGenerationProgress(
   completed: number,
   total: number,
   message: string,
-  data?: any
+  data?: any,
 ): void {
   const stepProgress = 70 + Math.floor((completed / total) * 25);
   const progress: GenerationProgress = {
@@ -171,7 +172,7 @@ export function emitGenerationCompleted(
   req: AuthenticatedRequest,
   jobId: string,
   userId: string,
-  result: FullCourseGenerationResult
+  result: FullCourseGenerationResult,
 ): void {
   const progress: GenerationProgress = {
     jobId,
@@ -179,7 +180,7 @@ export function emitGenerationCompleted(
     status: GenerationStatus.COMPLETED,
     currentStep: GenerationStep.LESSONS,
     progress: 100,
-    message: 'Course generation completed successfully!',
+    message: "Course generation completed successfully!",
     data: result,
     timestamp: new Date().toISOString(),
   };
@@ -191,7 +192,7 @@ export function emitGenerationFailed(
   jobId: string,
   userId: string,
   error: string,
-  currentStep: GenerationStep
+  currentStep: GenerationStep,
 ): void {
   const progress: GenerationProgress = {
     jobId,
@@ -199,13 +200,13 @@ export function emitGenerationFailed(
     status: GenerationStatus.FAILED,
     currentStep,
     progress: 0,
-    message: 'Generation failed',
+    message: "Generation failed",
     error,
     timestamp: new Date().toISOString(),
   };
   emitGenerationProgress(req, progress);
 
-  logger.error('Generation failed', {
+  logger.error("Generation failed", {
     jobId,
     userId,
     step: currentStep,

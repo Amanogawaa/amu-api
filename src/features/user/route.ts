@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import { authMiddleware } from '../../middlewares/auth.middleware';
-import multer from 'multer';
-import type { UserController } from './controller';
+import { Router } from "express";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import multer from "multer";
+import type { UserController } from "./controller";
 
 export class UserRoute {
   private userContoller: UserController;
@@ -20,18 +20,18 @@ export class UserRoute {
     },
     fileFilter: (req, file, cb) => {
       const allowedMimeTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
       ];
       if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
         cb(
           new Error(
-            'Invalid file type. Only JPEG, PNG, and WebP images are allowed'
-          )
+            "Invalid file type. Only JPEG, PNG, and WebP images are allowed",
+          ),
         );
       }
     },
@@ -55,9 +55,9 @@ export class UserRoute {
      *         description: User not found
      */
     this.router.get(
-      '/user/profile',
+      "/user/profile",
       authMiddleware,
-      this.userContoller.getUserProfile
+      this.userContoller.getUserProfile,
     );
 
     /**
@@ -92,9 +92,9 @@ export class UserRoute {
      *         description: User not found
      */
     this.router.put(
-      '/user/profile',
+      "/user/profile",
       authMiddleware,
-      this.userContoller.updateUserProfile
+      this.userContoller.updateUserProfile,
     );
 
     /**
@@ -126,10 +126,10 @@ export class UserRoute {
      *         description: User not found
      */
     this.router.post(
-      '/user/profile/picture',
+      "/user/profile/picture",
       authMiddleware,
-      this.upload.single('file'),
-      this.userContoller.uploadProfilePicture
+      this.upload.single("file"),
+      this.userContoller.uploadProfilePicture,
     );
 
     /**
@@ -183,9 +183,9 @@ export class UserRoute {
      *         description: Internal server error
      */
     this.router.get(
-      '/user/analytics',
+      "/user/analytics",
       authMiddleware,
-      this.userContoller.getUserAnalytics
+      this.userContoller.getUserAnalytics,
     );
   }
 

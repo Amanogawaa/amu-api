@@ -1,8 +1,8 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { ModuleController } from './controller';
-import { ModuleRepository } from './repository';
-import { ModuleRoute } from './route';
-import { ModuleService } from './service';
+import { firebaseFirestore } from "../../config/firebase";
+import { ModuleController } from "./controller";
+import { ModuleRepository } from "./repository";
+import { ModuleRoute } from "./route";
+import { ModuleService } from "./service";
 
 export class ModuleContainer {
   public readonly repository: ModuleRepository;

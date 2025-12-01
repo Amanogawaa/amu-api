@@ -123,4 +123,3 @@ General rules:
 - Output must be valid JSON, no markdown wrappers or trailing commas.
 `.trim(),
 };
-

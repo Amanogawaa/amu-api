@@ -1,19 +1,19 @@
-import { Router, type Request, type Response } from 'express';
-import { AuthContainer } from './features/auth/container';
-import type { ChapterContainer } from './features/chapter/container';
-import type { CodePlaygroundContainer } from './features/code-playground/container';
-import type { CommentsContainer } from './features/comments/container';
-import { CourseContainer } from './features/course/container';
-import type { EnrollmentContainer } from './features/enrollment/container';
-import type { LessonContainer } from './features/lesson/container';
-import type { LikesContainer } from './features/likes/container';
-import type { ModuleContainer } from './features/modules/container';
-import type { ProgressContainer } from './features/progress/container';
-import type { QuizContainer } from './features/quiz/container';
-import socketTestRoutes from './features/socket/route';
-import type { UserContainer } from './features/user/container';
-import type { CapstoneContainer } from './features/capstone/container';
-import type { GitHubContainer } from './features/github/container';
+import { Router, type Request, type Response } from "express";
+import { AuthContainer } from "./features/auth/container";
+import type { ChapterContainer } from "./features/chapter/container";
+import type { CodePlaygroundContainer } from "./features/code-playground/container";
+import type { CommentsContainer } from "./features/comments/container";
+import { CourseContainer } from "./features/course/container";
+import type { EnrollmentContainer } from "./features/enrollment/container";
+import type { LessonContainer } from "./features/lesson/container";
+import type { LikesContainer } from "./features/likes/container";
+import type { ModuleContainer } from "./features/modules/container";
+import type { ProgressContainer } from "./features/progress/container";
+import type { QuizContainer } from "./features/quiz/container";
+import socketTestRoutes from "./features/socket/route";
+import type { UserContainer } from "./features/user/container";
+import type { CapstoneContainer } from "./features/capstone/container";
+import type { GitHubContainer } from "./features/github/container";
 
 export class AppRoutes {
   private router: Router;
@@ -46,7 +46,7 @@ export class AppRoutes {
     enrollmentContainer: EnrollmentContainer,
     codePlaygroundContainer: CodePlaygroundContainer,
     capstoneContainer: CapstoneContainer,
-    githubContainer: GitHubContainer
+    githubContainer: GitHubContainer,
   ) {
     this.router = Router();
     this.authContainer = authContainer;
@@ -67,30 +67,30 @@ export class AppRoutes {
   }
 
   private initializeRoutes() {
-    this.router.get('/health', (req: Request, res: Response) => {
+    this.router.get("/health", (req: Request, res: Response) => {
       res.status(200).json({
-        status: 'ok',
+        status: "ok",
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || "development",
       });
     });
 
-    this.router.use('/', this.authContainer.getRouter());
-    this.router.use('/', this.courseContainer.getRouter());
-    this.router.use('/', this.moduleContainer.getRouter());
-    this.router.use('/', this.chapterContainer.getRouter());
-    this.router.use('/', this.lessonContainer.getRouter());
-    this.router.use('/', this.progressContainer.getRouter());
-    this.router.use('/', this.likesContainer.getRouter());
-    this.router.use('/', this.commentsContainer.getRouter());
-    this.router.use('/socket', socketTestRoutes);
-    this.router.use('/', this.userContainer.getRouter());
-    this.router.use('/', this.quizContainer.getRouter());
-    this.router.use('/', this.enrollmentContainer.route.getRouter());
-    this.router.use('/', this.codePlaygroundContainer.getRouter());
-    this.router.use('/capstone', this.capstoneContainer.getRouter());
-    this.router.use('/github', this.githubContainer.getRouter());
+    this.router.use("/", this.authContainer.getRouter());
+    this.router.use("/", this.courseContainer.getRouter());
+    this.router.use("/", this.moduleContainer.getRouter());
+    this.router.use("/", this.chapterContainer.getRouter());
+    this.router.use("/", this.lessonContainer.getRouter());
+    this.router.use("/", this.progressContainer.getRouter());
+    this.router.use("/", this.likesContainer.getRouter());
+    this.router.use("/", this.commentsContainer.getRouter());
+    this.router.use("/socket", socketTestRoutes);
+    this.router.use("/", this.userContainer.getRouter());
+    this.router.use("/", this.quizContainer.getRouter());
+    this.router.use("/", this.enrollmentContainer.route.getRouter());
+    this.router.use("/", this.codePlaygroundContainer.getRouter());
+    this.router.use("/capstone", this.capstoneContainer.getRouter());
+    this.router.use("/github", this.githubContainer.getRouter());
   }
 
   public getRouter(): Router {

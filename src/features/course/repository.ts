@@ -1,12 +1,13 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
-import { AppError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
-import type { Course, CourseQueryParams } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Firestore } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
+import { AppError } from "../../utils/errors";
+import { logger } from "../../utils/loggers";
+import type { Course, CourseQueryParams } from "./types";
 
 export class CourseRepository {
   private firebaseStore: Firestore;
-  private readonly COLLECTION_NAME = 'courses';
+  private readonly COLLECTION_NAME = "courses";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -17,31 +18,31 @@ export class CourseRepository {
       let query = this.firebaseStore.collection(this.COLLECTION_NAME);
 
       if (params?.uid) {
-        query = query.where('uid', '==', params.uid) as any;
+        query = query.where("uid", "==", params.uid) as any;
       }
 
       if (params?.search) {
         query = query
-          .where('name', '>=', params.search)
-          .where('name', '<=', params.search + '\uf8ff') as any;
+          .where("name", ">=", params.search)
+          .where("name", "<=", params.search + "\uf8ff") as any;
       }
 
       if (params?.publish !== undefined) {
-        query = query.where('publish', '==', params.publish) as any;
+        query = query.where("publish", "==", params.publish) as any;
       }
 
       if (params?.draft !== undefined) {
-        query = query.where('draft', '==', params.draft) as any;
+        query = query.where("draft", "==", params.draft) as any;
       }
 
       if (params?.level) {
-        query = query.where('level', '==', params.level) as any;
+        query = query.where("level", "==", params.level) as any;
       }
       if (params?.category) {
-        query = query.where('category', '==', params.category) as any;
+        query = query.where("category", "==", params.category) as any;
       }
       if (params?.language) {
-        query = query.where('language', '==', params.language) as any;
+        query = query.where("language", "==", params.language) as any;
       }
       if (params?.limit) {
         query = query.limit(params.limit) as any;
@@ -53,7 +54,7 @@ export class CourseRepository {
       const snapshot = await query.get();
 
       if (snapshot.empty) {
-        logger.info('No matching courses found.');
+        logger.info("No matching courses found.");
         return [];
       }
 
@@ -65,7 +66,7 @@ export class CourseRepository {
           id: doc.id,
           ...data,
           learning_outcomes:
-            typeof data.learning_outcomes === 'string'
+            typeof data.learning_outcomes === "string"
               ? JSON.parse(data.learning_outcomes)
               : data.learning_outcomes,
         } as Course);
@@ -73,7 +74,7 @@ export class CourseRepository {
 
       return courses;
     } catch (error) {
-      logger.error('Error in CourseRepository.getCourse:', error);
+      logger.error("Error in CourseRepository.getCourse:", error);
       throw error;
     }
   }
@@ -86,7 +87,7 @@ export class CourseRepository {
 
     if (!doc) {
       logger.info(`No course found with ID: ${slug}`);
-      throw new AppError('Course not found', 404);
+      throw new AppError("Course not found", 404);
     }
 
     const data = doc.data();
@@ -95,7 +96,7 @@ export class CourseRepository {
       id: doc.id,
       ...data,
       learning_outcomes:
-        typeof data?.learning_outcomes === 'string'
+        typeof data?.learning_outcomes === "string"
           ? JSON.parse(data.learning_outcomes)
           : data?.learning_outcomes,
       createdAt: data?.createdAt?.toDate,
@@ -103,7 +104,7 @@ export class CourseRepository {
     } as Course;
   }
 
-  async createCourse(request: Omit<Course, 'id'>): Promise<Course> {
+  async createCourse(request: Omit<Course, "id">): Promise<Course> {
     try {
       const data = {
         ...request,
@@ -121,8 +122,8 @@ export class CourseRepository {
       logger.info(`Course created with ID: ${res.id}`);
 
       if (!res) {
-        logger.error('Failed to create course: No response from Firestore');
-        throw new Error('Failed to create course');
+        logger.error("Failed to create course: No response from Firestore");
+        throw new Error("Failed to create course");
       }
 
       const createdCourse: Course = {
@@ -132,7 +133,7 @@ export class CourseRepository {
 
       return createdCourse;
     } catch (error) {
-      logger.error('Error in CourseRepository.createCourse:', error);
+      logger.error("Error in CourseRepository.createCourse:", error);
       throw error;
     }
   }
@@ -144,7 +145,7 @@ export class CourseRepository {
       const deleteCollection = async (collectionPath: string) => {
         const query = this.firebaseStore
           .collection(collectionPath)
-          .where('courseId', '==', courseId)
+          .where("courseId", "==", courseId)
           .limit(batchSize);
 
         return new Promise<void>((resolve, reject) => {
@@ -153,12 +154,12 @@ export class CourseRepository {
       };
 
       await Promise.all([
-        deleteCollection('modules'),
-        deleteCollection('chapters'),
-        deleteCollection('lessons'),
-        deleteCollection('capstoneGuidelines'),
-        deleteCollection('capstoneSubmissions'),
-        deleteCollection('enrollments'),
+        deleteCollection("modules"),
+        deleteCollection("chapters"),
+        deleteCollection("lessons"),
+        deleteCollection("capstoneGuidelines"),
+        deleteCollection("capstoneSubmissions"),
+        deleteCollection("enrollments"),
       ]);
 
       await this.firebaseStore
@@ -167,10 +168,10 @@ export class CourseRepository {
         .delete();
 
       logger.info(
-        `Course with ID: ${courseId} and its related data have been deleted.`
+        `Course with ID: ${courseId} and its related data have been deleted.`,
       );
     } catch (error) {
-      logger.error('Error in CourseRepository.deleteCourse:', error);
+      logger.error("Error in CourseRepository.deleteCourse:", error);
       throw error;
     }
   }
@@ -178,7 +179,7 @@ export class CourseRepository {
   private async deleteQueryBatch(
     query: any,
     resolve: () => void,
-    reject: (error: any) => void
+    reject: (error: any) => void,
   ): Promise<void> {
     try {
       const snapshot = await query.get();
@@ -206,8 +207,8 @@ export class CourseRepository {
   async courseNameExists(name: string, uid: string): Promise<boolean> {
     const snapshot = await this.firebaseStore
       .collection(this.COLLECTION_NAME)
-      .where('uid', '==', uid)
-      .where('name', '==', name)
+      .where("uid", "==", uid)
+      .where("name", "==", name)
       .limit(1)
       .get();
 
@@ -216,7 +217,7 @@ export class CourseRepository {
 
   async updateCourse(
     courseId: string,
-    updates: Partial<Course>
+    updates: Partial<Course>,
   ): Promise<void> {
     try {
       const docRef = this.firebaseStore
@@ -225,7 +226,7 @@ export class CourseRepository {
 
       const doc = await docRef.get();
       if (!doc.exists) {
-        throw new AppError('Course not found', 404);
+        throw new AppError("Course not found", 404);
       }
 
       await docRef.update({
@@ -235,7 +236,7 @@ export class CourseRepository {
 
       logger.info(`Course with ID: ${courseId} has been updated.`);
     } catch (error) {
-      logger.error('Error in CourseRepository.updateCourse:', error);
+      logger.error("Error in CourseRepository.updateCourse:", error);
       throw error;
     }
   }
@@ -246,15 +247,15 @@ export class CourseRepository {
   async getEnrollmentCount(courseId: string): Promise<number> {
     try {
       const snapshot = await this.firebaseStore
-        .collection('enrollments')
-        .where('courseId', '==', courseId)
-        .where('status', '==', 'active')
+        .collection("enrollments")
+        .where("courseId", "==", courseId)
+        .where("status", "==", "active")
         .count()
         .get();
 
       return snapshot.data().count;
     } catch (error) {
-      logger.error('Error in CourseRepository.getEnrollmentCount:', error);
+      logger.error("Error in CourseRepository.getEnrollmentCount:", error);
       return 0; // Return 0 instead of throwing to not break course queries
     }
   }
@@ -266,7 +267,7 @@ export class CourseRepository {
     try {
       const enrollmentId = `${courseId}_${userId}`;
       const doc = await this.firebaseStore
-        .collection('enrollments')
+        .collection("enrollments")
         .doc(enrollmentId)
         .get();
 
@@ -275,9 +276,9 @@ export class CourseRepository {
       }
 
       const data = doc.data();
-      return data?.status === 'active';
+      return data?.status === "active";
     } catch (error) {
-      logger.error('Error in CourseRepository.isUserEnrolled:', error);
+      logger.error("Error in CourseRepository.isUserEnrolled:", error);
       return false;
     }
   }
@@ -287,7 +288,7 @@ export class CourseRepository {
    */
   async getCourseWithEnrollmentInfo(
     courseId: string,
-    userId?: string
+    userId?: string,
   ): Promise<Course> {
     try {
       const course = await this.getCourseById(courseId);
@@ -305,8 +306,8 @@ export class CourseRepository {
       };
     } catch (error) {
       logger.error(
-        'Error in CourseRepository.getCourseWithEnrollmentInfo:',
-        error
+        "Error in CourseRepository.getCourseWithEnrollmentInfo:",
+        error,
       );
       throw error;
     }

@@ -1,8 +1,8 @@
-import type { UserProgress } from './types';
+import type { UserProgress } from "./types";
 
 export class ProgressRepository {
   private db: FirebaseFirestore.Firestore;
-  private collectionName = 'userProgress';
+  private collectionName = "userProgress";
 
   constructor(firestore: FirebaseFirestore.Firestore) {
     this.db = firestore;
@@ -15,7 +15,7 @@ export class ProgressRepository {
   async getProgressByUser(userId: string): Promise<UserProgress[]> {
     const snapshot = await this.db
       .collection(this.collectionName)
-      .where('userId', '==', userId)
+      .where("userId", "==", userId)
       .get();
 
     return snapshot.docs.map((doc) => ({
@@ -30,7 +30,7 @@ export class ProgressRepository {
 
   async getProgressByCourse(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<UserProgress | null> {
     const progressId = this.getProgressId(courseId, userId);
     const doc = await this.db
@@ -53,7 +53,7 @@ export class ProgressRepository {
   }
 
   async createProgress(
-    progress: Omit<UserProgress, 'id'>
+    progress: Omit<UserProgress, "id">,
   ): Promise<UserProgress> {
     const progressId = this.getProgressId(progress.courseId, progress.userId);
     const now = new Date();
@@ -79,7 +79,7 @@ export class ProgressRepository {
   async updateProgress(
     courseId: string,
     userId: string,
-    updates: Partial<UserProgress>
+    updates: Partial<UserProgress>,
   ): Promise<UserProgress> {
     const progressId = this.getProgressId(courseId, userId);
     const now = new Date();
@@ -97,7 +97,7 @@ export class ProgressRepository {
 
     const updated = await this.getProgressByCourse(courseId, userId);
     if (!updated) {
-      throw new Error('Failed to retrieve updated progress');
+      throw new Error("Failed to retrieve updated progress");
     }
 
     return updated;
@@ -111,7 +111,7 @@ export class ProgressRepository {
   async getAllProgressForCourse(courseId: string): Promise<UserProgress[]> {
     const snapshot = await this.db
       .collection(this.collectionName)
-      .where('courseId', '==', courseId)
+      .where("courseId", "==", courseId)
       .get();
 
     return snapshot.docs.map((doc) => ({

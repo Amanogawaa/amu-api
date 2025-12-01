@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import type { CommentsController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
+import { Router } from "express";
+import type { CommentsController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 export class CommentsRoute {
   public router: Router;
@@ -86,15 +86,15 @@ export class CommentsRoute {
      *         description: Comments retrieved successfully
      */
     this.router.post(
-      '/courses/:courseId/comments',
+      "/courses/:courseId/comments",
       authMiddleware,
-      this.controller.createComment.bind(this.controller)
+      this.controller.createComment.bind(this.controller),
     );
 
     this.router.get(
-      '/courses/:courseId/comments',
+      "/courses/:courseId/comments",
       authMiddleware,
-      this.controller.getCommentsForCourse.bind(this.controller)
+      this.controller.getCommentsForCourse.bind(this.controller),
     );
 
     /**
@@ -167,21 +167,21 @@ export class CommentsRoute {
      *         description: Not authorized
      */
     this.router.get(
-      '/comments/:commentId',
+      "/comments/:commentId",
       authMiddleware,
-      this.controller.getCommentById.bind(this.controller)
+      this.controller.getCommentById.bind(this.controller),
     );
 
     this.router.patch(
-      '/comments/:commentId',
+      "/comments/:commentId",
       authMiddleware,
-      this.controller.updateComment.bind(this.controller)
+      this.controller.updateComment.bind(this.controller),
     );
 
     this.router.delete(
-      '/comments/:commentId',
+      "/comments/:commentId",
       authMiddleware,
-      this.controller.deleteComment.bind(this.controller)
+      this.controller.deleteComment.bind(this.controller),
     );
 
     /**
@@ -198,9 +198,9 @@ export class CommentsRoute {
      *         description: User comments retrieved successfully
      */
     this.router.get(
-      '/comments/me',
+      "/comments/me",
       authMiddleware,
-      this.controller.getMyComments.bind(this.controller)
+      this.controller.getMyComments.bind(this.controller),
     );
 
     /**
@@ -223,9 +223,9 @@ export class CommentsRoute {
      *         description: Replies retrieved successfully
      */
     this.router.get(
-      '/comments/:commentId/replies',
+      "/comments/:commentId/replies",
       authMiddleware,
-      this.controller.getReplies.bind(this.controller)
+      this.controller.getReplies.bind(this.controller),
     );
   }
 

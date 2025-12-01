@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import type { QuizController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
+import { Router } from "express";
+import type { QuizController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 export class QuizRoute {
   public router: Router;
@@ -52,8 +52,8 @@ export class QuizRoute {
      *         description: Invalid request
      */
     this.router.post(
-      '/generate',
-      this.controller.generateQuiz.bind(this.controller)
+      "/generate",
+      this.controller.generateQuiz.bind(this.controller),
     );
 
     /**
@@ -77,8 +77,8 @@ export class QuizRoute {
      *         description: Quiz not found
      */
     this.router.get(
-      '/lessons/:lessonId/quiz',
-      this.controller.getQuiz.bind(this.controller)
+      "/lessons/:lessonId/quiz",
+      this.controller.getQuiz.bind(this.controller),
     );
 
     /**
@@ -127,9 +127,9 @@ export class QuizRoute {
      *         description: Quiz not found
      */
     this.router.post(
-      '/quizzes/:quizId/submit',
+      "/quizzes/:quizId/submit",
       authMiddleware,
-      this.controller.submitQuiz.bind(this.controller)
+      this.controller.submitQuiz.bind(this.controller),
     );
 
     /**
@@ -155,9 +155,9 @@ export class QuizRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/quizzes/:quizId/attempts',
+      "/quizzes/:quizId/attempts",
       authMiddleware,
-      this.controller.getUserAttempts.bind(this.controller)
+      this.controller.getUserAttempts.bind(this.controller),
     );
 
     /**
@@ -187,9 +187,9 @@ export class QuizRoute {
      *         description: Attempt not found
      */
     this.router.get(
-      '/attempts/:attemptId',
+      "/attempts/:attemptId",
       authMiddleware,
-      this.controller.getAttemptById.bind(this.controller)
+      this.controller.getAttemptById.bind(this.controller),
     );
   }
 }

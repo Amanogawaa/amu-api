@@ -1,6 +1,6 @@
-import type { Request, Response, NextFunction } from 'express';
-import { AppError, ValidationError } from '../utils/errors';
-import { logger } from '../utils/loggers';
+import type { Request, Response, NextFunction } from "express";
+import { AppError, ValidationError } from "../utils/errors";
+import { logger } from "../utils/loggers";
 
 interface ErrorResponse {
   error: {
@@ -9,20 +9,21 @@ interface ErrorResponse {
     fields?: Record<string, string>;
     requestId?: string;
   };
-  status: 'error';
+  status: "error";
 }
 
 export const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   // Extract or generate request ID
-  const requestId = (req.headers['x-request-id'] as string) || crypto.randomUUID();
+  const requestId =
+    (req.headers["x-request-id"] as string) || crypto.randomUUID();
 
   // Log error with context
-  logger.error('Error occurred', {
+  logger.error("Error occurred", {
     requestId,
     error: err.message,
     stack: err.stack,
@@ -39,7 +40,7 @@ export const errorHandler = (
         code: err.code,
         requestId,
       },
-      status: 'error',
+      status: "error",
     };
 
     // Add validation fields if present
@@ -52,7 +53,7 @@ export const errorHandler = (
   }
 
   // Handle unknown/programming errors
-  logger.error('Unexpected error', {
+  logger.error("Unexpected error", {
     requestId,
     error: err.message,
     stack: err.stack,
@@ -60,10 +61,10 @@ export const errorHandler = (
 
   res.status(500).json({
     error: {
-      message: 'An unexpected error occurred',
-      code: 'INTERNAL_SERVER_ERROR',
+      message: "An unexpected error occurred",
+      code: "INTERNAL_SERVER_ERROR",
       requestId,
     },
-    status: 'error',
+    status: "error",
   });
 };

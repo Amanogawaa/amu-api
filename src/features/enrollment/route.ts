@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import type { EnrollmentController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
+import { Router } from "express";
+import type { EnrollmentController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 export class EnrollmentRoute {
   public router: Router;
@@ -65,9 +65,9 @@ export class EnrollmentRoute {
      *         description: Already enrolled in this course
      */
     this.router.post(
-      '/courses/:courseId/enroll',
+      "/courses/:courseId/enroll",
       authMiddleware,
-      this.controller.enrollInCourse.bind(this.controller)
+      this.controller.enrollInCourse.bind(this.controller),
     );
 
     /**
@@ -105,9 +105,9 @@ export class EnrollmentRoute {
      *         description: Enrollment not found
      */
     this.router.delete(
-      '/courses/:courseId/unenroll',
+      "/courses/:courseId/unenroll",
       authMiddleware,
-      this.controller.unenrollFromCourse.bind(this.controller)
+      this.controller.unenrollFromCourse.bind(this.controller),
     );
 
     /**
@@ -160,9 +160,9 @@ export class EnrollmentRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/courses/:courseId/enrollment-status',
+      "/courses/:courseId/enrollment-status",
       authMiddleware,
-      this.controller.getEnrollmentStatus.bind(this.controller)
+      this.controller.getEnrollmentStatus.bind(this.controller),
     );
 
     /**
@@ -232,9 +232,9 @@ export class EnrollmentRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/enrollments',
+      "/enrollments",
       authMiddleware,
-      this.controller.getUserEnrollments.bind(this.controller)
+      this.controller.getUserEnrollments.bind(this.controller),
     );
 
     /**
@@ -271,8 +271,8 @@ export class EnrollmentRoute {
      *                   type: string
      */
     this.router.get(
-      '/courses/:courseId/enrollment-count',
-      this.controller.getCourseEnrollmentCount.bind(this.controller)
+      "/courses/:courseId/enrollment-count",
+      this.controller.getCourseEnrollmentCount.bind(this.controller),
     );
   }
 

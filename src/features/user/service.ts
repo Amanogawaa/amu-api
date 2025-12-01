@@ -1,9 +1,9 @@
-import { AppError, UserNotFoundError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
-import type { UserRepository } from './repository';
-import type { UpdateUserProfile, UserProfile, UserAnalytics } from './types';
-import path from 'path';
-import fs from 'fs/promises';
+import { AppError, UserNotFoundError } from "../../utils/errors";
+import { logger } from "../../utils/loggers";
+import type { UserRepository } from "./repository";
+import type { UpdateUserProfile, UserProfile, UserAnalytics } from "./types";
+import path from "path";
+import fs from "fs/promises";
 
 export class UserService {
   private userRepository: UserRepository;
@@ -17,60 +17,61 @@ export class UserService {
       const profile = await this.userRepository.getUserProfile(uid);
 
       if (!profile) {
-        throw new UserNotFoundError('User profile not found');
+        throw new UserNotFoundError("User profile not found");
       }
 
       return profile;
     } catch (error) {
-      logger.error('Error in UserService.getUserProfile:', error);
+      logger.error("Error in UserService.getUserProfile:", error);
       throw error;
     }
   }
 
   async updateUserProfile(
     uid: string,
-    updates: UpdateUserProfile
+    updates: UpdateUserProfile,
   ): Promise<UserProfile> {
     try {
       // Validate at least one field is being updated
       if (!updates.firstName && !updates.lastName && !updates.photoURL) {
         throw new AppError(
-          'At least one field must be provided for update',
-          400
+          "At least one field must be provided for update",
+          400,
         );
       }
 
       // Check if user exists
       const existingProfile = await this.userRepository.getUserProfile(uid);
       if (!existingProfile) {
-        throw new UserNotFoundError('User profile not found');
+        throw new UserNotFoundError("User profile not found");
       }
 
       const updatedProfile = await this.userRepository.updateUserProfile(
         uid,
-        updates
+        updates,
       );
 
       logger.info(`User profile updated for uid: ${uid}`);
       return updatedProfile;
     } catch (error) {
-      logger.error('Error in UserService.updateUserProfile:', error);
+      logger.error("Error in UserService.updateUserProfile:", error);
       throw error;
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async uploadProfilePicture(uid: string, file: any): Promise<string> {
     try {
       // Check if user exists
       const existingProfile = await this.userRepository.getUserProfile(uid);
       if (!existingProfile) {
-        throw new UserNotFoundError('User profile not found');
+        throw new UserNotFoundError("User profile not found");
       }
 
       // Generate unique filename
       const fileExtension = path.extname(file.originalname);
       const filename = `${uid}_${Date.now()}${fileExtension}`;
-      const uploadDir = path.join(process.cwd(), 'uploads', 'profile-pictures');
+      const uploadDir = path.join(process.cwd(), "uploads", "profile-pictures");
       const filePath = path.join(uploadDir, filename);
 
       // Ensure upload directory exists
@@ -82,9 +83,9 @@ export class UserService {
       // Delete old profile picture if exists
       if (
         existingProfile.photoURL &&
-        existingProfile.photoURL.includes('/uploads/')
+        existingProfile.photoURL.includes("/uploads/")
       ) {
-        const oldFilename = existingProfile.photoURL.split('/').pop();
+        const oldFilename = existingProfile.photoURL.split("/").pop();
         if (oldFilename) {
           const oldFilePath = path.join(uploadDir, oldFilename);
           try {
@@ -104,7 +105,7 @@ export class UserService {
       logger.info(`Profile picture uploaded for uid: ${uid}`);
       return photoURL;
     } catch (error) {
-      logger.error('Error in UserService.uploadProfilePicture:', error);
+      logger.error("Error in UserService.uploadProfilePicture:", error);
       throw error;
     }
   }
@@ -115,7 +116,7 @@ export class UserService {
       logger.info(`User analytics retrieved for uid: ${uid}`);
       return analytics;
     } catch (error) {
-      logger.error('Error in UserService.getUserAnalytics:', error);
+      logger.error("Error in UserService.getUserAnalytics:", error);
       throw error;
     }
   }

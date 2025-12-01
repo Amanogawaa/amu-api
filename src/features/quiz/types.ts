@@ -10,7 +10,7 @@ export interface Quiz {
 export interface QuizQuestion {
   questionId: string;
   questionText: string;
-  questionType: 'multiple-choice' | 'true-false';
+  questionType: "multiple-choice" | "true-false";
   options?: QuizOption[];
   correctAnswer: string;
   explanation: string;
@@ -27,7 +27,7 @@ export interface GenerateQuizRequest {
   lessonName: string;
   previousLessonsContent: string;
   numberOfQuestions?: number;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: "easy" | "medium" | "hard";
 }
 
 export interface SubmitQuizRequest {
@@ -63,44 +63,44 @@ export interface QuizGenerationResponse {
 }
 
 export const quizSchema = {
-  type: 'object' as const,
+  type: "object" as const,
   properties: {
     questions: {
-      type: 'array' as const,
+      type: "array" as const,
       items: {
-        type: 'object' as const,
+        type: "object" as const,
         properties: {
-          questionId: { type: 'string' as const },
-          questionText: { type: 'string' as const },
+          questionId: { type: "string" as const },
+          questionText: { type: "string" as const },
           questionType: {
-            type: 'string' as const,
-            enum: ['multiple-choice', 'true-false'],
+            type: "string" as const,
+            enum: ["multiple-choice", "true-false"],
           },
           options: {
-            type: 'array' as const,
+            type: "array" as const,
             items: {
-              type: 'object' as const,
+              type: "object" as const,
               properties: {
-                optionId: { type: 'string' as const },
-                optionText: { type: 'string' as const },
+                optionId: { type: "string" as const },
+                optionText: { type: "string" as const },
               },
-              required: ['optionId', 'optionText'],
+              required: ["optionId", "optionText"],
             },
           },
-          correctAnswer: { type: 'string' as const },
-          explanation: { type: 'string' as const },
-          points: { type: 'number' as const },
+          correctAnswer: { type: "string" as const },
+          explanation: { type: "string" as const },
+          points: { type: "number" as const },
         },
         required: [
-          'questionId',
-          'questionText',
-          'questionType',
-          'correctAnswer',
-          'explanation',
-          'points',
+          "questionId",
+          "questionText",
+          "questionType",
+          "correctAnswer",
+          "explanation",
+          "points",
         ],
       },
     },
   },
-  required: ['questions'],
+  required: ["questions"],
 };

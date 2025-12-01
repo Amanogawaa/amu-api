@@ -1,8 +1,8 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { LikesController } from './controller';
-import { LikesRepository } from './repository';
-import { LikesRoute } from './route';
-import { LikesService } from './service';
+import { firebaseFirestore } from "../../config/firebase";
+import { LikesController } from "./controller";
+import { LikesRepository } from "./repository";
+import { LikesRoute } from "./route";
+import { LikesService } from "./service";
 
 export class LikesContainer {
   public readonly repository: LikesRepository;

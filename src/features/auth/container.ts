@@ -1,8 +1,8 @@
-import { AuthController } from './controller';
-import { AuthRepository } from './repository';
-import { AuthRoute } from './route';
-import { AuthService } from './service';
-import admin from 'firebase-admin';
+import { AuthController } from "./controller";
+import { AuthRepository } from "./repository";
+import { AuthRoute } from "./route";
+import { AuthService } from "./service";
+import admin from "firebase-admin";
 
 export class AuthContainer {
   public readonly repository: AuthRepository;

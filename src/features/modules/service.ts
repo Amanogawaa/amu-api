@@ -1,17 +1,17 @@
-import { AppError } from '../../utils/errors';
-import { geminiCall } from '../../utils/geminiCall';
-import { logger } from '../../utils/loggers';
+import { AppError } from "../../utils/errors";
+import { geminiCall } from "../../utils/geminiCall";
+import { logger } from "../../utils/loggers";
 import {
   buildModulesPrompt,
   type ModulePromptMode,
-} from '../../utils/prompts/module-temp';
-import type { ModuleRepository } from './repository';
+} from "../../utils/prompts/module-temp";
+import type { ModuleRepository } from "./repository";
 import {
   modulesSchema,
   type GenerateModulesRequest,
   type Module,
   type UpdateModuleRequest,
-} from './types';
+} from "./types";
 
 export class ModuleService {
   private repository: ModuleRepository;
@@ -25,7 +25,7 @@ export class ModuleService {
       const modules = await this.repository.getModules(courseId);
       return modules;
     } catch (error) {
-      logger.error('Error in ModuleService.getModules:', error);
+      logger.error("Error in ModuleService.getModules:", error);
       throw error;
     }
   }
@@ -35,28 +35,28 @@ export class ModuleService {
       const module = await this.repository.getModule(moduleId);
       return module;
     } catch (error) {
-      logger.error('Error in ModuleService.getModule:', error);
+      logger.error("Error in ModuleService.getModule:", error);
       throw error;
     }
   }
 
   public async generateModules(request: GenerateModulesRequest) {
     try {
-      const promptMode: ModulePromptMode = request.promptMode ?? 'system';
+      const promptMode: ModulePromptMode = request.promptMode ?? "system";
       const { userPrompt, systemPrompt } = buildModulesPrompt(
         {
-        courseId: request.courseId,
-        courseName: request.courseName,
-        courseDescription: request.courseDescription,
-        learningOutcomes: request.learningOutcomes,
-        level: request.level,
-        duration: request.duration,
-        noOfModules: request.noOfModules,
-        language: request.language,
-        prerequisites: request.prerequisites,
+          courseId: request.courseId,
+          courseName: request.courseName,
+          courseDescription: request.courseDescription,
+          learningOutcomes: request.learningOutcomes,
+          level: request.level,
+          duration: request.duration,
+          noOfModules: request.noOfModules,
+          language: request.language,
+          prerequisites: request.prerequisites,
           userInstructions: request.userInstructions,
         },
-        { mode: promptMode, intent: 'generate' }
+        { mode: promptMode, intent: "generate" },
       );
 
       const result = await geminiCall(userPrompt, {
@@ -71,14 +71,14 @@ export class ModuleService {
         },
       });
 
-      logger.info('Modules generated via Gemini', {
+      logger.info("Modules generated via Gemini", {
         courseId: request.courseId,
         mode: promptMode,
         moduleCount: result?.modules?.length ?? 0,
       });
 
       if (!result.modules || !Array.isArray(result.modules)) {
-        throw new Error('Invalid response from Gemini: missing modules array');
+        throw new Error("Invalid response from Gemini: missing modules array");
       }
 
       const createdModules = await this.repository.createModules(
@@ -86,13 +86,13 @@ export class ModuleService {
         request.courseName,
         request.level,
         request.language,
-        result.modules
+        result.modules,
       );
 
       logger.info(`Successfully created ${createdModules} modules`);
       return createdModules;
     } catch (error) {
-      logger.error('Error in ModuleService.generateModules:', error);
+      logger.error("Error in ModuleService.generateModules:", error);
       throw error;
     }
   }
@@ -100,23 +100,23 @@ export class ModuleService {
   public async regenerateModules(request: UpdateModuleRequest) {
     try {
       const existingModules = await this.repository.getModules(
-        request.courseId
+        request.courseId,
       );
 
       if (existingModules.length === 0) {
         throw new AppError(
-          'No existing modules found. Use generateModules instead.',
-          404
+          "No existing modules found. Use generateModules instead.",
+          404,
         );
       }
 
       logger.info(
-        `Found ${existingModules.length} existing modules for courseId: ${request.courseId}`
+        `Found ${existingModules.length} existing modules for courseId: ${request.courseId}`,
       );
 
       existingModules.sort((a, b) => a.moduleOrder - b.moduleOrder);
 
-      const promptMode: ModulePromptMode = request.promptMode ?? 'system';
+      const promptMode: ModulePromptMode = request.promptMode ?? "system";
       const fallbackLearningOutcomes =
         request.learningOutcomes && request.learningOutcomes.length > 0
           ? request.learningOutcomes
@@ -127,25 +127,29 @@ export class ModuleService {
       const { userPrompt, systemPrompt } = buildModulesPrompt(
         {
           courseId: request.courseId,
-          courseName: request.courseName || existingModules[0]?.courseName || 'Untitled Course',
+          courseName:
+            request.courseName ||
+            existingModules[0]?.courseName ||
+            "Untitled Course",
           courseDescription:
             request.courseDescription ||
-            'Refresh the existing module blueprint with improved clarity.',
+            "Refresh the existing module blueprint with improved clarity.",
           learningOutcomes:
             fallbackLearningOutcomes.length > 0
               ? fallbackLearningOutcomes
-              : ['Deliver structured, outcome-focused modules.'],
-          level: request.level || existingModules[0]?.level || 'intermediate',
+              : ["Deliver structured, outcome-focused modules."],
+          level: request.level || existingModules[0]?.level || "intermediate",
           duration:
             request.duration ||
             existingModules[0]?.estimatedDuration ||
-            'Match previous pacing',
+            "Match previous pacing",
           noOfModules: request.noOfModules || existingModules.length,
-          language: request.language || existingModules[0]?.language || 'English',
-          prerequisites: request.prerequisites || '',
+          language:
+            request.language || existingModules[0]?.language || "English",
+          prerequisites: request.prerequisites || "",
           userInstructions: request.userInstructions,
         },
-        { mode: promptMode, intent: 'regenerate' }
+        { mode: promptMode, intent: "regenerate" },
       );
 
       const result = await geminiCall(userPrompt, {
@@ -156,18 +160,18 @@ export class ModuleService {
         benchmarkTag: `modules:${promptMode}`,
         metadata: {
           courseId: request.courseId,
-          intent: 'regenerate',
+          intent: "regenerate",
           mode: promptMode,
         },
       });
 
       if (!result.modules || !Array.isArray(result.modules)) {
-        throw new Error('Invalid response from Gemini: missing modules array');
+        throw new Error("Invalid response from Gemini: missing modules array");
       }
 
       if (result.modules.length !== existingModules.length) {
         logger.warn(
-          `AI generated ${result.modules.length} modules but expected ${existingModules.length}. Adjusting...`
+          `AI generated ${result.modules.length} modules but expected ${existingModules.length}. Adjusting...`,
         );
       }
 
@@ -185,19 +189,18 @@ export class ModuleService {
             moduleOrder: existing.moduleOrder,
             createdAt: existing.createdAt,
           };
-        }
+        },
       );
 
-      const updateResult = await this.repository.updateModulesBatch(
-        updatedModules
-      );
+      const updateResult =
+        await this.repository.updateModulesBatch(updatedModules);
 
       logger.info(
-        `Regenerated ${updateResult.updated} modules. Errors: ${updateResult.errors.length}`
+        `Regenerated ${updateResult.updated} modules. Errors: ${updateResult.errors.length}`,
       );
 
       if (updateResult.errors.length > 0) {
-        logger.error('Errors during batch update:', updateResult.errors);
+        logger.error("Errors during batch update:", updateResult.errors);
       }
 
       return {
@@ -206,7 +209,7 @@ export class ModuleService {
         modules: updatedModules,
       };
     } catch (error) {
-      logger.error('Error in ModuleService.regenerateModules:', error);
+      logger.error("Error in ModuleService.regenerateModules:", error);
       throw error;
     }
   }
@@ -216,7 +219,7 @@ export class ModuleService {
       await this.repository.deleteModulesByCourseId(courseId);
       logger.info(`Deleted modules for courseId: ${courseId}`);
     } catch (error) {
-      logger.error('Error in ModuleService.deleteModulesByCourseId:', error);
+      logger.error("Error in ModuleService.deleteModulesByCourseId:", error);
       throw error;
     }
   }

@@ -1,20 +1,20 @@
-import { AppError } from '../../utils/errors';
-import type { ProgressRepository } from './repository';
+import { AppError } from "../../utils/errors";
+import type { ProgressRepository } from "./repository";
 import type {
   ProgressSummary,
   ProgressUpdateRequest,
   UserProgress,
-} from './types';
-import { firebaseFirestore } from '../../config/firebase';
-import { logger } from '../../utils/loggers';
-import type { QuizService } from '../quiz/service';
-import type { LessonService } from '../lesson/service';
+} from "./types";
+import { firebaseFirestore } from "../../config/firebase";
+import { logger } from "../../utils/loggers";
+import type { QuizService } from "../quiz/service";
+import type { LessonService } from "../lesson/service";
 
 export class ProgressService {
   constructor(
     private repository: ProgressRepository,
     private quizService?: QuizService,
-    private lessonService?: LessonService
+    private lessonService?: LessonService,
   ) {}
 
   /**
@@ -22,12 +22,12 @@ export class ProgressService {
    */
   private async validateQuizCompletion(
     userId: string,
-    lessonId: string
+    lessonId: string,
   ): Promise<void> {
     // If services are not available, skip validation (for backward compatibility)
     if (!this.lessonService || !this.quizService) {
       logger.warn(
-        'Quiz and Lesson services not available, skipping quiz validation'
+        "Quiz and Lesson services not available, skipping quiz validation",
       );
       return;
     }
@@ -35,9 +35,9 @@ export class ProgressService {
     try {
       // Get lesson to check its type
       const lesson = await this.lessonService.getLessonById(lessonId);
-      
+
       // If lesson doesn't exist or is not a quiz type, no validation needed
-      if (!lesson || lesson.type !== 'quiz') {
+      if (!lesson || lesson.type !== "quiz") {
         return;
       }
 
@@ -45,25 +45,27 @@ export class ProgressService {
       const quiz = await this.quizService.getQuiz(lessonId);
       if (!quiz) {
         // If no quiz exists yet, allow completion (quiz might be generated later)
-        logger.info(`No quiz found for lesson ${lessonId}, allowing completion`);
+        logger.info(
+          `No quiz found for lesson ${lessonId}, allowing completion`,
+        );
         return;
       }
 
       // Get user's attempts for this quiz
       const attempts = await this.quizService.getUserAttempts(userId, quiz.id);
-      
+
       // Check if user has at least one passed attempt
       const hasPassed = attempts.some((attempt) => attempt.passed);
-      
+
       if (!hasPassed) {
         throw new AppError(
-          'You must pass the quiz before marking this lesson as complete',
-          403
+          "You must pass the quiz before marking this lesson as complete",
+          403,
         );
       }
 
       logger.info(
-        `Quiz validation passed for user ${userId} on lesson ${lessonId}`
+        `Quiz validation passed for user ${userId} on lesson ${lessonId}`,
       );
     } catch (error) {
       // If it's an AppError, re-throw it
@@ -71,7 +73,7 @@ export class ProgressService {
         throw error;
       }
       // For other errors, log and allow (fail open for backward compatibility)
-      logger.error('Error validating quiz completion:', error);
+      logger.error("Error validating quiz completion:", error);
     }
   }
 
@@ -80,17 +82,17 @@ export class ProgressService {
    */
   private async checkEnrollmentOrOwnership(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     try {
       // Check if user is the course owner
       const courseDoc = await firebaseFirestore
-        .collection('courses')
+        .collection("courses")
         .doc(courseId)
         .get();
 
       if (!courseDoc.exists) {
-        throw new AppError('Course not found', 404);
+        throw new AppError("Course not found", 404);
       }
 
       const courseData = courseDoc.data();
@@ -103,31 +105,31 @@ export class ProgressService {
       // Otherwise, check enrollment
       const enrollmentId = `${courseId}_${userId}`;
       const enrollmentDoc = await firebaseFirestore
-        .collection('enrollments')
+        .collection("enrollments")
         .doc(enrollmentId)
         .get();
 
       if (!enrollmentDoc.exists) {
         throw new AppError(
-          'You must enroll in this course before tracking progress',
-          403
+          "You must enroll in this course before tracking progress",
+          403,
         );
       }
 
       const enrollmentData = enrollmentDoc.data();
 
-      if (enrollmentData?.status !== 'active') {
-        throw new AppError('Your enrollment in this course is not active', 403);
+      if (enrollmentData?.status !== "active") {
+        throw new AppError("Your enrollment in this course is not active", 403);
       }
     } catch (error) {
-      logger.error('Error checking enrollment or ownership:', error);
+      logger.error("Error checking enrollment or ownership:", error);
       throw error;
     }
   }
 
   async markLessonProgress(
     userId: string,
-    data: ProgressUpdateRequest
+    data: ProgressUpdateRequest,
   ): Promise<UserProgress> {
     const {
       courseId,
@@ -202,7 +204,7 @@ export class ProgressService {
       progress = await this.repository.updateProgress(
         courseId,
         userId,
-        updates
+        updates,
       );
     }
 
@@ -211,7 +213,7 @@ export class ProgressService {
 
   async getProgressForCourse(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<UserProgress | null> {
     return this.repository.getProgressByCourse(courseId, userId);
   }
@@ -224,23 +226,23 @@ export class ProgressService {
     const allProgress = await this.repository.getProgressByUser(userId);
 
     const coursesInProgress = allProgress.filter(
-      (p) => p.percentComplete > 0 && p.percentComplete < 100
+      (p) => p.percentComplete > 0 && p.percentComplete < 100,
     ).length;
 
     const coursesCompleted = allProgress.filter(
-      (p) => p.percentComplete === 100
+      (p) => p.percentComplete === 100,
     ).length;
 
     const totalLessonsCompleted = allProgress.reduce(
       (sum, p) => sum + p.lessonsCompleted.length,
-      0
+      0,
     );
 
     // Note: We'd ideally fetch course names from the course service/repository
     // For now, just return IDs and let frontend resolve names
     const progressByCourseName = allProgress.map((p) => ({
       courseId: p.courseId,
-      courseName: '', // TODO: Resolve from course service
+      courseName: "", // TODO: Resolve from course service
       percentComplete: p.percentComplete,
       lessonsCompleted: p.lessonsCompleted.length,
       totalLessons: p.totalLessons,
@@ -258,19 +260,19 @@ export class ProgressService {
   async updateTotalLessons(
     courseId: string,
     userId: string,
-    totalLessons: number
+    totalLessons: number,
   ): Promise<UserProgress> {
     const progress = await this.repository.getProgressByCourse(
       courseId,
-      userId
+      userId,
     );
 
     if (!progress) {
-      throw new AppError('Progress not found', 404);
+      throw new AppError("Progress not found", 404);
     }
 
     const percentComplete = Math.round(
-      (progress.lessonsCompleted.length / totalLessons) * 100
+      (progress.lessonsCompleted.length / totalLessons) * 100,
     );
 
     return this.repository.updateProgress(courseId, userId, {
@@ -292,14 +294,14 @@ export class ProgressService {
 
     const totalEnrolled = allProgress.length;
     const completedCount = allProgress.filter(
-      (p) => p.percentComplete === 100
+      (p) => p.percentComplete === 100,
     ).length;
 
     const averageCompletion =
       totalEnrolled > 0
         ? Math.round(
             allProgress.reduce((sum, p) => sum + p.percentComplete, 0) /
-              totalEnrolled
+              totalEnrolled,
           )
         : 0;
 

@@ -1,8 +1,7 @@
-import type { Request, Response } from 'express';
-import type { UserRecord } from 'firebase-admin/auth';
-import { firebaseFirestore, firebaseAuth, admin } from '../../config/firebase';
-import type { CreateUser, LoginUser } from './types';
-import { logger } from '../../utils/loggers';
+import type { UserRecord } from "firebase-admin/auth";
+import { admin, firebaseFirestore } from "../../config/firebase";
+import { logger } from "../../utils/loggers";
+import type { CreateUser } from "./types";
 
 export class AuthRepository {
   private auth: admin.auth.Auth;
@@ -20,7 +19,7 @@ export class AuthRepository {
         password: request.password,
       });
 
-      await this.db.collection('users').add({
+      await this.db.collection("users").add({
         uid: user.uid,
         firstName: request.firstName,
         lastName: request.lastName,
@@ -30,7 +29,7 @@ export class AuthRepository {
 
       return user;
     } catch (error) {
-      logger.error('Error in AuthRepository.createUser:', error);
+      logger.error("Error in AuthRepository.createUser:", error);
       throw error;
     }
   }

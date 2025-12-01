@@ -1,8 +1,9 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import { FieldValue } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
-import { AppError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Firestore } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
+import { AppError } from "../../utils/errors";
+import { logger } from "../../utils/loggers";
 import type {
   CapstoneGuideline,
   CapstoneSubmission,
@@ -10,14 +11,14 @@ import type {
   CapstoneLike,
   CapstoneSubmissionQueryParams,
   CapstoneReviewQueryParams,
-} from './types';
+} from "./types";
 
 export class CapstoneRepository {
   private firebaseStore: Firestore;
-  private readonly GUIDELINES_COLLECTION = 'capstoneGuidelines';
-  private readonly SUBMISSIONS_COLLECTION = 'capstoneSubmissions';
-  private readonly REVIEWS_COLLECTION = 'capstoneReviews';
-  private readonly LIKES_COLLECTION = 'capstoneLikes';
+  private readonly GUIDELINES_COLLECTION = "capstoneGuidelines";
+  private readonly SUBMISSIONS_COLLECTION = "capstoneSubmissions";
+  private readonly REVIEWS_COLLECTION = "capstoneReviews";
+  private readonly LIKES_COLLECTION = "capstoneLikes";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -26,7 +27,7 @@ export class CapstoneRepository {
   // ==================== CAPSTONE GUIDELINES ====================
 
   async createGuideline(
-    guideline: Omit<CapstoneGuideline, 'id' | 'createdAt' | 'updatedAt'>
+    guideline: Omit<CapstoneGuideline, "id" | "createdAt" | "updatedAt">,
   ): Promise<CapstoneGuideline> {
     try {
       const docRef = this.firebaseStore
@@ -46,18 +47,18 @@ export class CapstoneRepository {
 
       return guidelineData;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.createGuideline:', error);
+      logger.error("Error in CapstoneRepository.createGuideline:", error);
       throw error;
     }
   }
 
   async getGuidelineByCourseId(
-    courseId: string
+    courseId: string,
   ): Promise<CapstoneGuideline | null> {
     try {
       const snapshot = await this.firebaseStore
         .collection(this.GUIDELINES_COLLECTION)
-        .where('courseId', '==', courseId)
+        .where("courseId", "==", courseId)
         .limit(1)
         .get();
 
@@ -72,8 +73,8 @@ export class CapstoneRepository {
       return this.serializeFirestoreDoc(doc) as CapstoneGuideline;
     } catch (error) {
       logger.error(
-        'Error in CapstoneRepository.getGuidelineByCourseId:',
-        error
+        "Error in CapstoneRepository.getGuidelineByCourseId:",
+        error,
       );
       throw error;
     }
@@ -87,19 +88,19 @@ export class CapstoneRepository {
         .get();
 
       if (!doc.exists) {
-        throw new AppError('Capstone guideline not found', 404);
+        throw new AppError("Capstone guideline not found", 404);
       }
 
       return this.serializeFirestoreDoc(doc) as CapstoneGuideline;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.getGuidelineById:', error);
+      logger.error("Error in CapstoneRepository.getGuidelineById:", error);
       throw error;
     }
   }
 
   async updateGuideline(
     id: string,
-    updates: Partial<CapstoneGuideline>
+    updates: Partial<CapstoneGuideline>,
   ): Promise<CapstoneGuideline> {
     try {
       const docRef = this.firebaseStore
@@ -116,7 +117,7 @@ export class CapstoneRepository {
       const updated = await this.getGuidelineById(id);
       return updated;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.updateGuideline:', error);
+      logger.error("Error in CapstoneRepository.updateGuideline:", error);
       throw error;
     }
   }
@@ -126,13 +127,13 @@ export class CapstoneRepository {
   async createSubmission(
     submission: Omit<
       CapstoneSubmission,
-      | 'id'
-      | 'submittedAt'
-      | 'updatedAt'
-      | 'viewCount'
-      | 'reviewCount'
-      | 'likeCount'
-    >
+      | "id"
+      | "submittedAt"
+      | "updatedAt"
+      | "viewCount"
+      | "reviewCount"
+      | "likeCount"
+    >,
   ): Promise<CapstoneSubmission> {
     try {
       const docRef = this.firebaseStore
@@ -156,41 +157,41 @@ export class CapstoneRepository {
 
       return submissionData;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.createSubmission:', error);
+      logger.error("Error in CapstoneRepository.createSubmission:", error);
       throw error;
     }
   }
 
   async getSubmissions(
-    params?: CapstoneSubmissionQueryParams
+    params?: CapstoneSubmissionQueryParams,
   ): Promise<CapstoneSubmission[]> {
     try {
       let query = this.firebaseStore.collection(
-        this.SUBMISSIONS_COLLECTION
+        this.SUBMISSIONS_COLLECTION,
       ) as any;
 
       if (params?.courseId) {
-        query = query.where('courseId', '==', params.courseId);
+        query = query.where("courseId", "==", params.courseId);
       }
 
       if (params?.userId) {
-        query = query.where('userId', '==', params.userId);
+        query = query.where("userId", "==", params.userId);
       }
 
       // Sorting
       switch (params?.sortBy) {
-        case 'popular':
-          query = query.orderBy('likeCount', 'desc');
+        case "popular":
+          query = query.orderBy("likeCount", "desc");
           break;
-        case 'mostReviewed':
-          query = query.orderBy('reviewCount', 'desc');
+        case "mostReviewed":
+          query = query.orderBy("reviewCount", "desc");
           break;
-        case 'topRated':
-          query = query.orderBy('averageRating', 'desc');
+        case "topRated":
+          query = query.orderBy("averageRating", "desc");
           break;
-        case 'recent':
+        case "recent":
         default:
-          query = query.orderBy('submittedAt', 'desc');
+          query = query.orderBy("submittedAt", "desc");
           break;
       }
 
@@ -215,7 +216,7 @@ export class CapstoneRepository {
 
       return submissions;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.getSubmissions:', error);
+      logger.error("Error in CapstoneRepository.getSubmissions:", error);
       throw error;
     }
   }
@@ -228,19 +229,19 @@ export class CapstoneRepository {
         .get();
 
       if (!doc.exists) {
-        throw new AppError('Capstone submission not found', 404);
+        throw new AppError("Capstone submission not found", 404);
       }
 
       return this.serializeFirestoreDoc(doc) as CapstoneSubmission;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.getSubmissionById:', error);
+      logger.error("Error in CapstoneRepository.getSubmissionById:", error);
       throw error;
     }
   }
 
   async updateSubmission(
     id: string,
-    updates: Partial<CapstoneSubmission>
+    updates: Partial<CapstoneSubmission>,
   ): Promise<CapstoneSubmission> {
     try {
       const docRef = this.firebaseStore
@@ -257,7 +258,7 @@ export class CapstoneRepository {
       const updated = await this.getSubmissionById(id);
       return updated;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.updateSubmission:', error);
+      logger.error("Error in CapstoneRepository.updateSubmission:", error);
       throw error;
     }
   }
@@ -271,7 +272,7 @@ export class CapstoneRepository {
 
       logger.info(`Capstone submission deleted: ${id}`);
     } catch (error) {
-      logger.error('Error in CapstoneRepository.deleteSubmission:', error);
+      logger.error("Error in CapstoneRepository.deleteSubmission:", error);
       throw error;
     }
   }
@@ -286,28 +287,28 @@ export class CapstoneRepository {
         viewCount: FieldValue.increment(1),
       });
     } catch (error) {
-      logger.error('Error in CapstoneRepository.incrementViewCount:', error);
+      logger.error("Error in CapstoneRepository.incrementViewCount:", error);
       throw error;
     }
   }
 
   async submissionExistsByRepo(
     userId: string,
-    githubRepoUrl: string
+    githubRepoUrl: string,
   ): Promise<boolean> {
     try {
       const snapshot = await this.firebaseStore
         .collection(this.SUBMISSIONS_COLLECTION)
-        .where('userId', '==', userId)
-        .where('githubRepoUrl', '==', githubRepoUrl)
+        .where("userId", "==", userId)
+        .where("githubRepoUrl", "==", githubRepoUrl)
         .limit(1)
         .get();
 
       return !snapshot.empty;
     } catch (error) {
       logger.error(
-        'Error in CapstoneRepository.submissionExistsByRepo:',
-        error
+        "Error in CapstoneRepository.submissionExistsByRepo:",
+        error,
       );
       throw error;
     }
@@ -318,8 +319,13 @@ export class CapstoneRepository {
   async createReview(
     review: Omit<
       CapstoneReview,
-      'id' | 'createdAt' | 'updatedAt' | 'deleted' | 'helpfulCount' | 'replyCount'
-    >
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "deleted"
+      | "helpfulCount"
+      | "replyCount"
+    >,
   ): Promise<CapstoneReview> {
     try {
       const docRef = this.firebaseStore
@@ -341,10 +347,10 @@ export class CapstoneRepository {
         suggestions: review.suggestions || [],
       };
 
-      // Ensure parentReviewId is explicitly set to null for top-level reviews
+      // Ensure parentReviewId is explicitly set to empty string for top-level reviews
       // This is important for Firestore queries to work correctly
       if (!reviewData.parentReviewId) {
-        reviewData.parentReviewId = null;
+        reviewData.parentReviewId = "";
       }
 
       const cleanedData = this.removeUndefinedValues(reviewData);
@@ -358,29 +364,29 @@ export class CapstoneRepository {
 
       return reviewData;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.createReview:', error);
+      logger.error("Error in CapstoneRepository.createReview:", error);
       throw error;
     }
   }
 
   async getReviews(
-    params?: CapstoneReviewQueryParams
+    params?: CapstoneReviewQueryParams,
   ): Promise<CapstoneReview[]> {
     try {
       let query = this.firebaseStore
         .collection(this.REVIEWS_COLLECTION)
-        .where('deleted', '==', false) as any;
+        .where("deleted", "==", false) as any;
 
       if (params?.capstoneSubmissionId) {
         query = query.where(
-          'capstoneSubmissionId',
-          '==',
-          params.capstoneSubmissionId
+          "capstoneSubmissionId",
+          "==",
+          params.capstoneSubmissionId,
         );
       }
 
       if (params?.reviewerId) {
-        query = query.where('reviewerId', '==', params.reviewerId);
+        query = query.where("reviewerId", "==", params.reviewerId);
       }
 
       // Handle parentReviewId filtering
@@ -390,24 +396,27 @@ export class CapstoneRepository {
       // the field exists and is explicitly null. If the field doesn't exist, it won't match.
       // So for top-level reviews, we query all reviews and filter in memory.
       let shouldFilterInMemory = false;
-      
+
       if (params?.parentReviewId !== undefined) {
-        if (params.parentReviewId === null || params.parentReviewId === '') {
+        if (params.parentReviewId === null || params.parentReviewId === "") {
           // For top-level reviews, query all reviews and filter in memory
           // This handles both cases: field is null OR field doesn't exist
           shouldFilterInMemory = true;
-          logger.info('Querying for top-level reviews - will filter in memory');
+          logger.info("Querying for top-level reviews - will filter in memory");
         } else {
-          query = query.where('parentReviewId', '==', params.parentReviewId);
+          query = query.where("parentReviewId", "==", params.parentReviewId);
         }
       }
 
       // Order by createdAt - note: this requires a composite index if combined with where clauses
       try {
-        query = query.orderBy('createdAt', 'desc');
+        query = query.orderBy("createdAt", "desc");
       } catch (orderError: any) {
         // If ordering fails (e.g., missing index), log and continue without ordering
-        logger.warn('Failed to order reviews by createdAt, continuing without order:', orderError);
+        logger.warn(
+          "Failed to order reviews by createdAt, continuing without order:",
+          orderError,
+        );
       }
 
       if (params?.limit && !shouldFilterInMemory) {
@@ -426,45 +435,51 @@ export class CapstoneRepository {
         snapshot = await query.get();
       } catch (queryError: any) {
         // If query fails (e.g., missing composite index), try without ordering
-        logger.warn('Query failed, trying without ordering:', queryError);
+        logger.warn("Query failed, trying without ordering:", queryError);
         let altQuery = this.firebaseStore
           .collection(this.REVIEWS_COLLECTION)
-          .where('deleted', '==', false) as any;
+          .where("deleted", "==", false) as any;
 
         if (params?.capstoneSubmissionId) {
           altQuery = altQuery.where(
-            'capstoneSubmissionId',
-            '==',
-            params.capstoneSubmissionId
+            "capstoneSubmissionId",
+            "==",
+            params.capstoneSubmissionId,
           );
         }
 
         if (params?.reviewerId) {
-          altQuery = altQuery.where('reviewerId', '==', params.reviewerId);
+          altQuery = altQuery.where("reviewerId", "==", params.reviewerId);
         }
 
         if (params?.parentReviewId && params.parentReviewId !== null) {
-          altQuery = altQuery.where('parentReviewId', '==', params.parentReviewId);
+          altQuery = altQuery.where(
+            "parentReviewId",
+            "==",
+            params.parentReviewId,
+          );
         } else if (params?.parentReviewId === null) {
           shouldFilterInMemory = true;
         }
 
         if (params?.limit) {
-          altQuery = altQuery.limit(shouldFilterInMemory ? params.limit * 3 : params.limit);
+          altQuery = altQuery.limit(
+            shouldFilterInMemory ? params.limit * 3 : params.limit,
+          );
         }
 
         snapshot = await altQuery.get();
       }
 
       if (snapshot.empty) {
-        logger.info('No reviews found for query:', params);
+        logger.info("No reviews found for query:", params);
         return [];
       }
 
       const reviews: CapstoneReview[] = [];
       snapshot.forEach((doc: any) => {
         const review = this.serializeFirestoreDoc(doc) as CapstoneReview;
-        
+
         // For top-level reviews, filter in memory to handle both null and missing field
         if (shouldFilterInMemory) {
           // Include reviews where parentReviewId is null, undefined, or doesn't exist
@@ -480,24 +495,29 @@ export class CapstoneRepository {
       // Sort by createdAt if we filtered in memory (since we might have skipped ordering)
       if (shouldFilterInMemory) {
         reviews.sort((a, b) => {
-          const aDate = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
-          const bDate = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+          const aDate =
+            a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+          const bDate =
+            b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
           return bDate.getTime() - aDate.getTime();
         });
-        
+
         // Apply limit and offset after filtering
         const start = params?.offset || 0;
         const end = start + (params?.limit || reviews.length);
         const paginatedReviews = reviews.slice(start, end);
-        
-        logger.info(`Found ${reviews.length} total reviews, returning ${paginatedReviews.length} after filtering and pagination:`, params);
+
+        logger.info(
+          `Found ${reviews.length} total reviews, returning ${paginatedReviews.length} after filtering and pagination:`,
+          params,
+        );
         return paginatedReviews;
       }
 
       logger.info(`Found ${reviews.length} reviews for query:`, params);
       return reviews;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.getReviews:', error);
+      logger.error("Error in CapstoneRepository.getReviews:", error);
       throw error;
     }
   }
@@ -510,25 +530,25 @@ export class CapstoneRepository {
         .get();
 
       if (!doc.exists) {
-        throw new AppError('Review not found', 404);
+        throw new AppError("Review not found", 404);
       }
 
       const review = this.serializeFirestoreDoc(doc) as CapstoneReview;
 
       if (review.deleted) {
-        throw new AppError('Review has been deleted', 404);
+        throw new AppError("Review has been deleted", 404);
       }
 
       return review;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.getReviewById:', error);
+      logger.error("Error in CapstoneRepository.getReviewById:", error);
       throw error;
     }
   }
 
   async updateReview(
     id: string,
-    updates: Partial<CapstoneReview>
+    updates: Partial<CapstoneReview>,
   ): Promise<CapstoneReview> {
     try {
       const docRef = this.firebaseStore
@@ -548,7 +568,7 @@ export class CapstoneRepository {
       const updated = await this.getReviewById(id);
       return updated;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.updateReview:', error);
+      logger.error("Error in CapstoneRepository.updateReview:", error);
       throw error;
     }
   }
@@ -570,27 +590,27 @@ export class CapstoneRepository {
 
       logger.info(`Capstone review deleted: ${id}`);
     } catch (error) {
-      logger.error('Error in CapstoneRepository.deleteReview:', error);
+      logger.error("Error in CapstoneRepository.deleteReview:", error);
       throw error;
     }
   }
 
   async reviewExists(
     reviewerId: string,
-    capstoneSubmissionId: string
+    capstoneSubmissionId: string,
   ): Promise<boolean> {
     try {
       const snapshot = await this.firebaseStore
         .collection(this.REVIEWS_COLLECTION)
-        .where('reviewerId', '==', reviewerId)
-        .where('capstoneSubmissionId', '==', capstoneSubmissionId)
-        .where('deleted', '==', false)
+        .where("reviewerId", "==", reviewerId)
+        .where("capstoneSubmissionId", "==", capstoneSubmissionId)
+        .where("deleted", "==", false)
         .limit(1)
         .get();
 
       return !snapshot.empty;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.reviewExists:', error);
+      logger.error("Error in CapstoneRepository.reviewExists:", error);
       throw error;
     }
   }
@@ -605,7 +625,7 @@ export class CapstoneRepository {
         replyCount: FieldValue.increment(1),
       });
     } catch (error) {
-      logger.error('Error incrementing reply count:', error);
+      logger.error("Error incrementing reply count:", error);
     }
   }
 
@@ -619,7 +639,7 @@ export class CapstoneRepository {
         replyCount: FieldValue.increment(-1),
       });
     } catch (error) {
-      logger.error('Error decrementing reply count:', error);
+      logger.error("Error decrementing reply count:", error);
     }
   }
 
@@ -635,7 +655,7 @@ export class CapstoneRepository {
 
       await this.updateAverageRating(submissionId);
     } catch (error) {
-      logger.error('Error incrementing review count:', error);
+      logger.error("Error incrementing review count:", error);
     }
   }
 
@@ -651,7 +671,7 @@ export class CapstoneRepository {
 
       await this.updateAverageRating(submissionId);
     } catch (error) {
-      logger.error('Error decrementing review count:', error);
+      logger.error("Error decrementing review count:", error);
     }
   }
 
@@ -659,11 +679,11 @@ export class CapstoneRepository {
     try {
       const reviews = await this.getReviews({
         capstoneSubmissionId: submissionId,
-        parentReviewId: null, 
+        parentReviewId: null,
       });
 
       const reviewsWithRatings = reviews.filter(
-        (review) => review.rating !== undefined && review.rating !== null
+        (review) => review.rating !== undefined && review.rating !== null,
       );
 
       if (reviewsWithRatings.length === 0) {
@@ -673,7 +693,7 @@ export class CapstoneRepository {
 
       const totalRating = reviewsWithRatings.reduce(
         (sum, review) => sum + (review.rating || 0),
-        0
+        0,
       );
       const averageRating = totalRating / reviewsWithRatings.length;
 
@@ -681,7 +701,7 @@ export class CapstoneRepository {
         averageRating: Math.round(averageRating * 10) / 10,
       });
     } catch (error) {
-      logger.error('Error updating average rating:', error);
+      logger.error("Error updating average rating:", error);
     }
   }
 
@@ -689,7 +709,7 @@ export class CapstoneRepository {
 
   async toggleLike(
     userId: string,
-    capstoneSubmissionId: string
+    capstoneSubmissionId: string,
   ): Promise<boolean> {
     try {
       const likeId = `${capstoneSubmissionId}_${userId}`;
@@ -738,14 +758,14 @@ export class CapstoneRepository {
         return true;
       }
     } catch (error) {
-      logger.error('Error in CapstoneRepository.toggleLike:', error);
+      logger.error("Error in CapstoneRepository.toggleLike:", error);
       throw error;
     }
   }
 
   async isLikedByUser(
     userId: string,
-    capstoneSubmissionId: string
+    capstoneSubmissionId: string,
   ): Promise<boolean> {
     try {
       const likeId = `${capstoneSubmissionId}_${userId}`;
@@ -756,7 +776,7 @@ export class CapstoneRepository {
 
       return doc.exists;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.isLikedByUser:', error);
+      logger.error("Error in CapstoneRepository.isLikedByUser:", error);
       throw error;
     }
   }
@@ -766,7 +786,7 @@ export class CapstoneRepository {
       const submission = await this.getSubmissionById(capstoneSubmissionId);
       return submission.likeCount || 0;
     } catch (error) {
-      logger.error('Error in CapstoneRepository.getLikeCount:', error);
+      logger.error("Error in CapstoneRepository.getLikeCount:", error);
       throw error;
     }
   }
@@ -791,7 +811,7 @@ export class CapstoneRepository {
 
     for (const key in data) {
       const value = data[key];
-      if (value && typeof value === 'object' && value.toDate) {
+      if (value && typeof value === "object" && value.toDate) {
         serialized[key] = value.toDate().toISOString();
       } else {
         serialized[key] = value;

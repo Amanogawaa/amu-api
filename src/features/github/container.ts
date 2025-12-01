@@ -1,6 +1,6 @@
-import { GitHubService } from './service';
-import { GitHubController } from './controller';
-import { GitHubRoute } from './route';
+import { GitHubService } from "./service";
+import { GitHubController } from "./controller";
+import { GitHubRoute } from "./route";
 
 export class GitHubContainer {
   private service: GitHubService;
@@ -17,4 +17,3 @@ export class GitHubContainer {
     return this.route.getRouter();
   }
 }
-

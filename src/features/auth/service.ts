@@ -1,8 +1,8 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { AppError, ConflictError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
-import type { AuthRepository } from './repository';
-import type { CreateUser, LoginUser } from './types';
+import { firebaseFirestore } from "@config/firebase";
+import { ConflictError, AppError } from "@utils/errors";
+import { logger } from "@utils/loggers";
+import { AuthRepository } from "./repository";
+import type { CreateUser } from "./types";
 
 export class AuthService {
   private authRepository: AuthRepository;
@@ -17,9 +17,9 @@ export class AuthService {
 
       if (userExists) {
         logger.warn(
-          `Attempt to sign up with existing email: ${userData.email}`
+          `Attempt to sign up with existing email: ${userData.email}`,
         );
-        throw new ConflictError('User with this email already exists');
+        throw new ConflictError("User with this email already exists");
       }
 
       this.validateSignUpData(userData);
@@ -27,27 +27,27 @@ export class AuthService {
 
       logger.info(`Use  r signed up with email: ${userData.email}`);
 
-      return { message: 'User created successfully' };
+      return { message: "User created successfully" };
     } catch (error) {
-      logger.error('Error in AuthService.signUp:', error);
+      logger.error("Error in AuthService.signUp:", error);
       throw error;
     }
   }
 
   private validateSignUpData(userData: CreateUser): void {
     if (!userData.email || !userData.password) {
-      throw new AppError('Email and password are required', 400);
+      throw new AppError("Email and password are required", 400);
     }
 
     if (userData.password.length < 6) {
-      throw new AppError('Password must be at least 6 characters', 400);
+      throw new AppError("Password must be at least 6 characters", 400);
     }
   }
 
   private isExistingUser(email: string): Promise<boolean> {
     return firebaseFirestore
-      .collection('users')
-      .where('email', '==', email)
+      .collection("users")
+      .where("email", "==", email)
       .get()
       .then((snapshot) => !snapshot.empty);
   }

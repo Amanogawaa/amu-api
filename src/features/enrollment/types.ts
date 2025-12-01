@@ -1,11 +1,11 @@
-import type { Course } from '../course/types';
+import type { Course } from "../course/types";
 
 export interface Enrollment {
   id: string;
   courseId: string;
   userId: string;
   enrolledAt: Date;
-  status: 'active' | 'completed' | 'dropped';
+  status: "active" | "completed" | "dropped";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,7 +39,7 @@ export interface EnrollmentCountResponse {
 }
 
 export interface EnrollmentQueryParams {
-  status?: 'active' | 'completed' | 'dropped';
+  status?: "active" | "completed" | "dropped";
   courseId?: string;
   limit?: number;
   offset?: number;
@@ -47,11 +47,11 @@ export interface EnrollmentQueryParams {
 
 export const enrollmentValidation = {
   enroll: {
-    type: 'object',
+    type: "object",
     properties: {
-      courseId: { type: 'string', minLength: 1 },
+      courseId: { type: "string", minLength: 1 },
     },
-    required: ['courseId'],
+    required: ["courseId"],
     additionalProperties: false,
   },
 };

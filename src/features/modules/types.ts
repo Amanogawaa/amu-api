@@ -10,20 +10,20 @@ export interface Module {
   learningObjectives: string[];
   keySkills?: string[];
   prerequisiteModules?: string[];
-  level: 'beginner' | 'intermediate' | 'advanced';
+  level: "beginner" | "intermediate" | "advanced";
   language: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-import type { PromptMode } from '../../utils/prompts/types';
+import type { PromptMode } from "../../utils/prompts/types";
 
 export interface GenerateModulesRequest {
   courseId: string;
   courseName: string;
   courseDescription: string;
   learningOutcomes: string[];
-  level: 'beginner' | 'intermediate' | 'advanced';
+  level: "beginner" | "intermediate" | "advanced";
   duration: string;
   noOfModules: number;
   language: string;
@@ -49,49 +49,49 @@ export interface ModuleResponse {
 }
 
 export const modulesSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     modules: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          moduleOrder: { type: 'integer', minimum: 1 },
-          moduleName: { type: 'string', minLength: 5, maxLength: 100 },
-          moduleDescription: { type: 'string', minLength: 50, maxLength: 500 },
+          moduleOrder: { type: "integer", minimum: 1 },
+          moduleName: { type: "string", minLength: 5, maxLength: 100 },
+          moduleDescription: { type: "string", minLength: 50, maxLength: 500 },
           estimatedDuration: {
-            type: 'string',
-            pattern: '^\\d+h( \\d+m)?$|^\\d+m$', // e.g., "6h 30m" or "45m"
+            type: "string",
+            pattern: "^\\d+h( \\d+m)?$|^\\d+m$", // e.g., "6h 30m" or "45m"
           },
-          estimatedChapterCount: { type: 'integer', minimum: 3, maximum: 8 },
+          estimatedChapterCount: { type: "integer", minimum: 3, maximum: 8 },
           learningObjectives: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
             minItems: 3,
             maxItems: 5,
           },
           keySkills: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
             minItems: 2,
           },
           prerequisiteModules: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
           },
         },
         required: [
-          'moduleOrder',
-          'moduleName',
-          'moduleDescription',
-          'estimatedDuration',
-          'learningObjectives',
-          'estimatedChapterCount',
-          'keySkills',
-          'prerequisiteModules',
+          "moduleOrder",
+          "moduleName",
+          "moduleDescription",
+          "estimatedDuration",
+          "learningObjectives",
+          "estimatedChapterCount",
+          "keySkills",
+          "prerequisiteModules",
         ],
       },
     },
   },
-  required: ['modules'],
+  required: ["modules"],
 };

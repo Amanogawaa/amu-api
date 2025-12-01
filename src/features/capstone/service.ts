@@ -1,8 +1,9 @@
-import { AppError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
-import { CapstoneRepository } from './repository';
-import fs from 'fs/promises';
-import path from 'path';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { AppError } from "../../utils/errors";
+import { logger } from "../../utils/loggers";
+import { CapstoneRepository } from "./repository";
+import fs from "fs/promises";
+import path from "path";
 import {
   type CapstoneGuideline,
   type CapstoneSubmission,
@@ -15,14 +16,14 @@ import {
   type CapstoneReviewQueryParams,
   type GitHubRepoMetadata,
   capstoneSchema,
-} from './types';
-import { geminiCall } from '../../utils/geminiCall';
-import { generateCapstonePrompt } from '../../utils/prompts/capstone-temp';
-import type { GitHubService } from '../github/service';
-import type { CourseRepository } from '../course/repository';
-import type { ModuleRepository } from '../modules/repository';
-import type { ChapterRepository } from '../chapter/repository';
-import type { LessonRepository } from '../lesson/repository';
+} from "./types";
+import { geminiCall } from "../../utils/geminiCall";
+import { generateCapstonePrompt } from "../../utils/prompts/capstone-temp";
+import type { GitHubService } from "../github/service";
+import type { CourseRepository } from "../course/repository";
+import type { ModuleRepository } from "../modules/repository";
+import type { ChapterRepository } from "../chapter/repository";
+import type { LessonRepository } from "../lesson/repository";
 
 export class CapstoneService {
   private repository: CapstoneRepository;
@@ -38,7 +39,7 @@ export class CapstoneService {
     courseRepository: CourseRepository,
     moduleRepository: ModuleRepository,
     chapterRepository: ChapterRepository,
-    lessonRepository: LessonRepository
+    lessonRepository: LessonRepository,
   ) {
     this.repository = repository;
     this.githubService = githubService;
@@ -56,17 +57,17 @@ export class CapstoneService {
 
       if (existing) {
         logger.info(
-          `Capstone guideline already exists for course: ${courseId}`
+          `Capstone guideline already exists for course: ${courseId}`,
         );
         return existing;
       }
 
-      logger.info('Fetching course context from database', { courseId });
+      logger.info("Fetching course context from database", { courseId });
       const courseContext = await this.gatherCourseContext(courseId);
 
       const prompt = generateCapstonePrompt(courseContext);
 
-      logger.info('Generating capstone guideline with AI', { courseId });
+      logger.info("Generating capstone guideline with AI", { courseId });
 
       const result = await geminiCall(prompt, {
         responseSchema: capstoneSchema,
@@ -74,20 +75,19 @@ export class CapstoneService {
         maxRetries: 3,
       });
 
-      logger.info('Capstone guideline generated successfully');
+      logger.info("Capstone guideline generated successfully");
 
       const guidelineData = {
         courseId,
         ...result,
       };
 
-      const createdGuideline = await this.repository.createGuideline(
-        guidelineData
-      );
+      const createdGuideline =
+        await this.repository.createGuideline(guidelineData);
 
       return createdGuideline;
     } catch (error) {
-      logger.error('Error in CapstoneService.generateGuideline:', error);
+      logger.error("Error in CapstoneService.generateGuideline:", error);
       throw error;
     }
   }
@@ -97,15 +97,15 @@ export class CapstoneService {
       const course = await this.courseRepository.getCourseById(courseId);
 
       if (!course) {
-        throw new AppError('Course not found', 404);
+        throw new AppError("Course not found", 404);
       }
 
       const modules = await this.moduleRepository.getModules(courseId);
 
       if (!modules || modules.length === 0) {
         throw new AppError(
-          'No modules found for this course. Generate course content first.',
-          400
+          "No modules found for this course. Generate course content first.",
+          400,
         );
       }
 
@@ -128,7 +128,7 @@ export class CapstoneService {
         for (const chapter of chapters) {
           const lessons = await this.lessonRepository.getLessons(chapter.id);
           allLessons.push(
-            ...lessons.map((l) => ({ ...l, moduleId: module.id }))
+            ...lessons.map((l) => ({ ...l, moduleId: module.id })),
           );
         }
       }
@@ -163,7 +163,7 @@ export class CapstoneService {
         learningOutcomes: course.learning_outcomes || [],
         skillsGained,
         prerequisites: course.prerequisites
-          ? course.prerequisites.split(',').map((p) => p.trim())
+          ? course.prerequisites.split(",").map((p) => p.trim())
           : [],
         totalModules: modules.length,
         totalLessons: allLessons.length,
@@ -172,7 +172,7 @@ export class CapstoneService {
         technologiesUsed,
       };
     } catch (error) {
-      logger.error('Error gathering course context:', error);
+      logger.error("Error gathering course context:", error);
       throw error;
     }
   }
@@ -186,7 +186,7 @@ export class CapstoneService {
     });
 
     lessons.forEach((lesson) => {
-      const text = `${lesson.title} ${lesson.description || ''}`.toLowerCase();
+      const text = `${lesson.title} ${lesson.description || ""}`.toLowerCase();
       this.findTechnologiesInText(text, technologies);
     });
 
@@ -195,38 +195,38 @@ export class CapstoneService {
 
   private findTechnologiesInText(text: string, technologies: Set<string>) {
     const techPatterns = [
-      'react',
-      'vue',
-      'angular',
-      'next.js',
-      'express',
-      'django',
-      'flask',
-      'javascript',
-      'typescript',
-      'python',
-      'java',
-      'c#',
-      'ruby',
-      'go',
-      'rust',
-      'mongodb',
-      'postgresql',
-      'mysql',
-      'redis',
-      'firebase',
-      'docker',
-      'kubernetes',
-      'git',
-      'aws',
-      'azure',
-      'gcp',
-      'tailwind',
-      'bootstrap',
-      'jquery',
-      'axios',
-      'pandas',
-      'numpy',
+      "react",
+      "vue",
+      "angular",
+      "next.js",
+      "express",
+      "django",
+      "flask",
+      "javascript",
+      "typescript",
+      "python",
+      "java",
+      "c#",
+      "ruby",
+      "go",
+      "rust",
+      "mongodb",
+      "postgresql",
+      "mysql",
+      "redis",
+      "firebase",
+      "docker",
+      "kubernetes",
+      "git",
+      "aws",
+      "azure",
+      "gcp",
+      "tailwind",
+      "bootstrap",
+      "jquery",
+      "axios",
+      "pandas",
+      "numpy",
     ];
 
     techPatterns.forEach((tech) => {
@@ -241,12 +241,12 @@ export class CapstoneService {
       const guideline = await this.repository.getGuidelineByCourseId(courseId);
 
       if (!guideline) {
-        throw new AppError('Capstone guideline not found for this course', 404);
+        throw new AppError("Capstone guideline not found for this course", 404);
       }
 
       return guideline;
     } catch (error) {
-      logger.error('Error in CapstoneService.getGuidelineByCourseId:', error);
+      logger.error("Error in CapstoneService.getGuidelineByCourseId:", error);
       throw error;
     }
   }
@@ -255,7 +255,7 @@ export class CapstoneService {
     try {
       return await this.repository.getGuidelineById(id);
     } catch (error) {
-      logger.error('Error in CapstoneService.getGuidelineById:', error);
+      logger.error("Error in CapstoneService.getGuidelineById:", error);
       throw error;
     }
   }
@@ -264,27 +264,26 @@ export class CapstoneService {
 
   async createSubmission(
     userId: string,
-    request: CreateCapstoneSubmissionRequest
+    request: CreateCapstoneSubmissionRequest,
   ): Promise<CapstoneSubmission> {
     try {
       await this.repository.getGuidelineById(request.guidelineId);
 
       const exists = await this.repository.submissionExistsByRepo(
         userId,
-        request.githubRepoUrl
+        request.githubRepoUrl,
       );
 
       if (exists) {
-        throw new AppError('You have already submitted this repository', 400);
+        throw new AppError("You have already submitted this repository", 400);
       }
 
       const { owner, repo } = this.parseGitHubUrl(request.githubRepoUrl);
 
       const repoMetadata = await this.githubService.getRepoMetadata(
         owner,
-        repo
+        repo,
       );
-
 
       const submissionData = {
         userId,
@@ -296,7 +295,7 @@ export class CapstoneService {
         title: request.title,
         description: request.description,
         repoMetadata: {
-          language: repoMetadata.language || 'Unknown',
+          language: repoMetadata.language || "Unknown",
           stars: repoMetadata.stargazers_count,
           forks: repoMetadata.forks_count,
           lastUpdated: new Date(repoMetadata.updated_at),
@@ -309,13 +308,13 @@ export class CapstoneService {
 
       return submission;
     } catch (error) {
-      logger.error('Error in CapstoneService.createSubmission:', error);
+      logger.error("Error in CapstoneService.createSubmission:", error);
       throw error;
     }
   }
 
   async getSubmissions(
-    params?: CapstoneSubmissionQueryParams
+    params?: CapstoneSubmissionQueryParams,
   ): Promise<{ submissions: CapstoneSubmission[]; total: number }> {
     try {
       const submissions = await this.repository.getSubmissions(params);
@@ -324,14 +323,14 @@ export class CapstoneService {
         total: submissions.length,
       };
     } catch (error) {
-      logger.error('Error in CapstoneService.getSubmissions:', error);
+      logger.error("Error in CapstoneService.getSubmissions:", error);
       throw error;
     }
   }
 
   async getSubmissionById(
     id: string,
-    incrementView: boolean = false
+    incrementView: boolean = false,
   ): Promise<CapstoneSubmission> {
     try {
       const submission = await this.repository.getSubmissionById(id);
@@ -342,7 +341,7 @@ export class CapstoneService {
 
       return submission;
     } catch (error) {
-      logger.error('Error in CapstoneService.getSubmissionById:', error);
+      logger.error("Error in CapstoneService.getSubmissionById:", error);
       throw error;
     }
   }
@@ -350,13 +349,13 @@ export class CapstoneService {
   async updateSubmission(
     id: string,
     userId: string,
-    request: UpdateCapstoneSubmissionRequest
+    request: UpdateCapstoneSubmissionRequest,
   ): Promise<CapstoneSubmission> {
     try {
       const submission = await this.repository.getSubmissionById(id);
 
       if (submission.userId !== userId) {
-        throw new AppError('You can only update your own submissions', 403);
+        throw new AppError("You can only update your own submissions", 403);
       }
 
       const updates: Partial<CapstoneSubmission> = {};
@@ -373,14 +372,14 @@ export class CapstoneService {
         const { owner, repo } = this.parseGitHubUrl(request.githubRepoUrl);
         const repoMetadata = await this.githubService.getRepoMetadata(
           owner,
-          repo
+          repo,
         );
 
         updates.githubRepoUrl = request.githubRepoUrl;
         updates.githubRepoName = repo;
         updates.githubRepoOwner = owner;
         updates.repoMetadata = {
-          language: repoMetadata.language || 'Unknown',
+          language: repoMetadata.language || "Unknown",
           stars: repoMetadata.stargazers_count,
           forks: repoMetadata.forks_count,
           lastUpdated: new Date(repoMetadata.updated_at),
@@ -392,7 +391,7 @@ export class CapstoneService {
 
       return updated;
     } catch (error) {
-      logger.error('Error in CapstoneService.updateSubmission:', error);
+      logger.error("Error in CapstoneService.updateSubmission:", error);
       throw error;
     }
   }
@@ -402,12 +401,12 @@ export class CapstoneService {
       const submission = await this.repository.getSubmissionById(id);
 
       if (submission.userId !== userId) {
-        throw new AppError('You can only delete your own submissions', 403);
+        throw new AppError("You can only delete your own submissions", 403);
       }
 
       await this.repository.deleteSubmission(id);
     } catch (error) {
-      logger.error('Error in CapstoneService.deleteSubmission:', error);
+      logger.error("Error in CapstoneService.deleteSubmission:", error);
       throw error;
     }
   }
@@ -418,29 +417,33 @@ export class CapstoneService {
     userId: string,
     userEmail: string,
     userName: string,
-    request: CreateCapstoneReviewRequest
+    request: CreateCapstoneReviewRequest,
   ): Promise<CapstoneReview> {
     try {
       const submission = await this.repository.getSubmissionById(
-        request.capstoneSubmissionId
+        request.capstoneSubmissionId,
       );
 
       if (request.parentReviewId) {
         const parentReview = await this.repository.getReviewById(
-          request.parentReviewId
+          request.parentReviewId,
         );
-        if (parentReview.capstoneSubmissionId !== request.capstoneSubmissionId) {
+        if (
+          parentReview.capstoneSubmissionId !== request.capstoneSubmissionId
+        ) {
           throw new AppError(
-            'Parent review does not belong to this submission',
-            400
+            "Parent review does not belong to this submission",
+            400,
           );
         }
       } else {
         if (submission.userId === userId) {
-          throw new AppError('You cannot create a top-level review for your own submission', 400);
+          throw new AppError(
+            "You cannot create a top-level review for your own submission",
+            400,
+          );
         }
       }
-
 
       const reviewData = {
         capstoneSubmissionId: request.capstoneSubmissionId,
@@ -450,14 +453,13 @@ export class CapstoneService {
         // Ensure parentReviewId is null (not undefined) for top-level reviews
         // This is important for Firestore queries to work correctly
         parentReviewId: request.parentReviewId || null,
-        rating: request.rating, 
+        rating: request.rating,
         feedback: request.feedback,
         highlights: request.highlights || [],
         suggestions: request.suggestions || [],
         criteriaScores: request.criteriaScores,
         images: [],
       };
-
 
       if (request.parentReviewId) {
         await this.repository.incrementReplyCount(request.parentReviewId);
@@ -467,7 +469,7 @@ export class CapstoneService {
 
       return review;
     } catch (error) {
-      logger.error('Error in CapstoneService.createReview:', error);
+      logger.error("Error in CapstoneService.createReview:", error);
       throw error;
     }
   }
@@ -483,7 +485,10 @@ export class CapstoneService {
       let averageRating: number | undefined;
 
       if (reviews.length > 0) {
-        const totalRating = reviews.reduce((sum, r) => sum + (r?.rating || 0), 0);
+        const totalRating = reviews.reduce(
+          (sum, r) => sum + (r?.rating || 0),
+          0,
+        );
         averageRating = Math.round((totalRating / reviews.length) * 10) / 10;
       }
 
@@ -493,7 +498,7 @@ export class CapstoneService {
         averageRating,
       };
     } catch (error) {
-      logger.error('Error in CapstoneService.getReviews:', error);
+      logger.error("Error in CapstoneService.getReviews:", error);
       throw error;
     }
   }
@@ -502,7 +507,7 @@ export class CapstoneService {
     try {
       return await this.repository.getReviewById(id);
     } catch (error) {
-      logger.error('Error in CapstoneService.getReviewById:', error);
+      logger.error("Error in CapstoneService.getReviewById:", error);
       throw error;
     }
   }
@@ -510,20 +515,20 @@ export class CapstoneService {
   async updateReview(
     id: string,
     userId: string,
-    request: UpdateCapstoneReviewRequest
+    request: UpdateCapstoneReviewRequest,
   ): Promise<CapstoneReview> {
     try {
       const review = await this.repository.getReviewById(id);
 
       if (review.reviewerId !== userId) {
-        throw new AppError('You can only update your own reviews', 403);
+        throw new AppError("You can only update your own reviews", 403);
       }
 
       const updated = await this.repository.updateReview(id, request);
 
       return updated;
     } catch (error) {
-      logger.error('Error in CapstoneService.updateReview:', error);
+      logger.error("Error in CapstoneService.updateReview:", error);
       throw error;
     }
   }
@@ -533,12 +538,12 @@ export class CapstoneService {
       const review = await this.repository.getReviewById(id);
 
       if (review.reviewerId !== userId) {
-        throw new AppError('You can only delete your own reviews', 403);
+        throw new AppError("You can only delete your own reviews", 403);
       }
 
       await this.repository.deleteReview(id);
     } catch (error) {
-      logger.error('Error in CapstoneService.deleteReview:', error);
+      logger.error("Error in CapstoneService.deleteReview:", error);
       throw error;
     }
   }
@@ -547,42 +552,40 @@ export class CapstoneService {
 
   async toggleLike(
     userId: string,
-    capstoneSubmissionId: string
+    capstoneSubmissionId: string,
   ): Promise<{ liked: boolean; likeCount: number }> {
     try {
       await this.repository.getSubmissionById(capstoneSubmissionId);
 
       const liked = await this.repository.toggleLike(
         userId,
-        capstoneSubmissionId
+        capstoneSubmissionId,
       );
-      const likeCount = await this.repository.getLikeCount(
-        capstoneSubmissionId
-      );
+      const likeCount =
+        await this.repository.getLikeCount(capstoneSubmissionId);
 
       return { liked, likeCount };
     } catch (error) {
-      logger.error('Error in CapstoneService.toggleLike:', error);
+      logger.error("Error in CapstoneService.toggleLike:", error);
       throw error;
     }
   }
 
   async getLikeStatus(
     userId: string,
-    capstoneSubmissionId: string
+    capstoneSubmissionId: string,
   ): Promise<{ liked: boolean; likeCount: number }> {
     try {
       const liked = await this.repository.isLikedByUser(
         userId,
-        capstoneSubmissionId
+        capstoneSubmissionId,
       );
-      const likeCount = await this.repository.getLikeCount(
-        capstoneSubmissionId
-      );
+      const likeCount =
+        await this.repository.getLikeCount(capstoneSubmissionId);
 
       return { liked, likeCount };
     } catch (error) {
-      logger.error('Error in CapstoneService.getLikeStatus:', error);
+      logger.error("Error in CapstoneService.getLikeStatus:", error);
       throw error;
     }
   }
@@ -592,15 +595,15 @@ export class CapstoneService {
   async uploadScreenshot(
     submissionId: string,
     userId: string,
-    file: any
+    file: any,
   ): Promise<string> {
     try {
       const submission = await this.repository.getSubmissionById(submissionId);
 
       if (submission.userId !== userId) {
         throw new AppError(
-          'You can only upload screenshots to your own submissions',
-          403
+          "You can only upload screenshots to your own submissions",
+          403,
         );
       }
 
@@ -610,8 +613,8 @@ export class CapstoneService {
         .substring(7)}${fileExtension}`;
       const uploadDir = path.join(
         process.cwd(),
-        'uploads',
-        'capstone-submissions'
+        "uploads",
+        "capstone-submissions",
       );
       const filePath = path.join(uploadDir, filename);
       await fs.mkdir(uploadDir, { recursive: true });
@@ -628,11 +631,11 @@ export class CapstoneService {
       });
 
       logger.info(
-        `Screenshot uploaded for submission: ${submissionId}, filename: ${filename}`
+        `Screenshot uploaded for submission: ${submissionId}, filename: ${filename}`,
       );
       return screenshotUrl;
     } catch (error) {
-      logger.error('Error in CapstoneService.uploadScreenshot:', error);
+      logger.error("Error in CapstoneService.uploadScreenshot:", error);
       throw error;
     }
   }
@@ -640,35 +643,35 @@ export class CapstoneService {
   async deleteScreenshot(
     submissionId: string,
     userId: string,
-    screenshotUrl: string
+    screenshotUrl: string,
   ): Promise<void> {
     try {
       const submission = await this.repository.getSubmissionById(submissionId);
 
       if (submission.userId !== userId) {
         throw new AppError(
-          'You can only delete screenshots from your own submissions',
-          403
+          "You can only delete screenshots from your own submissions",
+          403,
         );
       }
 
       const currentScreenshots = submission.screenshots || [];
       const updatedScreenshots = currentScreenshots.filter(
-        (url) => url !== screenshotUrl
+        (url) => url !== screenshotUrl,
       );
 
       await this.repository.updateSubmission(submissionId, {
         screenshots: updatedScreenshots,
       });
 
-      if (screenshotUrl.includes('/uploads/capstone-submissions/')) {
-        const filename = screenshotUrl.split('/').pop();
+      if (screenshotUrl.includes("/uploads/capstone-submissions/")) {
+        const filename = screenshotUrl.split("/").pop();
         if (filename) {
           const filePath = path.join(
             process.cwd(),
-            'uploads',
-            'capstone-submissions',
-            filename
+            "uploads",
+            "capstone-submissions",
+            filename,
           );
           try {
             await fs.unlink(filePath);
@@ -680,10 +683,10 @@ export class CapstoneService {
       }
 
       logger.info(
-        `Screenshot deleted from submission: ${submissionId}, URL: ${screenshotUrl}`
+        `Screenshot deleted from submission: ${submissionId}, URL: ${screenshotUrl}`,
       );
     } catch (error) {
-      logger.error('Error in CapstoneService.deleteScreenshot:', error);
+      logger.error("Error in CapstoneService.deleteScreenshot:", error);
       throw error;
     }
   }
@@ -693,15 +696,15 @@ export class CapstoneService {
   async uploadReviewImage(
     reviewId: string,
     userId: string,
-    file: any
+    file: any,
   ): Promise<string> {
     try {
       const review = await this.repository.getReviewById(reviewId);
 
       if (review.reviewerId !== userId) {
         throw new AppError(
-          'You can only upload images to your own reviews',
-          403
+          "You can only upload images to your own reviews",
+          403,
         );
       }
 
@@ -709,11 +712,7 @@ export class CapstoneService {
       const filename = `${reviewId}_${Date.now()}_${Math.random()
         .toString(36)
         .substring(7)}${fileExtension}`;
-      const uploadDir = path.join(
-        process.cwd(),
-        'uploads',
-        'capstone-reviews'
-      );
+      const uploadDir = path.join(process.cwd(), "uploads", "capstone-reviews");
       const filePath = path.join(uploadDir, filename);
 
       await fs.mkdir(uploadDir, { recursive: true });
@@ -729,11 +728,11 @@ export class CapstoneService {
       });
 
       logger.info(
-        `Review image uploaded for review: ${reviewId}, filename: ${filename}`
+        `Review image uploaded for review: ${reviewId}, filename: ${filename}`,
       );
       return imageUrl;
     } catch (error) {
-      logger.error('Error in CapstoneService.uploadReviewImage:', error);
+      logger.error("Error in CapstoneService.uploadReviewImage:", error);
       throw error;
     }
   }
@@ -741,15 +740,15 @@ export class CapstoneService {
   async deleteReviewImage(
     reviewId: string,
     userId: string,
-    imageUrl: string
+    imageUrl: string,
   ): Promise<void> {
     try {
       const review = await this.repository.getReviewById(reviewId);
 
       if (review.reviewerId !== userId) {
         throw new AppError(
-          'You can only delete images from your own reviews',
-          403
+          "You can only delete images from your own reviews",
+          403,
         );
       }
       // Remove image from array
@@ -760,29 +759,32 @@ export class CapstoneService {
         images: updatedImages,
       });
 
-      if (imageUrl.includes('/uploads/capstone-reviews/')) {
-        const filename = imageUrl.split('/').pop();
+      if (imageUrl.includes("/uploads/capstone-reviews/")) {
+        const filename = imageUrl.split("/").pop();
         if (filename) {
           const filePath = path.join(
             process.cwd(),
-            'uploads',
-            'capstone-reviews',
-            filename
+            "uploads",
+            "capstone-reviews",
+            filename,
           );
           try {
             await fs.unlink(filePath);
             logger.info(`Review image file deleted: ${filename}`);
           } catch (error) {
-            logger.warn(`Failed to delete review image file: ${filePath}`, error);
+            logger.warn(
+              `Failed to delete review image file: ${filePath}`,
+              error,
+            );
           }
         }
       }
 
       logger.info(
-        `Review image deleted from review: ${reviewId}, URL: ${imageUrl}`
+        `Review image deleted from review: ${reviewId}, URL: ${imageUrl}`,
       );
     } catch (error) {
-      logger.error('Error in CapstoneService.deleteReviewImage:', error);
+      logger.error("Error in CapstoneService.deleteReviewImage:", error);
       throw error;
     }
   }
@@ -792,26 +794,25 @@ export class CapstoneService {
   private parseGitHubUrl(url: string): { owner: string; repo: string } {
     try {
       // Remove trailing slash if present
-      const cleanUrl = url.replace(/\/$/, '');
+      const cleanUrl = url.replace(/\/$/, "");
 
-   
       const match = cleanUrl.match(
-        /^https:\/\/github\.com\/([\w-]+)\/([\w.-]+)$/
+        /^https:\/\/github\.com\/([\w-]+)\/([\w.-]+)$/,
       );
 
       if (!match) {
-        throw new AppError('Invalid GitHub repository URL format', 400);
+        throw new AppError("Invalid GitHub repository URL format", 400);
       }
       const [, owner, repo] = match;
 
       if (!owner || !repo) {
-        throw new AppError('Invalid GitHub repository URL format', 400);
+        throw new AppError("Invalid GitHub repository URL format", 400);
       }
 
       return { owner, repo };
     } catch (error) {
-      logger.error('Error parsing GitHub URL:', error);
-      throw new AppError('Invalid GitHub repository URL', 400);
+      logger.error("Error parsing GitHub URL:", error);
+      throw new AppError("Invalid GitHub repository URL", 400);
     }
   }
 }

@@ -1,8 +1,8 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { UserController } from './controller';
-import { UserRepository } from './repository';
-import { UserRoute } from './route';
-import { UserService } from './service';
+import { firebaseFirestore } from "../../config/firebase";
+import { UserController } from "./controller";
+import { UserRepository } from "./repository";
+import { UserRoute } from "./route";
+import { UserService } from "./service";
 
 export class UserContainer {
   public readonly repository: UserRepository;

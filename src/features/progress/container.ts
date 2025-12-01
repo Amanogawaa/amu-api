@@ -1,10 +1,10 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { ProgressController } from './controller';
-import { ProgressRepository } from './repository';
-import { ProgressRoute } from './route';
-import { ProgressService } from './service';
-import type { QuizService } from '../quiz/service';
-import type { LessonService } from '../lesson/service';
+import { firebaseFirestore } from "../../config/firebase";
+import { ProgressController } from "./controller";
+import { ProgressRepository } from "./repository";
+import { ProgressRoute } from "./route";
+import { ProgressService } from "./service";
+import type { QuizService } from "../quiz/service";
+import type { LessonService } from "../lesson/service";
 
 export class ProgressContainer {
   public readonly repository: ProgressRepository;
@@ -15,13 +15,13 @@ export class ProgressContainer {
   constructor(
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
     quizService?: QuizService,
-    lessonService?: LessonService
+    lessonService?: LessonService,
   ) {
     this.repository = new ProgressRepository(firestore);
     this.service = new ProgressService(
       this.repository,
       quizService,
-      lessonService
+      lessonService,
     );
     this.controller = new ProgressController(this.service);
     this.routes = new ProgressRoute(this.controller);

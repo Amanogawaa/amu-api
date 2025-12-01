@@ -71,6 +71,7 @@ RATE_LIMIT_MAX_REQUESTS=1000
 ```
 
 **Important Notes:**
+
 - `PORT` must be set to `10000` (Render's default) or use `process.env.PORT`
 - `FIREBASE_PRIVATE_KEY` must include the full key with `\n` for newlines
 - `CORS_ORIGINS` should include your Vercel domain and any custom domains
@@ -106,6 +107,7 @@ When setting `FIREBASE_PRIVATE_KEY` in Render:
 4. Or paste the key as-is if Render supports multiline values
 
 **Example:**
+
 ```
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...\n-----END PRIVATE KEY-----\n"
 ```
@@ -113,11 +115,13 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFA
 ### CORS Configuration
 
 Update `CORS_ORIGINS` to include:
+
 - Your Vercel deployment URL: `https://your-app.vercel.app`
 - Your custom domain (if any): `https://app.yourdomain.com`
 - Local development (optional): `http://localhost:3000`
 
 **Example:**
+
 ```
 CORS_ORIGINS=https://amu-client.vercel.app,https://app.amu.com,http://localhost:3000
 ```
@@ -140,7 +144,7 @@ services:
       - key: PORT
         value: 10000
       - key: JWT_SECRET
-        sync: false  # Set manually in dashboard
+        sync: false # Set manually in dashboard
       - key: GEMINI_API_KEY
         sync: false
       - key: FIREBASE_TYPE
@@ -152,6 +156,7 @@ services:
 ```
 
 Then:
+
 1. Go to **Dashboard** → **New** → **Blueprint**
 2. Connect your repository
 3. Render will read `render.yaml` and create the service
@@ -189,8 +194,8 @@ Render automatically checks if your service is healthy:
 If you don't have one, add to your `src/app.ts`:
 
 ```typescript
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 ```
 
@@ -206,6 +211,7 @@ app.get('/health', (req, res) => {
 ### Secret Management
 
 For sensitive values:
+
 - Use Render's **Secret Files** feature for `service_account.json`
 - Or use environment variables (recommended for this setup)
 - Never commit secrets to Git
@@ -213,6 +219,7 @@ For sensitive values:
 ### Environment-Specific Variables
 
 You can create separate services for:
+
 - **Production**: `amu-api`
 - **Staging**: `amu-api-staging`
 
@@ -296,6 +303,7 @@ The Render free plan has some limitations:
 - **Build Time**: 90 minutes/month
 
 **Upgrade to Starter ($7/month)** for:
+
 - Always-on service
 - Better WebSocket support
 - More resources
@@ -320,6 +328,7 @@ The Render free plan has some limitations:
 ### Database Backups
 
 If you're using a database:
+
 1. Go to **Dashboard** → **New** → **PostgreSQL** (or your DB)
 2. Enable automatic backups
 3. Configure backup retention
@@ -354,5 +363,3 @@ If you're using a database:
 - [Render Web Services](https://render.com/docs/web-services)
 - [Environment Variables](https://render.com/docs/environment-variables)
 - [Bun on Render](https://render.com/docs/runtime#bun)
-
-

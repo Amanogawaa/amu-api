@@ -1,5 +1,5 @@
-import { SYSTEM_PROMPTS } from './system-prompts';
-import type { PromptIntent, PromptMode, PromptPayload } from './types';
+import { SYSTEM_PROMPTS } from "./system-prompts";
+import type { PromptIntent, PromptMode, PromptPayload } from "./types";
 
 export type ChapterPromptMode = PromptMode;
 
@@ -25,7 +25,7 @@ interface BuildChaptersPromptOptions {
 
 const legacyChaptersPrompt = (
   args: ChapterPromptArgs,
-  intent: PromptIntent
+  intent: PromptIntent,
 ): string => {
   const intro = `Create ${args.estimatedChapterCount} chapters for Module ${
     args.moduleOrder
@@ -34,19 +34,19 @@ const legacyChaptersPrompt = (
 Course: ${args.courseName} (${args.level})
 Language: ${args.language}
 Module: ${args.moduleDescription}
-Objectives: ${args.moduleLearningObjectives.join('; ')}
-Skills: ${args.moduleKeySkills.join(', ')}
+Objectives: ${args.moduleLearningObjectives.join("; ")}
+Skills: ${args.moduleKeySkills.join(", ")}
 Duration: ${args.estimatedDuration}
 `;
 
   const regenNote =
-    intent === 'regenerate'
-      ? '\n**NOTE:** Regenerate existing chapters while keeping the same count/order. Refresh content quality and specificity.'
-      : '';
+    intent === "regenerate"
+      ? "\n**NOTE:** Regenerate existing chapters while keeping the same count/order. Refresh content quality and specificity."
+      : "";
 
   const feedback = args.userInstructions
     ? `\n**USER FEEDBACK:**\n${args.userInstructions}`
-    : '';
+    : "";
 
   return `${intro}${feedback}${regenNote}
 
@@ -98,41 +98,41 @@ Level adjustments:
 
 const systemChaptersPrompt = (
   args: ChapterPromptArgs,
-  intent: PromptIntent
+  intent: PromptIntent,
 ): PromptPayload => {
   const lines = [
     `Generate ${args.estimatedChapterCount} chapters for module "${args.moduleName}" (order ${args.moduleOrder}).`,
     `Course: ${args.courseName} | Level: ${args.level} | Language: ${args.language}`,
     `Module summary: ${args.moduleDescription}`,
-    `Module objectives: ${args.moduleLearningObjectives.join(' | ')}`,
-    `Module skills: ${args.moduleKeySkills.join(', ')}`,
+    `Module objectives: ${args.moduleLearningObjectives.join(" | ")}`,
+    `Module skills: ${args.moduleKeySkills.join(", ")}`,
     `Module duration: ${args.estimatedDuration}`,
   ];
 
-  if (intent === 'regenerate') {
+  if (intent === "regenerate") {
     lines.push(
-      'Regeneration request: keep chapter count/order but refresh narratives, objectives, and key topics.'
+      "Regeneration request: keep chapter count/order but refresh narratives, objectives, and key topics.",
     );
   }
 
   if (args.userInstructions) {
-    lines.push('User feedback to apply:', args.userInstructions);
+    lines.push("User feedback to apply:", args.userInstructions);
   }
 
   return {
-    userPrompt: lines.join('\n'),
+    userPrompt: lines.join("\n"),
     systemPrompt: SYSTEM_PROMPTS.CHAPTER,
   };
 };
 
 export const buildChaptersPrompt = (
   args: ChapterPromptArgs,
-  options: BuildChaptersPromptOptions = {}
+  options: BuildChaptersPromptOptions = {},
 ): PromptPayload => {
-  const mode = options.mode ?? 'system';
-  const intent = options.intent ?? 'generate';
+  const mode = options.mode ?? "system";
+  const intent = options.intent ?? "generate";
 
-  if (mode === 'legacy') {
+  if (mode === "legacy") {
     return {
       userPrompt: legacyChaptersPrompt(args, intent),
     };

@@ -38,7 +38,7 @@ export interface GitHubConnection {
 export interface GitHubTreeItem {
   path: string;
   mode: string;
-  type: 'blob' | 'tree';
+  type: "blob" | "tree";
   sha: string;
   size?: number;
   url: string;
@@ -60,9 +60,9 @@ export interface GitHubFileContent {
   html_url: string;
   git_url: string;
   download_url: string | null;
-  type: 'file';
+  type: "file";
   content: string; // Base64 encoded
-  encoding: 'base64';
+  encoding: "base64";
   _links: {
     self: string;
     git: string;

@@ -1,8 +1,8 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { ChapterController } from './controller';
-import { ChapterRepository } from './repository';
-import { ChapterRoute } from './route';
-import { ChapterService } from './service';
+import { firebaseFirestore } from "../../config/firebase";
+import { ChapterController } from "./controller";
+import { ChapterRepository } from "./repository";
+import { ChapterRoute } from "./route";
+import { ChapterService } from "./service";
 
 export class ChapterContainer {
   public readonly repository: ChapterRepository;

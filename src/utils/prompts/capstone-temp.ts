@@ -46,16 +46,16 @@ Total Lessons: ${context.totalLessons}
 **LEARNING OUTCOMES**
 ${context.learningOutcomes
   .map((outcome, i) => `${i + 1}. ${outcome}`)
-  .join('\n')}
+  .join("\n")}
 
 **SKILLS GAINED**
-${context.skillsGained.join(', ')}
+${context.skillsGained.join(", ")}
 
 **TECHNOLOGIES USED**
 ${
   context.technologiesUsed.length > 0
-    ? context.technologiesUsed.join(', ')
-    : 'Based on course content'
+    ? context.technologiesUsed.join(", ")
+    : "Based on course content"
 }
 
 **COURSE MODULES**
@@ -65,10 +65,10 @@ ${context.moduleSummaries
 Module ${module.order}: ${module.title}
 - ${module.description}
 - Duration: ${module.duration}
-- Learning Outcomes: ${module.learningOutcomes.join('; ')}
-`
+- Learning Outcomes: ${module.learningOutcomes.join("; ")}
+`,
   )
-  .join('\n')}
+  .join("\n")}
 
 **LESSON BREAKDOWN BY MODULE**
 ${context.lessonsByModule
@@ -77,10 +77,10 @@ ${context.lessonsByModule
 ${moduleData.moduleTitle} (${moduleData.lessonCount} lessons)
 Sample lessons: ${moduleData.lessons
       .map((l) => `"${l.title}" (${l.type}, ${l.duration})`)
-      .join(', ')}
-`
+      .join(", ")}
+`,
   )
-  .join('\n')}
+  .join("\n")}
 
 **REQUIREMENTS**
 Create a capstone project that:
@@ -233,30 +233,30 @@ ${getCategoryFocus(context.category)}
 
 function getCategoryFocus(category: string): string {
   const focuses: Record<string, string> = {
-    'Web Development':
-      '- Responsive UI/UX design\n- API integration and data management\n- Deployment to production environment\n- Performance optimization\n- Project examples: E-commerce site, Social media platform, Task manager',
-    'Data Science':
-      '- Data cleaning and preprocessing\n- Statistical analysis and visualization\n- Model building and evaluation\n- Insights presentation\n- Project examples: Sales forecasting, Customer segmentation, Sentiment analysis',
-    'Mobile Development':
-      '- Native mobile features (camera, GPS, notifications)\n- Offline capability and data persistence\n- Mobile UX best practices\n- App store deployment\n- Project examples: Fitness tracker, Chat app, Expense tracker',
-    'Backend Development':
-      '- RESTful API design\n- Authentication and authorization\n- Database schema design\n- API documentation (Swagger/OpenAPI)\n- Project examples: Blog API, E-commerce backend, User management system',
-    'AI/Machine Learning':
-      '- Model training and hyperparameter tuning\n- Model evaluation metrics\n- Practical real-world application\n- Results visualization\n- Project examples: Image classifier, Recommendation engine, Price predictor',
-    'Systems Programming':
-      '- Memory management and pointers\n- File I/O and data structures\n- Process management and concurrency\n- Performance optimization\n- Project examples: Banking system, File compression tool, Shell implementation, Mini database',
-    'Game Development':
-      '- Game loop and state management\n- Collision detection and physics\n- Asset management and rendering\n- User input handling\n- Project examples: 2D platformer, Puzzle game, RPG battle system',
+    "Web Development":
+      "- Responsive UI/UX design\n- API integration and data management\n- Deployment to production environment\n- Performance optimization\n- Project examples: E-commerce site, Social media platform, Task manager",
+    "Data Science":
+      "- Data cleaning and preprocessing\n- Statistical analysis and visualization\n- Model building and evaluation\n- Insights presentation\n- Project examples: Sales forecasting, Customer segmentation, Sentiment analysis",
+    "Mobile Development":
+      "- Native mobile features (camera, GPS, notifications)\n- Offline capability and data persistence\n- Mobile UX best practices\n- App store deployment\n- Project examples: Fitness tracker, Chat app, Expense tracker",
+    "Backend Development":
+      "- RESTful API design\n- Authentication and authorization\n- Database schema design\n- API documentation (Swagger/OpenAPI)\n- Project examples: Blog API, E-commerce backend, User management system",
+    "AI/Machine Learning":
+      "- Model training and hyperparameter tuning\n- Model evaluation metrics\n- Practical real-world application\n- Results visualization\n- Project examples: Image classifier, Recommendation engine, Price predictor",
+    "Systems Programming":
+      "- Memory management and pointers\n- File I/O and data structures\n- Process management and concurrency\n- Performance optimization\n- Project examples: Banking system, File compression tool, Shell implementation, Mini database",
+    "Game Development":
+      "- Game loop and state management\n- Collision detection and physics\n- Asset management and rendering\n- User input handling\n- Project examples: 2D platformer, Puzzle game, RPG battle system",
     DevOps:
-      '- CI/CD pipeline setup\n- Container orchestration\n- Infrastructure as code\n- Monitoring and logging\n- Project examples: Automated deployment system, Container management tool',
+      "- CI/CD pipeline setup\n- Container orchestration\n- Infrastructure as code\n- Monitoring and logging\n- Project examples: Automated deployment system, Container management tool",
     Cybersecurity:
-      '- Encryption and hashing\n- Authentication mechanisms\n- Vulnerability scanning\n- Secure coding practices\n- Project examples: Password manager, Network scanner, Encryption tool',
-    'Desktop Applications':
-      '- GUI design and event handling\n- Local data persistence\n- Cross-platform compatibility\n- Performance and responsiveness\n- Project examples: Text editor, Media player, File organizer, Calculator',
+      "- Encryption and hashing\n- Authentication mechanisms\n- Vulnerability scanning\n- Secure coding practices\n- Project examples: Password manager, Network scanner, Encryption tool",
+    "Desktop Applications":
+      "- GUI design and event handling\n- Local data persistence\n- Cross-platform compatibility\n- Performance and responsiveness\n- Project examples: Text editor, Media player, File organizer, Calculator",
   };
 
   return (
     focuses[category] ||
-    '- Apply best practices from the course\n- Demonstrate real-world application\n- Show technical depth and breadth\n- Create a project that solves a practical problem'
+    "- Apply best practices from the course\n- Demonstrate real-world application\n- Show technical depth and breadth\n- Create a project that solves a practical problem"
   );
 }

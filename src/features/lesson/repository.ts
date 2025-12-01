@@ -1,11 +1,12 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
-import { logger } from '../../utils/loggers';
-import type { Lesson } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Firestore } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
+import { logger } from "../../utils/loggers";
+import type { Lesson } from "./types";
 
 export class LessonRepository {
   private firebaseStore: Firestore;
-  private readonly COLLECTION_NAME = 'lessons';
+  private readonly COLLECTION_NAME = "lessons";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -17,11 +18,11 @@ export class LessonRepository {
 
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where('chapterId', '==', chapterId)
+        .where("chapterId", "==", chapterId)
         .get();
 
       logger.info(
-        `Found ${querySnapshot.size} lessons for chapter: ${chapterId}`
+        `Found ${querySnapshot.size} lessons for chapter: ${chapterId}`,
       );
 
       if (querySnapshot.empty) {
@@ -36,14 +37,16 @@ export class LessonRepository {
 
       return lessons.sort((a, b) => a.lessonOrder - b.lessonOrder);
     } catch (error) {
-      logger.error('Error in ChapterRepository.getChapter:', error);
+      logger.error("Error in ChapterRepository.getChapter:", error);
       throw error;
     }
   }
 
   async createLessons(
     chapterId: string,
-    lessons: Array<Omit<Lesson, 'id' | 'chapterId' | 'createdAt' | 'updatedAt'>>
+    lessons: Array<
+      Omit<Lesson, "id" | "chapterId" | "createdAt" | "updatedAt">
+    >,
   ): Promise<Lesson[]> {
     try {
       const batch = this.firebaseStore.batch();
@@ -69,18 +72,18 @@ export class LessonRepository {
 
       await batch.commit();
       logger.info(
-        `Created ${createdLesson.length} lesson for chapter ${chapterId}`
+        `Created ${createdLesson.length} lesson for chapter ${chapterId}`,
       );
 
       return createdLesson;
     } catch (error) {
-      logger.error('Error in LessonRepository.createLessons:', error);
+      logger.error("Error in LessonRepository.createLessons:", error);
       throw error;
     }
   }
 
   async updateLessonsBatch(
-    lessons: Lesson[]
+    lessons: Lesson[],
   ): Promise<{ updated: number; errors: any[] }> {
     const batch = this.firebaseStore.batch();
     const errors: any[] = [];
@@ -89,7 +92,7 @@ export class LessonRepository {
     try {
       for (const lesson of lessons) {
         if (!lesson.id) {
-          errors.push({ lesson, error: 'Lesson ID is required for update' });
+          errors.push({ lesson, error: "Lesson ID is required for update" });
           continue;
         }
 
@@ -100,7 +103,7 @@ export class LessonRepository {
         // Check if document exists
         const doc = await docRef.get();
         if (!doc.exists) {
-          errors.push({ lesson, error: 'Lesson not found' });
+          errors.push({ lesson, error: "Lesson not found" });
           continue;
         }
 
@@ -118,7 +121,7 @@ export class LessonRepository {
       await batch.commit();
       return { updated, errors };
     } catch (error) {
-      logger.error('Error in LessonRepository.updateLessonsBatch:', error);
+      logger.error("Error in LessonRepository.updateLessonsBatch:", error);
       throw error;
     }
   }
@@ -139,14 +142,14 @@ export class LessonRepository {
         ...doc.data(),
       } as Lesson;
     } catch (error) {
-      logger.error('Error in LessonRepository.getLessonById:', error);
+      logger.error("Error in LessonRepository.getLessonById:", error);
       throw error;
     }
   }
 
   async updateLesson(
     lessonId: string,
-    lessonData: Partial<Omit<Lesson, 'id' | 'chapterId' | 'createdAt'>>
+    lessonData: Partial<Omit<Lesson, "id" | "chapterId" | "createdAt">>,
   ): Promise<Lesson> {
     try {
       const docRef = this.firebaseStore
@@ -155,7 +158,7 @@ export class LessonRepository {
 
       const doc = await docRef.get();
       if (!doc.exists) {
-        throw new Error('Lesson not found');
+        throw new Error("Lesson not found");
       }
 
       const updateData = {
@@ -171,7 +174,7 @@ export class LessonRepository {
         ...updatedDoc.data(),
       } as Lesson;
     } catch (error) {
-      logger.error('Error in LessonRepository.updateLesson:', error);
+      logger.error("Error in LessonRepository.updateLesson:", error);
       throw error;
     }
   }
@@ -184,13 +187,13 @@ export class LessonRepository {
 
       const doc = await docRef.get();
       if (!doc.exists) {
-        throw new Error('Lesson not found');
+        throw new Error("Lesson not found");
       }
 
       await docRef.delete();
       logger.info(`Deleted lesson ${lessonId}`);
     } catch (error) {
-      logger.error('Error in LessonRepository.deleteLesson:', error);
+      logger.error("Error in LessonRepository.deleteLesson:", error);
       throw error;
     }
   }

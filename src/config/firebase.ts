@@ -4,7 +4,7 @@ import { config } from "./environment";
 
 admin.initializeApp({
   credential: admin.credential.cert(
-    config.firebase.serviceAccount as ServiceAccount
+    config.firebase.serviceAccount as ServiceAccount,
   ),
 });
 

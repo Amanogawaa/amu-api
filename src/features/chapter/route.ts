@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import type { ChapterController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
-import { courseOwnershipMiddleware } from '../../middlewares/ownership.middle';
+import { Router } from "express";
+import type { ChapterController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import { courseOwnershipMiddleware } from "../../middlewares/ownership.middle";
 
 export class ChapterRoute {
   public router: Router;
@@ -84,12 +84,12 @@ export class ChapterRoute {
      *       500:
      *         description: Internal server error
      */
-    this.router.get('/:moduleId/chapter', (req, res, next) =>
-      this.controller.getChapters(req, res, next)
+    this.router.get("/:moduleId/chapter", (req, res, next) =>
+      this.controller.getChapters(req, res, next),
     );
 
-    this.router.get('/chapter/:chapterId', (req, res, next) =>
-      this.controller.getChapter(req, res, next)
+    this.router.get("/chapter/:chapterId", (req, res, next) =>
+      this.controller.getChapter(req, res, next),
     );
 
     /**
@@ -205,10 +205,10 @@ export class ChapterRoute {
      *         description: Internal server error
      */
     this.router.post(
-      '/chapter',
+      "/chapter",
       // authMiddleware,
       // courseOwnershipMiddleware,
-      (req, res, next) => this.controller.generateChapter(req, res, next)
+      (req, res, next) => this.controller.generateChapter(req, res, next),
     );
 
     /**
@@ -338,10 +338,10 @@ export class ChapterRoute {
      *         description: Internal server error
      */
     this.router.put(
-      '/:moduleId/chapter',
+      "/:moduleId/chapter",
       authMiddleware,
       courseOwnershipMiddleware,
-      (req, res, next) => this.controller.regenerateChapters(req, res, next)
+      (req, res, next) => this.controller.regenerateChapters(req, res, next),
     );
 
     /**
@@ -375,11 +375,11 @@ export class ChapterRoute {
      *         description: Internal server error
      */
     this.router.delete(
-      '/:moduleId/chapter',
+      "/:moduleId/chapter",
       authMiddleware,
       courseOwnershipMiddleware,
       (req, res, next) =>
-        this.controller.deleteChaptersByModuleId(req, res, next)
+        this.controller.deleteChaptersByModuleId(req, res, next),
     );
   }
 

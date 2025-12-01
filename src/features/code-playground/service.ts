@@ -1,17 +1,16 @@
-import axios from 'axios';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from "axios";
+import { AppError } from "../../utils/errors";
+import { CodePlaygroundRepository } from "./repository";
 import type {
+  CodeWorkspace,
   ExecutionRequest,
   ExecutionResult,
-  Judge0SubmissionRequest,
-  Judge0SubmissionResponse,
   Judge0ResultResponse,
+  Judge0SubmissionRequest,
   SaveWorkspaceRequest,
-  CodeWorkspace,
-} from './types';
-import { LANGUAGE_MAP, SUPPORTED_LANGUAGES } from './types';
-import { CodePlaygroundRepository } from './repository';
-import { AppError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
+} from "./types";
+import { LANGUAGE_MAP, SUPPORTED_LANGUAGES } from "./types";
 
 export class CodePlaygroundService {
   private repository: CodePlaygroundRepository;
@@ -21,18 +20,18 @@ export class CodePlaygroundService {
   constructor(repository: CodePlaygroundRepository) {
     this.repository = repository;
     this.judge0ApiUrl =
-      process.env.JUDGE0_API_URL || 'https://judge0-ce.p.rapidapi.com';
-    this.judge0ApiKey = process.env.JUDGE0_API_KEY || '';
+      process.env.JUDGE0_API_URL || "https://judge0-ce.p.rapidapi.com";
+    this.judge0ApiKey = process.env.JUDGE0_API_KEY || "";
 
     if (!this.judge0ApiKey) {
-      console.warn('JUDGE0_API_KEY not set. Code execution will not work.');
+      console.warn("JUDGE0_API_KEY not set. Code execution will not work.");
     }
   }
 
   async pistonGetLanguages(): Promise<string[]> {
     try {
       const response = await axios.get<any>(
-        'https://emkc.org/api/v2/piston/runtimes'
+        "https://emkc.org/api/v2/piston/runtimes",
       );
       return response.data;
     } catch (error) {
@@ -54,7 +53,7 @@ export class CodePlaygroundService {
   }) {
     try {
       const response = await axios.post<any>(
-        'https://emkc.org/api/v2/piston/execute',
+        "https://emkc.org/api/v2/piston/execute",
         {
           language,
           version,
@@ -63,7 +62,7 @@ export class CodePlaygroundService {
               content: sourceCode,
             },
           ],
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -80,9 +79,9 @@ export class CodePlaygroundService {
     if (!SUPPORTED_LANGUAGES.includes(language)) {
       throw new AppError(
         `Unsupported language: ${language}. Supported languages: ${SUPPORTED_LANGUAGES.join(
-          ', '
+          ", ",
         )}`,
-        400
+        400,
       );
     }
 
@@ -94,9 +93,9 @@ export class CodePlaygroundService {
 
     try {
       const submissionData: Judge0SubmissionRequest = {
-        source_code: Buffer.from(code).toString('base64'),
+        source_code: Buffer.from(code).toString("base64"),
         language_id: languageId,
-        stdin: stdin ? Buffer.from(stdin).toString('base64') : undefined,
+        stdin: stdin ? Buffer.from(stdin).toString("base64") : undefined,
       };
 
       const response = await axios.post<Judge0ResultResponse>(
@@ -104,30 +103,30 @@ export class CodePlaygroundService {
         submissionData,
         {
           headers: {
-            'Content-Type': 'application/json',
-            'X-RapidAPI-Key': this.judge0ApiKey,
-            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+            "Content-Type": "application/json",
+            "X-RapidAPI-Key": this.judge0ApiKey,
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
-        }
+        },
       );
 
       const result = response.data;
 
       const stdout = result.stdout
-        ? Buffer.from(result.stdout, 'base64').toString()
-        : '';
+        ? Buffer.from(result.stdout, "base64").toString()
+        : "";
       const stderr = result.stderr
-        ? Buffer.from(result.stderr, 'base64').toString()
-        : '';
+        ? Buffer.from(result.stderr, "base64").toString()
+        : "";
       const compileOutput = result.compile_output
-        ? Buffer.from(result.compile_output, 'base64').toString()
+        ? Buffer.from(result.compile_output, "base64").toString()
         : undefined;
 
       return {
         stdout,
         stderr,
         status: result.status,
-        time: result.time || '0',
+        time: result.time || "0",
         memory: result.memory || 0,
         compile_output: compileOutput,
       };
@@ -146,7 +145,7 @@ export class CodePlaygroundService {
 
     const existing = await this.repository.getWorkspaceByUserAndLesson(
       request.userId,
-      request.lessonId
+      request.lessonId,
     );
 
     if (existing) {
@@ -158,14 +157,14 @@ export class CodePlaygroundService {
 
   async getWorkspace(
     userId: string,
-    lessonId: string
+    lessonId: string,
   ): Promise<CodeWorkspace | null> {
     return this.repository.getWorkspaceByUserAndLesson(userId, lessonId);
   }
 
   async getWorkspacesByCourse(
     userId: string,
-    courseId: string
+    courseId: string,
   ): Promise<CodeWorkspace[]> {
     return this.repository.getWorkspacesByCourse(userId, courseId);
   }
@@ -174,13 +173,13 @@ export class CodePlaygroundService {
     const workspace = await this.repository.getWorkspace(workspaceId);
 
     if (!workspace) {
-      throw new AppError('Workspace not found', 404);
+      throw new AppError("Workspace not found", 404);
     }
 
     if (workspace.userId !== userId) {
       throw new AppError(
-        'You do not have permission to delete this workspace',
-        403
+        "You do not have permission to delete this workspace",
+        403,
       );
     }
 
@@ -188,7 +187,7 @@ export class CodePlaygroundService {
   }
 
   async executeAndSave(
-    request: ExecutionRequest
+    request: ExecutionRequest,
   ): Promise<{ result: ExecutionResult; workspace: CodeWorkspace }> {
     const startTime = Date.now();
 
@@ -199,7 +198,7 @@ export class CodePlaygroundService {
     const workspace = await this.saveWorkspace({
       userId: request.userId,
       lessonId: request.lessonId,
-      courseId: '',
+      courseId: "",
       code: request.code,
       language: request.language,
     });
@@ -208,7 +207,7 @@ export class CodePlaygroundService {
       output: result.stdout || result.stderr,
       error: result.stderr || result.compile_output,
       executionTime,
-      status: result.status.id === 3 ? 'success' : 'error',
+      status: result.status.id === 3 ? "success" : "error",
     });
 
     return { result, workspace };

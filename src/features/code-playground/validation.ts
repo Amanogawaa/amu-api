@@ -1,26 +1,26 @@
-import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
-import { SUPPORTED_LANGUAGES } from './types';
+import type { Response, NextFunction } from "express";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import { SUPPORTED_LANGUAGES } from "./types";
 
 export const validateExecuteCode = (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
-  const { code, language, lessonId } = req.body;
+  const { code, language } = req.body;
 
-  if (!code || typeof code !== 'string') {
+  if (!code || typeof code !== "string") {
     res.status(400).json({
       success: false,
-      message: 'Code is required and must be a string',
+      message: "Code is required and must be a string",
     });
     return;
   }
 
-  if (!language || typeof language !== 'string') {
+  if (!language || typeof language !== "string") {
     res.status(400).json({
       success: false,
-      message: 'Language is required and must be a string',
+      message: "Language is required and must be a string",
     });
     return;
   }
@@ -29,7 +29,7 @@ export const validateExecuteCode = (
     res.status(400).json({
       success: false,
       message: `Unsupported language. Supported languages are: ${SUPPORTED_LANGUAGES.join(
-        ', '
+        ", ",
       )}`,
     });
     return;
@@ -47,7 +47,7 @@ export const validateExecuteCode = (
   if (code.length > 50000) {
     res.status(400).json({
       success: false,
-      message: 'Code exceeds maximum length of 50,000 characters',
+      message: "Code exceeds maximum length of 50,000 characters",
     });
     return;
   }
@@ -58,22 +58,22 @@ export const validateExecuteCode = (
 export const validateSaveWorkspace = (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const { code, language, lessonId, courseId } = req.body;
 
-  if (!code || typeof code !== 'string') {
+  if (!code || typeof code !== "string") {
     res.status(400).json({
       success: false,
-      message: 'Code is required and must be a string',
+      message: "Code is required and must be a string",
     });
     return;
   }
 
-  if (!language || typeof language !== 'string') {
+  if (!language || typeof language !== "string") {
     res.status(400).json({
       success: false,
-      message: 'Language is required and must be a string',
+      message: "Language is required and must be a string",
     });
     return;
   }
@@ -82,24 +82,24 @@ export const validateSaveWorkspace = (
     res.status(400).json({
       success: false,
       message: `Unsupported language. Supported languages are: ${SUPPORTED_LANGUAGES.join(
-        ', '
+        ", ",
       )}`,
     });
     return;
   }
 
-  if (!lessonId || typeof lessonId !== 'string') {
+  if (!lessonId || typeof lessonId !== "string") {
     res.status(400).json({
       success: false,
-      message: 'Lesson ID is required and must be a string',
+      message: "Lesson ID is required and must be a string",
     });
     return;
   }
 
-  if (!courseId || typeof courseId !== 'string') {
+  if (!courseId || typeof courseId !== "string") {
     res.status(400).json({
       success: false,
-      message: 'Course ID is required and must be a string',
+      message: "Course ID is required and must be a string",
     });
     return;
   }
@@ -108,7 +108,7 @@ export const validateSaveWorkspace = (
   if (code.length > 100000) {
     res.status(400).json({
       success: false,
-      message: 'Code exceeds maximum length of 100,000 characters',
+      message: "Code exceeds maximum length of 100,000 characters",
     });
     return;
   }

@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import type { GitHubController } from './controller';
+import { Router } from "express";
+import type { GitHubController } from "./controller";
 
 export class GitHubRoute {
   public router: Router;
@@ -46,10 +46,7 @@ export class GitHubRoute {
      *       403:
      *         description: Access denied
      */
-    this.router.get(
-      '/repos/:owner/:repo/tree',
-      this.controller.getRepoTree
-    );
+    this.router.get("/repos/:owner/:repo/tree", this.controller.getRepoTree);
 
     /**
      * @openapi
@@ -87,8 +84,8 @@ export class GitHubRoute {
      *         description: Path not found
      */
     this.router.get(
-      '/repos/:owner/:repo/contents',
-      this.controller.getRepoContents
+      "/repos/:owner/:repo/contents",
+      this.controller.getRepoContents,
     );
 
     /**
@@ -130,10 +127,7 @@ export class GitHubRoute {
      *         description: File not found
      */
     // Use query parameter for file path to handle paths with slashes
-    this.router.get(
-      '/repos/:owner/:repo/file',
-      this.controller.getFileContent
-    );
+    this.router.get("/repos/:owner/:repo/file", this.controller.getFileContent);
 
     /**
      * @openapi
@@ -161,8 +155,8 @@ export class GitHubRoute {
      *         description: Repository not found
      */
     this.router.get(
-      '/repos/:owner/:repo/branches',
-      this.controller.getBranches
+      "/repos/:owner/:repo/branches",
+      this.controller.getBranches,
     );
   }
 
@@ -170,4 +164,3 @@ export class GitHubRoute {
     return this.router;
   }
 }
-

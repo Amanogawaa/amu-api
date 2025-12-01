@@ -1,16 +1,16 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
+import type { Firestore } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
 import type {
   Comment,
   CreateCommentRequest,
   UpdateCommentRequest,
-} from './types';
-import { FieldValue } from 'firebase-admin/firestore';
+} from "./types";
+import { FieldValue } from "firebase-admin/firestore";
 
 export class CommentsRepository {
   private firebaseStore: Firestore;
-  private commentsCollection = 'comments';
-  private coursesCollection = 'courses';
+  private commentsCollection = "comments";
+  private coursesCollection = "courses";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -20,14 +20,14 @@ export class CommentsRepository {
     data: CreateCommentRequest,
     authorId: string,
     authorName?: string,
-    authorEmail?: string
+    authorEmail?: string,
   ): Promise<Comment> {
     const now = new Date();
     const commentData = {
       courseId: data.courseId,
       authorId,
-      authorName: authorName || 'Anonymous',
-      authorEmail: authorEmail || '',
+      authorName: authorName || "Anonymous",
+      authorEmail: authorEmail || "",
       content: data.content,
       parentId: data.parentId || null,
       createdAt: now,
@@ -79,19 +79,19 @@ export class CommentsRepository {
     courseId: string,
     limit = 20,
     offset = 0,
-    parentId?: string | null
+    parentId?: string | null,
   ): Promise<{ comments: Comment[]; total: number }> {
     let query = this.firebaseStore
       .collection(this.commentsCollection)
-      .where('courseId', '==', courseId)
-      .where('deleted', '==', false);
+      .where("courseId", "==", courseId)
+      .where("deleted", "==", false);
 
     if (parentId !== undefined) {
-      query = query.where('parentId', '==', parentId || null);
+      query = query.where("parentId", "==", parentId || null);
     }
 
     const snapshot = await query
-      .orderBy('createdAt', 'desc')
+      .orderBy("createdAt", "desc")
       .limit(limit)
       .offset(offset)
       .get();
@@ -105,11 +105,11 @@ export class CommentsRepository {
 
     let countQuery = this.firebaseStore
       .collection(this.commentsCollection)
-      .where('courseId', '==', courseId)
-      .where('deleted', '==', false);
+      .where("courseId", "==", courseId)
+      .where("deleted", "==", false);
 
     if (parentId !== undefined) {
-      countQuery = countQuery.where('parentId', '==', parentId || null);
+      countQuery = countQuery.where("parentId", "==", parentId || null);
     }
 
     const countSnapshot = await countQuery.count().get();
@@ -122,7 +122,7 @@ export class CommentsRepository {
 
   async updateComment(
     commentId: string,
-    data: UpdateCommentRequest
+    data: UpdateCommentRequest,
   ): Promise<Comment> {
     const now = new Date();
 
@@ -136,7 +136,7 @@ export class CommentsRepository {
 
     const updated = await this.getCommentById(commentId);
     if (!updated) {
-      throw new Error('Failed to retrieve updated comment');
+      throw new Error("Failed to retrieve updated comment");
     }
 
     return updated;
@@ -166,9 +166,9 @@ export class CommentsRepository {
   async getCommentsByUser(userId: string): Promise<Comment[]> {
     const snapshot = await this.firebaseStore
       .collection(this.commentsCollection)
-      .where('authorId', '==', userId)
-      .where('deleted', '==', false)
-      .orderBy('createdAt', 'desc')
+      .where("authorId", "==", userId)
+      .where("deleted", "==", false)
+      .orderBy("createdAt", "desc")
       .get();
 
     return snapshot.docs.map((doc) => ({
@@ -182,9 +182,9 @@ export class CommentsRepository {
   async getReplies(parentId: string): Promise<Comment[]> {
     const snapshot = await this.firebaseStore
       .collection(this.commentsCollection)
-      .where('parentId', '==', parentId)
-      .where('deleted', '==', false)
-      .orderBy('createdAt', 'asc')
+      .where("parentId", "==", parentId)
+      .where("deleted", "==", false)
+      .orderBy("createdAt", "asc")
       .get();
 
     return snapshot.docs.map((doc) => ({

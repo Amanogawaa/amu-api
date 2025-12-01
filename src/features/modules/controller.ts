@@ -1,7 +1,7 @@
-import { logger } from '../../utils/loggers';
-import type { ModuleService } from './service';
-import type { NextFunction, Request, Response } from 'express';
-import { notifyModuleCreated } from '../../utils/socket/socket.helpers';
+import { logger } from "../../utils/loggers";
+import type { ModuleService } from "./service";
+import type { NextFunction, Request, Response } from "express";
+import { notifyModuleCreated } from "../../utils/socket/socket.helpers";
 
 export class ModuleController {
   private service: ModuleService;
@@ -13,13 +13,13 @@ export class ModuleController {
   async getModules(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { courseId } = request.params;
       if (!courseId) {
         response.status(400).json({
-          message: 'Course ID is required',
+          message: "Course ID is required",
         });
         return;
       }
@@ -28,7 +28,7 @@ export class ModuleController {
 
       response.status(200).send(modules);
     } catch (error) {
-      logger.error('Error in ModuleController.getModules:', error);
+      logger.error("Error in ModuleController.getModules:", error);
       next(error);
     }
   }
@@ -36,13 +36,13 @@ export class ModuleController {
   async getModule(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { moduleId } = request.params;
       if (!moduleId) {
         response.status(400).json({
-          message: 'Module ID is required',
+          message: "Module ID is required",
         });
         return;
       }
@@ -51,14 +51,14 @@ export class ModuleController {
 
       if (!module) {
         response.status(404).json({
-          message: 'Module not found',
+          message: "Module not found",
         });
         return;
       }
 
       response.status(200).send(module);
     } catch (error) {
-      logger.error('Error in ModuleController.getModule:', error);
+      logger.error("Error in ModuleController.getModule:", error);
       next(error);
     }
   }
@@ -66,7 +66,7 @@ export class ModuleController {
   async generateModules(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const moduleRequest = request.body;
@@ -76,10 +76,10 @@ export class ModuleController {
 
       response.status(201).json({
         data: createdModules,
-        message: 'Modules generated successfully',
+        message: "Modules generated successfully",
       });
     } catch (error) {
-      logger.error('Error in ModuleController.generateModules:', error);
+      logger.error("Error in ModuleController.generateModules:", error);
       next(error);
     }
   }
@@ -87,14 +87,14 @@ export class ModuleController {
   async regenerateModules(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { courseId } = request.params;
 
       if (!courseId) {
         response.status(400).json({
-          message: 'Course ID is required',
+          message: "Course ID is required",
         });
         return;
       }
@@ -115,7 +115,7 @@ export class ModuleController {
         errors: result.errors.length > 0 ? result.errors : undefined,
       });
     } catch (error) {
-      logger.error('Error in ModuleController.regenerateModules:', error);
+      logger.error("Error in ModuleController.regenerateModules:", error);
       next(error);
     }
   }
@@ -123,14 +123,14 @@ export class ModuleController {
   async deleteModulesByCourseId(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { courseId } = request.params;
 
       if (!courseId) {
         response.status(400).json({
-          message: 'Course ID is required',
+          message: "Course ID is required",
         });
         return;
       }
@@ -141,7 +141,7 @@ export class ModuleController {
         message: `Modules for courseId ${courseId} deleted successfully`,
       });
     } catch (error) {
-      logger.error('Error in ModuleController.deleteModulesByCourseId:', error);
+      logger.error("Error in ModuleController.deleteModulesByCourseId:", error);
       next(error);
     }
   }

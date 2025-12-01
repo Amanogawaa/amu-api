@@ -1,8 +1,8 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { QuizController } from './controller';
-import { QuizRepository } from './repository';
-import { QuizRoute } from './route';
-import { QuizService } from './service';
+import { firebaseFirestore } from "../../config/firebase";
+import { QuizController } from "./controller";
+import { QuizRepository } from "./repository";
+import { QuizRoute } from "./route";
+import { QuizService } from "./service";
 
 export class QuizContainer {
   public readonly repository: QuizRepository;

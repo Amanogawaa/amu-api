@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import type { LessonController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
-import { courseOwnershipMiddleware } from '../../middlewares/ownership.middle';
+import { Router } from "express";
+import type { LessonController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import { courseOwnershipMiddleware } from "../../middlewares/ownership.middle";
 
 export class LessonRoute {
   public router: Router;
@@ -93,8 +93,8 @@ export class LessonRoute {
      *       500:
      *         description: Internal server error
      */
-    this.router.get('/:chapterId/lessons', (req, res, next) =>
-      this.controller.getLessons(req, res, next)
+    this.router.get("/:chapterId/lessons", (req, res, next) =>
+      this.controller.getLessons(req, res, next),
     );
 
     /**
@@ -213,10 +213,10 @@ export class LessonRoute {
      *         description: Internal server error
      */
     this.router.post(
-      '/lessons',
+      "/lessons",
       // authMiddleware,
       // courseOwnershipMiddleware,
-      (req, res, next) => this.controller.generateLessons(req, res, next)
+      (req, res, next) => this.controller.generateLessons(req, res, next),
     );
 
     /**
@@ -293,8 +293,8 @@ export class LessonRoute {
      *       500:
      *         description: Internal server error
      */
-    this.router.get('/lessons/:lessonId', (req, res, next) =>
-      this.controller.getLessonById(req, res, next)
+    this.router.get("/lessons/:lessonId", (req, res, next) =>
+      this.controller.getLessonById(req, res, next),
     );
 
     /**
@@ -418,10 +418,10 @@ export class LessonRoute {
      *         description: Internal server error
      */
     this.router.patch(
-      '/lessons/:lessonId',
+      "/lessons/:lessonId",
       authMiddleware,
       courseOwnershipMiddleware,
-      (req, res, next) => this.controller.updateLesson(req, res, next)
+      (req, res, next) => this.controller.updateLesson(req, res, next),
     );
 
     /**
@@ -455,10 +455,10 @@ export class LessonRoute {
      *         description: Internal server error
      */
     this.router.delete(
-      '/lessons/:lessonId',
+      "/lessons/:lessonId",
       // authMiddleware,
       // courseOwnershipMiddleware,
-      (req, res, next) => this.controller.deleteLesson(req, res, next)
+      (req, res, next) => this.controller.deleteLesson(req, res, next),
     );
 
     /**
@@ -520,8 +520,8 @@ export class LessonRoute {
      *       500:
      *         description: Internal server error
      */
-    this.router.get('/lessons/:lessonId/videos', (req, res, next) =>
-      this.controller.getLessonVideos(req, res, next)
+    this.router.get("/lessons/:lessonId/videos", (req, res, next) =>
+      this.controller.getLessonVideos(req, res, next),
     );
 
     /**
@@ -588,9 +588,9 @@ export class LessonRoute {
      *         description: Internal server error
      */
     this.router.post(
-      '/lessons/:lessonId/transcript',
+      "/lessons/:lessonId/transcript",
       // authMiddleware,
-      (req, res, next) => this.controller.fetchTranscript(req, res, next)
+      (req, res, next) => this.controller.fetchTranscript(req, res, next),
     );
 
     /**
@@ -632,8 +632,8 @@ export class LessonRoute {
      *       500:
      *         description: Internal server error
      */
-    this.router.get('/lessons/:lessonId/transcript', (req, res, next) =>
-      this.controller.getTranscript(req, res, next)
+    this.router.get("/lessons/:lessonId/transcript", (req, res, next) =>
+      this.controller.getTranscript(req, res, next),
     );
   }
 

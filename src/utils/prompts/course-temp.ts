@@ -1,5 +1,5 @@
-import { SYSTEM_PROMPTS } from './system-prompts';
-import type { PromptMode, PromptPayload } from './types';
+import { SYSTEM_PROMPTS } from "./system-prompts";
+import type { PromptMode, PromptPayload } from "./types";
 
 export type CoursePromptMode = PromptMode;
 
@@ -27,7 +27,7 @@ const legacyCoursePrompt = (args: CoursePromptArgs): string => {
 
   const feedback = args.userInstructions
     ? `\n**IMPORTANT USER FEEDBACK FOR REGENERATION:**\n${args.userInstructions}\n`
-    : '';
+    : "";
 
   return `${base}${feedback}
 Return valid JSON only:
@@ -99,27 +99,27 @@ const systemCoursePrompt = (args: CoursePromptArgs): PromptPayload => {
     `Total duration: ${args.duration}`,
     `Desired modules: ${args.noOfModules}`,
     `Language: ${args.language}`,
-    `Return JSON that satisfies the schema described in the system prompt.`,
+    "Return JSON that satisfies the schema described in the system prompt.",
   ];
 
   if (args.userInstructions) {
     lines.push(
-      'User feedback to incorporate (honor without changing the schema):',
-      args.userInstructions
+      "User feedback to incorporate (honor without changing the schema):",
+      args.userInstructions,
     );
   }
 
   return {
-    userPrompt: lines.join('\n'),
+    userPrompt: lines.join("\n"),
     systemPrompt: SYSTEM_PROMPTS.COURSE,
   };
 };
 
 export const buildCoursePrompt = (
   args: CoursePromptArgs,
-  mode: CoursePromptMode = 'system'
+  mode: CoursePromptMode = "system",
 ): PromptPayload => {
-  if (mode === 'legacy') {
+  if (mode === "legacy") {
     return {
       userPrompt: legacyCoursePrompt(args),
     };

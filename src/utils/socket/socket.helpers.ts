@@ -1,6 +1,7 @@
-import type { Request, Response } from 'express';
-import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
-import type { SocketHandlers } from './socket.handlers';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Request } from "express";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { SocketHandlers } from "./socket.handlers";
 
 export function getSocketHandlers(req: Request): SocketHandlers | null {
   return req.app.locals.socketHandlers || null;
@@ -10,7 +11,7 @@ export function notifyCourseCreated(req: Request, courseData: any): void {
   const socketHandlers = getSocketHandlers(req);
 
   if (socketHandlers) {
-    socketHandlers.broadcast('course:created', {
+    socketHandlers.broadcast("course:created", {
       course: courseData,
       timestamp: new Date().toISOString(),
     });
@@ -20,11 +21,11 @@ export function notifyCourseCreated(req: Request, courseData: any): void {
 export function notifyModuleCreated(
   req: Request,
   courseId: string,
-  moduleData: any
+  moduleData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
-    socketHandlers.emitToCourse(courseId, 'module:created', {
+    socketHandlers.emitToCourse(courseId, "module:created", {
       module: moduleData,
       timestamp: new Date().toISOString(),
     });
@@ -34,12 +35,12 @@ export function notifyModuleCreated(
 export function notifyChapterCreated(
   req: Request,
   moduleId: string,
-  chapterData: any
+  chapterData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
 
   if (socketHandlers) {
-    socketHandlers.emitToModule(moduleId, 'chapter:created', {
+    socketHandlers.emitToModule(moduleId, "chapter:created", {
       chapter: chapterData,
       timestamp: new Date().toISOString(),
     });
@@ -49,11 +50,11 @@ export function notifyChapterCreated(
 export function notifyModuleUpdated(
   req: Request,
   courseId: string,
-  moduleData: any
+  moduleData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
-    socketHandlers.emitToCourse(courseId, 'module:updated', {
+    socketHandlers.emitToCourse(courseId, "module:updated", {
       module: moduleData,
       timestamp: new Date().toISOString(),
     });
@@ -63,11 +64,11 @@ export function notifyModuleUpdated(
 export function notifyProgressUpdated(
   req: Request,
   userId: string,
-  progressData: any
+  progressData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
-    socketHandlers.emitToUser(userId, 'progress:updated', {
+    socketHandlers.emitToUser(userId, "progress:updated", {
       progress: progressData,
       timestamp: new Date().toISOString(),
     });
@@ -78,13 +79,13 @@ export function notifyCommentCreated(
   req: Request,
   resourceId: string,
   resourceType: string,
-  commentData: any
+  commentData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
     socketHandlers.io
       .to(`${resourceType}:${resourceId}`)
-      .emit('comment:created', {
+      .emit("comment:created", {
         comment: commentData,
         timestamp: new Date().toISOString(),
       });
@@ -94,11 +95,11 @@ export function notifyCommentCreated(
 export function notifyLessonCreated(
   req: AuthenticatedRequest,
   chapterId: string,
-  lessonData: any
+  lessonData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
-    socketHandlers.emitToChapter(chapterId, 'lesson:created', {
+    socketHandlers.emitToChapter(chapterId, "lesson:created", {
       lesson: lessonData,
       timestamp: new Date().toISOString(),
     });
@@ -108,11 +109,11 @@ export function notifyLessonCreated(
 export function notifyLessonUpdated(
   req: AuthenticatedRequest,
   chapterId: string,
-  lessonData: any
+  lessonData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
-    socketHandlers.emitToChapter(chapterId, 'lesson:updated', {
+    socketHandlers.emitToChapter(chapterId, "lesson:updated", {
       lesson: lessonData,
       timestamp: new Date().toISOString(),
     });
@@ -122,11 +123,11 @@ export function notifyLessonUpdated(
 export function notifyLessonDeleted(
   req: AuthenticatedRequest,
   chapterId: string,
-  lessonId: string
+  lessonId: string,
 ): void {
   const socketHandlers = getSocketHandlers(req);
   if (socketHandlers) {
-    socketHandlers.emitToChapter(chapterId, 'lesson:deleted', {
+    socketHandlers.emitToChapter(chapterId, "lesson:deleted", {
       lessonId,
       timestamp: new Date().toISOString(),
     });

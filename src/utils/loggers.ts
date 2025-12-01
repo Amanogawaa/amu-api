@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Winston-compatible logger built on top of Pino for high-performance logging
  * Provides multiple output streams (file, console) with level-based filtering
  */
 import pino from "pino";
-import { config } from "../config/environment"
+import { config } from "../config/environment";
 import fs from "fs";
 import path from "path";
 
@@ -96,7 +97,7 @@ const baseLogger = pino(
       error: pino.stdSerializers.err,
     },
   },
-  pino.multistream(streams)
+  pino.multistream(streams),
 );
 
 /**

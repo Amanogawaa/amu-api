@@ -1,7 +1,7 @@
-import type { NextFunction, Request, Response } from 'express';
-import type { AuthService } from './service';
-import { logger } from '../../utils/loggers';
-import type { CreateUser } from './types';
+import type { NextFunction, Request, Response } from "express";
+import type { AuthService } from "./service";
+import { logger } from "../../utils/loggers";
+import type { CreateUser } from "./types";
 
 export class AuthController {
   private authService: AuthService;
@@ -13,7 +13,7 @@ export class AuthController {
   async signUp(
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const userData = request.body as CreateUser;
@@ -23,7 +23,7 @@ export class AuthController {
         message: res.message,
       });
     } catch (error) {
-      logger.error('Error in AuthController.signUp:', error);
+      logger.error("Error in AuthController.signUp:", error);
       next(error);
     }
   }

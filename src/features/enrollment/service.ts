@@ -1,15 +1,16 @@
-import { AppError } from '../../utils/errors';
-import { logger } from '../../utils/loggers';
-import type { CourseRepository } from '../course/repository';
-import type { ProgressRepository } from '../progress/repository';
-import type { EnrollmentRepository } from './repository';
-import type { Enrollment, EnrollmentQueryParams } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { AppError } from "../../utils/errors";
+import { logger } from "../../utils/loggers";
+import type { CourseRepository } from "../course/repository";
+import type { ProgressRepository } from "../progress/repository";
+import type { EnrollmentRepository } from "./repository";
+import type { Enrollment, EnrollmentQueryParams } from "./types";
 
 export class EnrollmentService {
   constructor(
     private enrollmentRepository: EnrollmentRepository,
     private courseRepository: CourseRepository,
-    private progressRepository: ProgressRepository
+    private progressRepository: ProgressRepository,
   ) {}
 
   async enrollInCourse(courseId: string, userId: string): Promise<Enrollment> {
@@ -17,22 +18,22 @@ export class EnrollmentService {
       const course = await this.courseRepository.getCourseById(courseId);
 
       if (!course.publish) {
-        throw new AppError('Cannot enroll in unpublished courses', 403);
+        throw new AppError("Cannot enroll in unpublished courses", 403);
       }
 
       if (course.draft) {
-        throw new AppError('Cannot enroll in draft courses', 403);
+        throw new AppError("Cannot enroll in draft courses", 403);
       }
 
       if (course.uid === userId) {
-        throw new AppError('Cannot enroll in your own course', 400);
+        throw new AppError("Cannot enroll in your own course", 400);
       }
 
       const enrollment = await this.enrollmentRepository.createEnrollment({
         courseId,
         userId,
         enrolledAt: new Date(),
-        status: 'active',
+        status: "active",
       });
 
       await this.progressRepository.createProgress({
@@ -51,7 +52,7 @@ export class EnrollmentService {
 
       return enrollment;
     } catch (error) {
-      logger.error('Error in EnrollmentService.enrollInCourse:', error);
+      logger.error("Error in EnrollmentService.enrollInCourse:", error);
       throw error;
     }
   }
@@ -59,64 +60,63 @@ export class EnrollmentService {
   async unenrollFromCourse(courseId: string, userId: string): Promise<void> {
     try {
       const enrollmentId = `${courseId}_${userId}`;
-      const enrollment = await this.enrollmentRepository.getEnrollmentById(
-        enrollmentId
-      );
+      const enrollment =
+        await this.enrollmentRepository.getEnrollmentById(enrollmentId);
 
       if (!enrollment) {
-        throw new AppError('Enrollment not found', 404);
+        throw new AppError("Enrollment not found", 404);
       }
 
-      if (enrollment.status !== 'active') {
-        throw new AppError('Enrollment is not active', 400);
+      if (enrollment.status !== "active") {
+        throw new AppError("Enrollment is not active", 400);
       }
 
       await this.enrollmentRepository.deleteEnrollment(enrollmentId);
 
       logger.info(`User ${userId} unenrolled from course ${courseId}`);
     } catch (error) {
-      logger.error('Error in EnrollmentService.unenrollFromCourse:', error);
+      logger.error("Error in EnrollmentService.unenrollFromCourse:", error);
       throw error;
     }
   }
 
   async getEnrollmentStatus(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<{ isEnrolled: boolean; enrollment?: Enrollment }> {
     try {
       const enrollment =
         await this.enrollmentRepository.getEnrollmentByCourseAndUser(
           courseId,
-          userId
+          userId,
         );
 
-      if (!enrollment || enrollment.status !== 'active') {
+      if (!enrollment || enrollment.status !== "active") {
         return { isEnrolled: false };
       }
 
       return { isEnrolled: true, enrollment };
     } catch (error) {
-      logger.error('Error in EnrollmentService.getEnrollmentStatus:', error);
+      logger.error("Error in EnrollmentService.getEnrollmentStatus:", error);
       throw error;
     }
   }
 
   async getUserEnrollments(
     userId: string,
-    params?: EnrollmentQueryParams
+    params?: EnrollmentQueryParams,
   ): Promise<Enrollment[]> {
     try {
       const enrollments = await this.enrollmentRepository.getEnrollmentsByUser(
         userId,
-        params
+        params,
       );
 
       const enrollmentsWithCourses = await Promise.all(
         enrollments.map(async (enrollment) => {
           try {
             const course = await this.courseRepository.getCourseById(
-              enrollment.courseId
+              enrollment.courseId,
             );
             return {
               ...enrollment,
@@ -125,11 +125,11 @@ export class EnrollmentService {
           } catch (error) {
             logger.warn(
               `Failed to fetch course ${enrollment.courseId} for enrollment ${enrollment.id}`,
-              error
+              error,
             );
             return enrollment;
           }
-        })
+        }),
       );
 
       // Get user's own published courses
@@ -145,20 +145,20 @@ export class EnrollmentService {
           courseId: course.id,
           userId,
           enrolledAt: course.createdAt || new Date(),
-          status: 'active' as const,
+          status: "active" as const,
           course,
-        })
+        }),
       );
 
       // Combine both lists, avoiding duplicates
       const enrolledCourseIds = new Set(enrollments.map((e) => e.courseId));
       const uniqueOwnedCourses = ownedCourseEnrollments.filter(
-        (oe: any) => !enrolledCourseIds.has(oe.courseId)
+        (oe: any) => !enrolledCourseIds.has(oe.courseId),
       );
 
       return [...enrollmentsWithCourses, ...uniqueOwnedCourses] as any;
     } catch (error) {
-      logger.error('Error in EnrollmentService.getUserEnrollments:', error);
+      logger.error("Error in EnrollmentService.getUserEnrollments:", error);
       throw error;
     }
   }
@@ -166,12 +166,12 @@ export class EnrollmentService {
   async getCourseEnrollmentCount(courseId: string): Promise<number> {
     try {
       return await this.enrollmentRepository.getEnrollmentCountByCourse(
-        courseId
+        courseId,
       );
     } catch (error) {
       logger.error(
-        'Error in EnrollmentService.getCourseEnrollmentCount:',
-        error
+        "Error in EnrollmentService.getCourseEnrollmentCount:",
+        error,
       );
       throw error;
     }
@@ -181,24 +181,24 @@ export class EnrollmentService {
     try {
       return await this.enrollmentRepository.isUserEnrolled(courseId, userId);
     } catch (error) {
-      logger.error('Error in EnrollmentService.isUserEnrolled:', error);
+      logger.error("Error in EnrollmentService.isUserEnrolled:", error);
       throw error;
     }
   }
 
   async markEnrollmentAsCompleted(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<Enrollment> {
     try {
       const enrollmentId = `${courseId}_${userId}`;
       return await this.enrollmentRepository.updateEnrollment(enrollmentId, {
-        status: 'completed',
+        status: "completed",
       });
     } catch (error) {
       logger.error(
-        'Error in EnrollmentService.markEnrollmentAsCompleted:',
-        error
+        "Error in EnrollmentService.markEnrollmentAsCompleted:",
+        error,
       );
       throw error;
     }

@@ -1,13 +1,13 @@
-import { AppError } from '../../utils/errors';
-import type { LikesRepository } from './repository';
-import type { Like } from './types';
+import { AppError } from "../../utils/errors";
+import type { LikesRepository } from "./repository";
+import type { Like } from "./types";
 
 export class LikesService {
   constructor(private repository: LikesRepository) {}
 
   async toggleLike(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<{ liked: boolean; likesCount: number }> {
     const existingLike = await this.repository.getLike(courseId, userId);
 
@@ -24,7 +24,7 @@ export class LikesService {
 
   async getLikeStatus(
     courseId: string,
-    userId: string
+    userId: string,
   ): Promise<{ liked: boolean; likesCount: number }> {
     const like = await this.repository.getLike(courseId, userId);
     const likesCount = await this.repository.getLikesCount(courseId);
@@ -38,7 +38,7 @@ export class LikesService {
   async getLikesForCourse(
     courseId: string,
     limit = 50,
-    offset = 0
+    offset = 0,
   ): Promise<{ likes: Like[]; total: number }> {
     return this.repository.getLikesForCourse(courseId, limit, offset);
   }

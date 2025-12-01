@@ -1,12 +1,12 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import { FieldValue } from 'firebase-admin/firestore';
-import type { Like } from './types';
-import { firebaseFirestore } from '../../config/firebase';
+import type { Firestore } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
+import type { Like } from "./types";
+import { firebaseFirestore } from "../../config/firebase";
 
 export class LikesRepository {
   private firebaseStore: Firestore;
-  private likesCollection = 'likes';
-  private coursesCollection = 'courses';
+  private likesCollection = "likes";
+  private coursesCollection = "courses";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -89,12 +89,12 @@ export class LikesRepository {
   async getLikesForCourse(
     courseId: string,
     limit = 50,
-    offset = 0
+    offset = 0,
   ): Promise<{ likes: Like[]; total: number }> {
     const snapshot = await this.firebaseStore
       .collection(this.likesCollection)
-      .where('courseId', '==', courseId)
-      .orderBy('createdAt', 'desc')
+      .where("courseId", "==", courseId)
+      .orderBy("createdAt", "desc")
       .limit(limit)
       .offset(offset)
       .get();
@@ -107,7 +107,7 @@ export class LikesRepository {
 
     const countSnapshot = await this.firebaseStore
       .collection(this.likesCollection)
-      .where('courseId', '==', courseId)
+      .where("courseId", "==", courseId)
       .count()
       .get();
 
@@ -129,8 +129,8 @@ export class LikesRepository {
   async getLikesByUser(userId: string): Promise<Like[]> {
     const snapshot = await this.firebaseStore
       .collection(this.likesCollection)
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
       .get();
 
     return snapshot.docs.map((doc) => ({

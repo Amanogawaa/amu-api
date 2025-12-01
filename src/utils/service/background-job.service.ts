@@ -1,4 +1,5 @@
-import { logger } from '../loggers';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { logger } from "../loggers";
 
 type Job = () => Promise<void>;
 
@@ -53,4 +54,3 @@ class BackgroundJobService {
 export const backgroundJobService = new BackgroundJobService({
   concurrency: Number(process.env.BACKGROUND_JOB_CONCURRENCY ?? 2),
 });
-

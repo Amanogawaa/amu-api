@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import type { CapstoneController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
-import multer from 'multer';
+import { Router } from "express";
+import type { CapstoneController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import multer from "multer";
 
 export class CapstoneRoute {
   public router: Router;
@@ -13,18 +13,18 @@ export class CapstoneRoute {
     },
     fileFilter: (req, file, cb) => {
       const allowedMimeTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
       ];
       if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
         cb(
           new Error(
-            'Invalid file type. Only JPEG, PNG, and WebP images are allowed'
-          )
+            "Invalid file type. Only JPEG, PNG, and WebP images are allowed",
+          ),
         );
       }
     },
@@ -69,9 +69,9 @@ export class CapstoneRoute {
      *         description: Guideline already exists for this course
      */
     this.router.post(
-      '/guidelines/generate/:courseId',
+      "/guidelines/generate/:courseId",
       authMiddleware,
-      this.controller.generateGuideline
+      this.controller.generateGuideline,
     );
 
     /**
@@ -94,8 +94,8 @@ export class CapstoneRoute {
      *         description: Guideline not found
      */
     this.router.get(
-      '/guidelines/course/:courseId',
-      this.controller.getGuidelineByCourseId
+      "/guidelines/course/:courseId",
+      this.controller.getGuidelineByCourseId,
     );
 
     /**
@@ -117,7 +117,7 @@ export class CapstoneRoute {
      *       404:
      *         description: Guideline not found
      */
-    this.router.get('/guidelines/:id', this.controller.getGuidelineById);
+    this.router.get("/guidelines/:id", this.controller.getGuidelineById);
 
     // ==================== CAPSTONE SUBMISSIONS ====================
 
@@ -163,9 +163,9 @@ export class CapstoneRoute {
      *         description: Unauthorized
      */
     this.router.post(
-      '/submissions',
+      "/submissions",
       authMiddleware,
-      this.controller.createSubmission
+      this.controller.createSubmission,
     );
 
     /**
@@ -203,7 +203,7 @@ export class CapstoneRoute {
      *       200:
      *         description: Submissions retrieved successfully
      */
-    this.router.get('/submissions', this.controller.getSubmissions);
+    this.router.get("/submissions", this.controller.getSubmissions);
 
     /**
      * @openapi
@@ -224,7 +224,7 @@ export class CapstoneRoute {
      *       404:
      *         description: Submission not found
      */
-    this.router.get('/submissions/:id', this.controller.getSubmissionById);
+    this.router.get("/submissions/:id", this.controller.getSubmissionById);
 
     /**
      * @openapi
@@ -263,9 +263,9 @@ export class CapstoneRoute {
      *         description: Submission not found
      */
     this.router.put(
-      '/submissions/:id',
+      "/submissions/:id",
       authMiddleware,
-      this.controller.updateSubmission
+      this.controller.updateSubmission,
     );
 
     /**
@@ -292,9 +292,9 @@ export class CapstoneRoute {
      *         description: Submission not found
      */
     this.router.delete(
-      '/submissions/:id',
+      "/submissions/:id",
       authMiddleware,
-      this.controller.deleteSubmission
+      this.controller.deleteSubmission,
     );
 
     // ==================== CAPSTONE REVIEWS ====================
@@ -345,7 +345,7 @@ export class CapstoneRoute {
      *       401:
      *         description: Unauthorized
      */
-    this.router.post('/reviews', authMiddleware, this.controller.createReview);
+    this.router.post("/reviews", authMiddleware, this.controller.createReview);
 
     /**
      * @openapi
@@ -377,7 +377,7 @@ export class CapstoneRoute {
      *       200:
      *         description: Reviews retrieved successfully
      */
-    this.router.get('/reviews', this.controller.getReviews);
+    this.router.get("/reviews", this.controller.getReviews);
 
     /**
      * @openapi
@@ -398,7 +398,7 @@ export class CapstoneRoute {
      *       404:
      *         description: Review not found
      */
-    this.router.get('/reviews/:id', this.controller.getReviewById);
+    this.router.get("/reviews/:id", this.controller.getReviewById);
 
     /**
      * @openapi
@@ -443,9 +443,9 @@ export class CapstoneRoute {
      *         description: Review not found
      */
     this.router.put(
-      '/reviews/:id',
+      "/reviews/:id",
       authMiddleware,
-      this.controller.updateReview
+      this.controller.updateReview,
     );
 
     /**
@@ -472,9 +472,9 @@ export class CapstoneRoute {
      *         description: Review not found
      */
     this.router.delete(
-      '/reviews/:id',
+      "/reviews/:id",
       authMiddleware,
-      this.controller.deleteReview
+      this.controller.deleteReview,
     );
 
     // ==================== CAPSTONE LIKES ====================
@@ -503,9 +503,9 @@ export class CapstoneRoute {
      *         description: Submission not found
      */
     this.router.post(
-      '/submissions/:id/like',
+      "/submissions/:id/like",
       authMiddleware,
-      this.controller.toggleLike
+      this.controller.toggleLike,
     );
 
     /**
@@ -532,9 +532,9 @@ export class CapstoneRoute {
      *         description: Submission not found
      */
     this.router.get(
-      '/submissions/:id/like-status',
+      "/submissions/:id/like-status",
       authMiddleware,
-      this.controller.getLikeStatus
+      this.controller.getLikeStatus,
     );
 
     // ==================== CAPSTONE REVIEW IMAGES ====================
@@ -578,10 +578,10 @@ export class CapstoneRoute {
      *         description: Review not found
      */
     this.router.post(
-      '/reviews/:id/images',
+      "/reviews/:id/images",
       authMiddleware,
-      this.upload.single('file'),
-      this.controller.uploadReviewImage
+      this.upload.single("file"),
+      this.controller.uploadReviewImage,
     );
 
     /**
@@ -625,9 +625,9 @@ export class CapstoneRoute {
      *         description: Review not found
      */
     this.router.delete(
-      '/reviews/:id/images',
+      "/reviews/:id/images",
       authMiddleware,
-      this.controller.deleteReviewImage
+      this.controller.deleteReviewImage,
     );
 
     // ==================== CAPSTONE SCREENSHOTS ====================
@@ -671,10 +671,10 @@ export class CapstoneRoute {
      *         description: Submission not found
      */
     this.router.post(
-      '/submissions/:id/screenshots',
+      "/submissions/:id/screenshots",
       authMiddleware,
-      this.upload.single('file'),
-      this.controller.uploadScreenshot
+      this.upload.single("file"),
+      this.controller.uploadScreenshot,
     );
 
     /**
@@ -718,9 +718,9 @@ export class CapstoneRoute {
      *         description: Submission not found
      */
     this.router.delete(
-      '/submissions/:id/screenshots',
+      "/submissions/:id/screenshots",
       authMiddleware,
-      this.controller.deleteScreenshot
+      this.controller.deleteScreenshot,
     );
   }
 

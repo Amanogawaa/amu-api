@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import type { LikesController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
+import { Router } from "express";
+import type { LikesController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 export class LikesRoute {
   public router: Router;
@@ -53,9 +53,9 @@ export class LikesRoute {
      *         description: Unauthorized
      */
     this.router.post(
-      '/courses/:courseId/like',
+      "/courses/:courseId/like",
       authMiddleware,
-      this.controller.toggleLike.bind(this.controller)
+      this.controller.toggleLike.bind(this.controller),
     );
 
     /**
@@ -96,9 +96,9 @@ export class LikesRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/courses/:courseId/like/status',
+      "/courses/:courseId/like/status",
       authMiddleware,
-      this.controller.getLikeStatus.bind(this.controller)
+      this.controller.getLikeStatus.bind(this.controller),
     );
 
     /**
@@ -163,9 +163,9 @@ export class LikesRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/courses/:courseId/likes',
+      "/courses/:courseId/likes",
       authMiddleware,
-      this.controller.getLikesForCourse.bind(this.controller)
+      this.controller.getLikesForCourse.bind(this.controller),
     );
 
     /**
@@ -208,9 +208,9 @@ export class LikesRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/likes/me',
+      "/likes/me",
       authMiddleware,
-      this.controller.getMyLikes.bind(this.controller)
+      this.controller.getMyLikes.bind(this.controller),
     );
   }
 

@@ -1,9 +1,9 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { LessonController } from './controller';
-import { LessonRepository } from './repository';
-import { LessonRoute } from './route';
-import { LessonService } from './service';
-import type { QuizService } from '../quiz/service';
+import { firebaseFirestore } from "../../config/firebase";
+import { LessonController } from "./controller";
+import { LessonRepository } from "./repository";
+import { LessonRoute } from "./route";
+import { LessonService } from "./service";
+import type { QuizService } from "../quiz/service";
 
 export class LessonContainer {
   public readonly repository: LessonRepository;
@@ -13,7 +13,7 @@ export class LessonContainer {
 
   constructor(
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
-    quizService?: QuizService
+    quizService?: QuizService,
   ) {
     this.repository = new LessonRepository(firestore);
     this.service = new LessonService(this.repository, quizService);

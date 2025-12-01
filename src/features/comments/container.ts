@@ -1,8 +1,8 @@
-import { firebaseFirestore } from '../../config/firebase';
-import { CommentsController } from './controller';
-import { CommentsRepository } from './repository';
-import { CommentsRoute } from './route';
-import { CommentsService } from './service';
+import { firebaseFirestore } from "../../config/firebase";
+import { CommentsController } from "./controller";
+import { CommentsRepository } from "./repository";
+import { CommentsRoute } from "./route";
+import { CommentsService } from "./service";
 
 export class CommentsContainer {
   public readonly repository: CommentsRepository;

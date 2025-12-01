@@ -1,11 +1,12 @@
-import { enforceLimit, GENERATION_LIMITS } from '../../config/generationLimit';
-import type { ChapterService } from '../../features/chapter/service';
-import type { CourseService } from '../../features/course/service';
-import type { GenerateCourseRequest } from '../../features/course/types';
-import type { LessonService } from '../../features/lesson/service';
-import type { ModuleService } from '../../features/modules/service';
-import type { Module } from '../../features/modules/types';
-import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { enforceLimit, GENERATION_LIMITS } from "../../config/generationLimit";
+import type { ChapterService } from "../../features/chapter/service";
+import type { CourseService } from "../../features/course/service";
+import type { GenerateCourseRequest } from "../../features/course/types";
+import type { LessonService } from "../../features/lesson/service";
+import type { ModuleService } from "../../features/modules/service";
+import type { Module } from "../../features/modules/types";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
   createGenerationJobId,
   GenerationStep,
@@ -17,27 +18,27 @@ import {
   emitChaptersGenerationProgress,
   emitLessonsGenerationProgress,
   type FullCourseGenerationResult,
-} from '../helper/generation.helpers';
-import { logger } from '../loggers';
+} from "../helper/generation.helpers";
+import { logger } from "../loggers";
 
 export class FullCourseGenerationService {
   constructor(
     private courseService: CourseService,
     private moduleService: ModuleService,
     private chapterService: ChapterService,
-    private lessonService: LessonService
+    private lessonService: LessonService,
   ) {}
 
   async generateFullCourse(
     req: AuthenticatedRequest,
-    request: GenerateCourseRequest
+    request: GenerateCourseRequest,
   ): Promise<FullCourseGenerationResult> {
     const jobId = createGenerationJobId();
     const userId = req.user!.uid;
     let currentStep = GenerationStep.COURSE;
 
     try {
-      logger.info('Starting full course generation', {
+      logger.info("Starting full course generation", {
         jobId,
         userId,
         request,
@@ -50,12 +51,12 @@ export class FullCourseGenerationService {
         req,
         jobId,
         userId,
-        'Generating course metadata...'
+        "Generating course metadata...",
       );
 
       const course = await this.courseService.generateCourse(request);
 
-      logger.info('Course generated successfully', {
+      logger.info("Course generated successfully", {
         jobId,
         courseId: course.id,
         courseName: course.name,
@@ -66,7 +67,7 @@ export class FullCourseGenerationService {
         jobId,
         userId,
         `Course "${course.name}" created successfully!`,
-        { courseId: course.id, courseName: course.name }
+        { courseId: course.id, courseName: course.name },
       );
 
       currentStep = GenerationStep.MODULES;
@@ -75,7 +76,7 @@ export class FullCourseGenerationService {
         jobId,
         userId,
         course,
-        request
+        request,
       );
 
       currentStep = GenerationStep.CHAPTERS;
@@ -85,7 +86,7 @@ export class FullCourseGenerationService {
         userId,
         course,
         modules,
-        request
+        request,
       );
 
       currentStep = GenerationStep.LESSONS;
@@ -95,7 +96,7 @@ export class FullCourseGenerationService {
         userId,
         course,
         modules,
-        request
+        request,
       );
 
       const result: FullCourseGenerationResult = {
@@ -106,7 +107,7 @@ export class FullCourseGenerationService {
         totalDuration: course.duration,
       };
 
-      logger.info('Full course generation completed', {
+      logger.info("Full course generation completed", {
         jobId,
         result,
       });
@@ -115,7 +116,7 @@ export class FullCourseGenerationService {
 
       return result;
     } catch (error: any) {
-      logger.error('Full course generation failed', {
+      logger.error("Full course generation failed", {
         jobId,
         userId,
         currentStep,
@@ -133,7 +134,7 @@ export class FullCourseGenerationService {
     jobId: string,
     userId: string,
     course: any,
-    courseRequest: GenerateCourseRequest
+    courseRequest: GenerateCourseRequest,
   ): Promise<Module[]> {
     try {
       emitModulesGenerationProgress(
@@ -142,7 +143,7 @@ export class FullCourseGenerationService {
         userId,
         0,
         1,
-        'Generating course modules...'
+        "Generating course modules...",
       );
 
       const modulesRequest = {
@@ -163,7 +164,7 @@ export class FullCourseGenerationService {
 
       const modules = await this.moduleService.getModules(course.id);
 
-      logger.info('Modules generated successfully', {
+      logger.info("Modules generated successfully", {
         jobId,
         courseId: course.id,
         modulesCount: modules.length,
@@ -176,12 +177,12 @@ export class FullCourseGenerationService {
         1,
         1,
         `Generated ${modules.length} modules successfully!`,
-        { modulesCount: modules.length }
+        { modulesCount: modules.length },
       );
 
       return modules;
     } catch (error: any) {
-      logger.error('Module generation failed', {
+      logger.error("Module generation failed", {
         jobId,
         courseId: course.id,
         error: error.message,
@@ -196,14 +197,14 @@ export class FullCourseGenerationService {
     userId: string,
     course: any,
     modules: Module[],
-    courseRequest: GenerateCourseRequest
+    courseRequest: GenerateCourseRequest,
   ): Promise<number> {
     let totalChapters = 0;
 
     try {
       const concurrency = Math.max(
         1,
-        GENERATION_LIMITS.CHAPTER_CONCURRENCY || modules.length
+        GENERATION_LIMITS.CHAPTER_CONCURRENCY || modules.length,
       );
 
       for (let offset = 0; offset < modules.length; offset += concurrency) {
@@ -222,7 +223,7 @@ export class FullCourseGenerationService {
               `Generating chapters for module ${globalIdx + 1}/${
                 modules.length
               }: "${module.moduleName}"...`,
-              { moduleId: module.id, moduleName: module.moduleName }
+              { moduleId: module.id, moduleName: module.moduleName },
             );
 
             const requestedChapters = module.estimatedChapterCount;
@@ -230,7 +231,7 @@ export class FullCourseGenerationService {
             const limitedChapters = enforceLimit(
               requestedChapters!,
               GENERATION_LIMITS.MAX_CHAPTERS_PER_MODULE,
-              'chapters'
+              "chapters",
             );
 
             const chaptersRequest = {
@@ -253,7 +254,7 @@ export class FullCourseGenerationService {
 
             const chapters = await this.chapterService.getChapters(module.id);
 
-            logger.info('Chapters generated for module', {
+            logger.info("Chapters generated for module", {
               jobId,
               moduleId: module.id,
               chaptersCount: chapters.length,
@@ -270,10 +271,10 @@ export class FullCourseGenerationService {
                 moduleId: module.id,
                 moduleName: module.moduleName,
                 chaptersCount: chapters.length,
-              }
+              },
             );
             return chapters.length;
-          })
+          }),
         );
 
         totalChapters += batchResults.reduce((sum, count) => sum + count, 0);
@@ -281,14 +282,14 @@ export class FullCourseGenerationService {
         await this.applyBatchDelay(offset + concurrency, modules.length);
       }
 
-      logger.info('All chapters generated successfully', {
+      logger.info("All chapters generated successfully", {
         jobId,
         totalChapters,
       });
 
       return totalChapters;
     } catch (error: any) {
-      logger.error('Chapter generation failed', {
+      logger.error("Chapter generation failed", {
         jobId,
         error: error.message,
       });
@@ -302,7 +303,7 @@ export class FullCourseGenerationService {
     userId: string,
     course: any,
     modules: Module[],
-    courseRequest: GenerateCourseRequest
+    courseRequest: GenerateCourseRequest,
   ): Promise<number> {
     let totalLessons = 0;
 
@@ -310,7 +311,7 @@ export class FullCourseGenerationService {
       // Prefetch chapters with limited concurrency to avoid serial waits
       const prefetchConcurrency = Math.max(
         1,
-        GENERATION_LIMITS.PREFETCH_CONCURRENCY || modules.length
+        GENERATION_LIMITS.PREFETCH_CONCURRENCY || modules.length,
       );
       const allChapters: Array<{ chapter: any; module: Module }> = [];
 
@@ -324,7 +325,7 @@ export class FullCourseGenerationService {
           batch.map(async (module) => {
             const chapters = await this.chapterService.getChapters(module.id);
             return chapters.map((chapter) => ({ chapter, module }));
-          })
+          }),
         );
         allChapters.push(...batchChapters.flat());
       }
@@ -336,7 +337,7 @@ export class FullCourseGenerationService {
 
       const concurrency = Math.max(
         1,
-        GENERATION_LIMITS.LESSON_CONCURRENCY || totalChapters
+        GENERATION_LIMITS.LESSON_CONCURRENCY || totalChapters,
       );
 
       for (
@@ -364,14 +365,14 @@ export class FullCourseGenerationService {
                 chapterTitle: chapter.chapterName,
                 moduleId: module.id,
                 moduleName: module.moduleName,
-              }
+              },
             );
 
             const requestedLessons = chapter.estimatedLessonCount || 5;
             const limitedLessons = enforceLimit(
               requestedLessons,
               GENERATION_LIMITS.MAX_LESSONS_PER_CHAPTER,
-              'lessons'
+              "lessons",
             );
 
             const lessonsRequest = {
@@ -406,25 +407,25 @@ export class FullCourseGenerationService {
                 chapterId: chapter.id,
                 chapterTitle: chapter.chapterName,
                 lessonsCount: lessons.length,
-              }
+              },
             );
 
             return lessons.length;
-          })
+          }),
         );
 
         totalLessons += batchResults.reduce((sum, count) => sum + count, 0);
         await this.applyBatchDelay(batchStart + concurrency, totalChapters);
       }
 
-      logger.info('All lessons generated successfully', {
+      logger.info("All lessons generated successfully", {
         jobId,
         totalLessons,
       });
 
       return totalLessons;
     } catch (error: any) {
-      logger.error('Lesson generation failed', {
+      logger.error("Lesson generation failed", {
         jobId,
         error: error.message,
       });
@@ -437,7 +438,7 @@ export class FullCourseGenerationService {
 
   private async applyBatchDelay(
     completed: number,
-    total: number
+    total: number,
   ): Promise<void> {
     const delayMs = GENERATION_LIMITS.BATCH_DELAY_MS || 0;
     if (delayMs > 0 && completed < total) {

@@ -113,7 +113,7 @@ Example query pattern:
 ```typescript
 let query = this.firebaseStore.collection(this.COLLECTION_NAME);
 if (params?.level) {
-  query = query.where('level', '==', params.level) as any;
+  query = query.where("level", "==", params.level) as any;
 }
 const snapshot = await query.get();
 ```
@@ -156,7 +156,7 @@ const result = await geminiCall(prompt, {
 **Usage in services:**
 
 ```typescript
-throw new AppError('Course not found', 404);
+throw new AppError("Course not found", 404);
 ```
 
 ## Validation with Zod
@@ -166,7 +166,7 @@ throw new AppError('Course not found', 404);
 ```typescript
 export const generateCourseSchema = z.object({
   category: z.string().min(2).max(50),
-  level: z.enum(['beginner', 'intermediate', 'advanced']),
+  level: z.enum(["beginner", "intermediate", "advanced"]),
 });
 
 export const validateGenerateCourse = (req, res, next) => {
@@ -176,7 +176,7 @@ export const validateGenerateCourse = (req, res, next) => {
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new ValidationError(
-        error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+        error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", "),
       );
     }
     next(error);
@@ -213,11 +213,11 @@ bun run dev  # Uses nodemon with tsx, watches src/**/*.ts
 **Usage:**
 
 ```typescript
-import { logger } from '../../utils/loggers';
+import { logger } from "../../utils/loggers";
 
-logger.info('Message', { contextData });
-logger.error('Error occurred:', error);
-logger.warn('Warning:', { details });
+logger.info("Message", { contextData });
+logger.error("Error occurred:", error);
+logger.warn("Warning:", { details });
 ```
 
 Logs include timestamps, levels, and structured data.
@@ -250,7 +250,7 @@ async method(req: Request, res: Response, next: NextFunction): Promise<void> {
 **Binding in routes:** Always bind controller methods:
 
 ```typescript
-this.router.get('/path', this.controller.method.bind(this.controller));
+this.router.get("/path", this.controller.method.bind(this.controller));
 ```
 
 **Response format:** Return objects with metadata:

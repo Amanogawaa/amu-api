@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import type { ProgressController } from './controller';
-import { authMiddleware } from '../../middlewares/auth.middleware';
+import { Router } from "express";
+import type { ProgressController } from "./controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 export class ProgressRoute {
   public router: Router;
@@ -77,9 +77,9 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.post(
-      '/progress',
+      "/progress",
       authMiddleware,
-      this.controller.markLessonProgress.bind(this.controller)
+      this.controller.markLessonProgress.bind(this.controller),
     );
 
     /**
@@ -132,9 +132,9 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/progress/summary',
+      "/progress/summary",
       authMiddleware,
-      this.controller.getProgressSummary.bind(this.controller)
+      this.controller.getProgressSummary.bind(this.controller),
     );
 
     /**
@@ -185,9 +185,9 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/progress/me',
+      "/progress/me",
       authMiddleware,
-      this.controller.getProgressForUser.bind(this.controller)
+      this.controller.getProgressForUser.bind(this.controller),
     );
 
     /**
@@ -262,15 +262,15 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/progress/course/:courseId',
+      "/progress/course/:courseId",
       authMiddleware,
-      this.controller.getProgressForCourse.bind(this.controller)
+      this.controller.getProgressForCourse.bind(this.controller),
     );
 
     this.router.delete(
-      '/progress/course/:courseId',
+      "/progress/course/:courseId",
       authMiddleware,
-      this.controller.deleteProgress.bind(this.controller)
+      this.controller.deleteProgress.bind(this.controller),
     );
 
     /**
@@ -313,9 +313,9 @@ export class ProgressRoute {
      *         description: Unauthorized
      */
     this.router.get(
-      '/progress/course/:courseId/stats',
+      "/progress/course/:courseId/stats",
       authMiddleware,
-      this.controller.getCourseStatistics.bind(this.controller)
+      this.controller.getCourseStatistics.bind(this.controller),
     );
   }
 

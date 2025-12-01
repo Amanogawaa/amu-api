@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import type { ModuleController } from './controller';
-import { validateGenerateModules } from './validation';
-import { authMiddleware } from '../../middlewares/auth.middleware';
-import { courseOwnershipMiddleware } from '../../middlewares/ownership.middle';
+import { Router } from "express";
+import type { ModuleController } from "./controller";
+import { validateGenerateModules } from "./validation";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import { courseOwnershipMiddleware } from "../../middlewares/ownership.middle";
 
 export class ModuleRoute {
   public route: Router;
@@ -68,8 +68,8 @@ export class ModuleRoute {
      *       500:
      *         description: Internal server error
      */
-    this.route.get('/:courseId/modules', (req, res, next) =>
-      this.controller.getModules(req, res, next)
+    this.route.get("/:courseId/modules", (req, res, next) =>
+      this.controller.getModules(req, res, next),
     );
 
     /**
@@ -99,8 +99,8 @@ export class ModuleRoute {
      *       500:
      *         description: Internal server error
      */
-    this.route.get('/modules/:moduleId', (req, res, next) =>
-      this.controller.getModule(req, res, next)
+    this.route.get("/modules/:moduleId", (req, res, next) =>
+      this.controller.getModule(req, res, next),
     );
 
     /**
@@ -194,11 +194,11 @@ export class ModuleRoute {
      *         description: Internal server error
      */
     this.route.post(
-      '/modules',
+      "/modules",
       authMiddleware,
       courseOwnershipMiddleware,
       validateGenerateModules,
-      (req, res, next) => this.controller.generateModules(req, res, next)
+      (req, res, next) => this.controller.generateModules(req, res, next),
     );
 
     /**
@@ -307,11 +307,11 @@ export class ModuleRoute {
      *         description: Internal server error
      */
     this.route.put(
-      '/:courseId/modules',
+      "/:courseId/modules",
       authMiddleware,
       courseOwnershipMiddleware,
       validateGenerateModules,
-      (req, res, next) => this.controller.regenerateModules(req, res, next)
+      (req, res, next) => this.controller.regenerateModules(req, res, next),
     );
 
     /**
@@ -346,11 +346,11 @@ export class ModuleRoute {
      *         description: Internal server error
      */
     this.route.delete(
-      '/:courseId/modules',
+      "/:courseId/modules",
       authMiddleware,
       courseOwnershipMiddleware,
       (req, res, next) =>
-        this.controller.deleteModulesByCourseId(req, res, next)
+        this.controller.deleteModulesByCourseId(req, res, next),
     );
   }
 

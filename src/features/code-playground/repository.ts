@@ -1,10 +1,10 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
-import type { CodeWorkspace, SaveWorkspaceRequest } from './types';
+import type { Firestore } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
+import type { CodeWorkspace, SaveWorkspaceRequest } from "./types";
 
 export class CodePlaygroundRepository {
   private firebaseStore: Firestore;
-  private readonly COLLECTION_NAME = 'code_workspaces';
+  private readonly COLLECTION_NAME = "code_workspaces";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
@@ -12,7 +12,7 @@ export class CodePlaygroundRepository {
 
   async saveWorkspace(
     workspaceData: SaveWorkspaceRequest,
-    workspaceId?: string
+    workspaceId?: string,
   ): Promise<CodeWorkspace> {
     const now = new Date();
 
@@ -24,7 +24,7 @@ export class CodePlaygroundRepository {
       }
     }
 
-    const workspace: Omit<CodeWorkspace, 'id'> = {
+    const workspace: Omit<CodeWorkspace, "id"> = {
       userId: workspaceData.userId,
       lessonId: workspaceData.lessonId,
       courseId: workspaceData.courseId,
@@ -75,13 +75,13 @@ export class CodePlaygroundRepository {
 
   async getWorkspaceByUserAndLesson(
     userId: string,
-    lessonId: string
+    lessonId: string,
   ): Promise<CodeWorkspace | null> {
     const snapshot = await this.firebaseStore
       .collection(this.COLLECTION_NAME)
-      .where('userId', '==', userId)
-      .where('lessonId', '==', lessonId)
-      .orderBy('updatedAt', 'desc')
+      .where("userId", "==", userId)
+      .where("lessonId", "==", lessonId)
+      .orderBy("updatedAt", "desc")
       .limit(1)
       .get();
 
@@ -110,13 +110,13 @@ export class CodePlaygroundRepository {
 
   async getWorkspacesByCourse(
     userId: string,
-    courseId: string
+    courseId: string,
   ): Promise<CodeWorkspace[]> {
     const snapshot = await this.firebaseStore
       .collection(this.COLLECTION_NAME)
-      .where('userId', '==', userId)
-      .where('courseId', '==', courseId)
-      .orderBy('updatedAt', 'desc')
+      .where("userId", "==", userId)
+      .where("courseId", "==", courseId)
+      .orderBy("updatedAt", "desc")
       .get();
 
     return snapshot.docs.map((doc) => {
@@ -142,8 +142,8 @@ export class CodePlaygroundRepository {
       output: string;
       error?: string;
       executionTime: number;
-      status: 'success' | 'error' | 'timeout';
-    }
+      status: "success" | "error" | "timeout";
+    },
   ): Promise<void> {
     await this.firebaseStore
       .collection(this.COLLECTION_NAME)
@@ -166,12 +166,12 @@ export class CodePlaygroundRepository {
 
   async deleteWorkspacesByLesson(
     userId: string,
-    lessonId: string
+    lessonId: string,
   ): Promise<void> {
     const snapshot = await this.firebaseStore
       .collection(this.COLLECTION_NAME)
-      .where('userId', '==', userId)
-      .where('lessonId', '==', lessonId)
+      .where("userId", "==", userId)
+      .where("lessonId", "==", lessonId)
       .get();
 
     const deletePromises = snapshot.docs.map((doc) => doc.ref.delete());

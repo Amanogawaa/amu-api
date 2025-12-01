@@ -1,11 +1,12 @@
-import { Server as SocketIOServer } from 'socket.io';
-import type { Server as HTTPServer } from 'http';
-import { logger } from '../utils/loggers';
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+import { Server as SocketIOServer } from "socket.io";
+import type { Server as HTTPServer } from "http";
+import { logger } from "../utils/loggers";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
   SocketData,
-} from '../utils/socket/socket.types';
+} from "../utils/socket/socket.types";
 
 export interface SocketConfig {
   cors: {
@@ -19,8 +20,8 @@ export interface SocketConfig {
 
 export const socketConfig: SocketConfig = {
   cors: {
-    origin: [process.env.NEXTJS_FRONTEND_URL || 'http://localhost:3000', '*'],
-    methods: ['GET', 'POST'],
+    origin: [process.env.NEXTJS_FRONTEND_URL || "http://localhost:3000", "*"],
+    methods: ["GET", "POST"],
     credentials: true,
   },
   pingTimeout: 60000,
@@ -28,7 +29,7 @@ export const socketConfig: SocketConfig = {
 };
 
 export function initializeSocketIO(
-  httpServer: HTTPServer
+  httpServer: HTTPServer,
 ): SocketIOServer<ClientToServerEvents, ServerToClientEvents, {}, SocketData> {
   const io = new SocketIOServer<
     ClientToServerEvents,
@@ -37,14 +38,14 @@ export function initializeSocketIO(
     SocketData
   >(httpServer, socketConfig);
 
-  io.on('connection', (socket) => {
+  io.on("connection", (socket) => {
     logger.info(`Socket connected: ${socket.id}`);
 
-    socket.on('disconnect', (reason) => {
+    socket.on("disconnect", (reason) => {
       logger.info(`Socket disconnected: ${socket.id}, reason: ${reason}`);
     });
 
-    socket.on('error', (error) => {
+    socket.on("error", (error) => {
       logger.error(`Socket error for ${socket.id}:`, error);
     });
   });

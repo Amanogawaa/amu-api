@@ -1,7 +1,7 @@
-import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
-import type { CodePlaygroundService } from './service';
-import type { ExecutionRequest, SaveWorkspaceRequest } from './types';
+import type { Response, NextFunction } from "express";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import type { CodePlaygroundService } from "./service";
+import type { ExecutionRequest, SaveWorkspaceRequest } from "./types";
 
 export class CodePlaygroundController {
   private codePlaygroundService: CodePlaygroundService;
@@ -12,14 +12,14 @@ export class CodePlaygroundController {
   executeCode = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { code, language, stdin, lessonId } = req.body;
       const userId = req.user?.uid;
 
       if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
+        res.status(401).json({ message: "Unauthorized" });
         return;
       }
 
@@ -36,7 +36,7 @@ export class CodePlaygroundController {
       res.status(200).json({
         success: true,
         data: result,
-        message: 'Code executed successfully',
+        message: "Code executed successfully",
       });
     } catch (error) {
       next(error);
@@ -46,14 +46,14 @@ export class CodePlaygroundController {
   executeAndSave = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { code, language, stdin, lessonId } = req.body;
       const userId = req.user?.uid;
 
       if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
+        res.status(401).json({ message: "Unauthorized" });
         return;
       }
 
@@ -74,7 +74,7 @@ export class CodePlaygroundController {
           result,
           workspace,
         },
-        message: 'Code executed and saved successfully',
+        message: "Code executed and saved successfully",
       });
     } catch (error) {
       next(error);
@@ -84,14 +84,14 @@ export class CodePlaygroundController {
   saveWorkspace = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { lessonId, courseId, code, language } = req.body;
       const userId = req.user?.uid;
 
       if (!userId) {
-        res.status(401).json({ message: 'Unauthorized' });
+        res.status(401).json({ message: "Unauthorized" });
         return;
       }
 
@@ -108,7 +108,7 @@ export class CodePlaygroundController {
       res.status(200).json({
         success: true,
         data: workspace,
-        message: 'Workspace saved successfully',
+        message: "Workspace saved successfully",
       });
     } catch (error) {
       next(error);
@@ -118,7 +118,7 @@ export class CodePlaygroundController {
   getPistonSupportedLanguages = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const languages = await this.codePlaygroundService.pistonGetLanguages();
@@ -126,7 +126,7 @@ export class CodePlaygroundController {
       res.status(200).json({
         success: true,
         data: languages,
-        message: 'Supported languages retrieved successfully',
+        message: "Supported languages retrieved successfully",
       });
     } catch (error) {
       next(error);
@@ -136,7 +136,7 @@ export class CodePlaygroundController {
   pistonExecuteCode = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { language, version, code } = req.body;
@@ -160,26 +160,26 @@ export class CodePlaygroundController {
   getWorkspace = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { lessonId } = req.params;
       const userId = req.user?.uid;
 
       if (!userId || !lessonId) {
-        res.status(401).json({ message: 'Unauthorized or missing lesson ID' });
+        res.status(401).json({ message: "Unauthorized or missing lesson ID" });
         return;
       }
 
       const workspace = await this.codePlaygroundService.getWorkspace(
         userId,
-        lessonId
+        lessonId,
       );
 
       if (!workspace) {
         res.status(404).json({
           success: false,
-          message: 'Workspace not found',
+          message: "Workspace not found",
         });
         return;
       }
@@ -187,7 +187,7 @@ export class CodePlaygroundController {
       res.status(200).json({
         success: true,
         data: workspace,
-        message: 'Workspace retrieved successfully',
+        message: "Workspace retrieved successfully",
       });
     } catch (error) {
       next(error);
@@ -201,27 +201,27 @@ export class CodePlaygroundController {
   getWorkspacesByCourse = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { courseId } = req.params;
       const userId = req.user?.uid;
 
       if (!userId || !courseId) {
-        res.status(401).json({ message: 'Unauthorized or missing course ID' });
+        res.status(401).json({ message: "Unauthorized or missing course ID" });
         return;
       }
 
       const workspaces = await this.codePlaygroundService.getWorkspacesByCourse(
         userId,
-        courseId
+        courseId,
       );
 
       res.status(200).json({
         success: true,
         data: workspaces,
         total: workspaces.length,
-        message: 'Workspaces retrieved successfully',
+        message: "Workspaces retrieved successfully",
       });
     } catch (error) {
       next(error);
@@ -235,7 +235,7 @@ export class CodePlaygroundController {
   deleteWorkspace = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { workspaceId } = req.params;
@@ -244,7 +244,7 @@ export class CodePlaygroundController {
       if (!userId || !workspaceId) {
         res
           .status(401)
-          .json({ message: 'Unauthorized or missing workspace ID' });
+          .json({ message: "Unauthorized or missing workspace ID" });
         return;
       }
 
@@ -252,7 +252,7 @@ export class CodePlaygroundController {
 
       res.status(200).json({
         success: true,
-        message: 'Workspace deleted successfully',
+        message: "Workspace deleted successfully",
       });
     } catch (error) {
       next(error);
@@ -261,19 +261,19 @@ export class CodePlaygroundController {
 
   async getSupportedLanguages(
     req: AuthenticatedRequest,
-    res: Response
+    res: Response,
   ): Promise<void> {
     if (!req.user) {
-      res.status(401).json({ message: 'Unauthorized' });
+      res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    const { SUPPORTED_LANGUAGES } = await import('./types');
+    const { SUPPORTED_LANGUAGES } = await import("./types");
 
     res.status(200).json({
       success: true,
       data: SUPPORTED_LANGUAGES,
-      message: 'Supported languages retrieved successfully',
+      message: "Supported languages retrieved successfully",
     });
   }
 }

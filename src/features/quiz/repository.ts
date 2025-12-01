@@ -1,19 +1,19 @@
-import type { Firestore } from 'firebase-admin/firestore';
-import { firebaseFirestore } from '../../config/firebase';
-import { logger } from '../../utils/loggers';
-import type { Quiz, QuizAttempt } from './types';
+import type { Firestore } from "firebase-admin/firestore";
+import { firebaseFirestore } from "../../config/firebase";
+import { logger } from "../../utils/loggers";
+import type { Quiz, QuizAttempt } from "./types";
 
 export class QuizRepository {
   private firebaseStore: Firestore;
-  private readonly QUIZ_COLLECTION = 'quizzes';
-  private readonly ATTEMPTS_COLLECTION = 'quiz_attempts';
+  private readonly QUIZ_COLLECTION = "quizzes";
+  private readonly ATTEMPTS_COLLECTION = "quiz_attempts";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
   }
 
   async createQuiz(
-    quiz: Omit<Quiz, 'id' | 'createdAt' | 'updatedAt'>
+    quiz: Omit<Quiz, "id" | "createdAt" | "updatedAt">,
   ): Promise<Quiz> {
     try {
       logger.info(`Creating quiz for lesson: ${quiz.lessonId}`);
@@ -35,7 +35,7 @@ export class QuizRepository {
       logger.info(`Quiz created successfully with id: ${docRef.id}`);
       return createdQuiz;
     } catch (error) {
-      logger.error('Error in QuizRepository.createQuiz:', error);
+      logger.error("Error in QuizRepository.createQuiz:", error);
       throw error;
     }
   }
@@ -59,7 +59,7 @@ export class QuizRepository {
         ...doc.data(),
       } as Quiz;
     } catch (error) {
-      logger.error('Error in QuizRepository.getQuizById:', error);
+      logger.error("Error in QuizRepository.getQuizById:", error);
       throw error;
     }
   }
@@ -70,7 +70,7 @@ export class QuizRepository {
 
       const querySnapshot = await this.firebaseStore
         .collection(this.QUIZ_COLLECTION)
-        .where('lessonId', '==', lessonId)
+        .where("lessonId", "==", lessonId)
         .limit(1)
         .get();
 
@@ -89,15 +89,15 @@ export class QuizRepository {
         ...doc.data(),
       } as Quiz;
     } catch (error) {
-      logger.error('Error in QuizRepository.getQuizByLessonId:', error);
+      logger.error("Error in QuizRepository.getQuizByLessonId:", error);
       throw error;
     }
   }
 
-  async saveAttempt(attempt: Omit<QuizAttempt, 'id'>): Promise<QuizAttempt> {
+  async saveAttempt(attempt: Omit<QuizAttempt, "id">): Promise<QuizAttempt> {
     try {
       logger.info(
-        `Saving quiz attempt for user: ${attempt.userId}, quiz: ${attempt.quizId}`
+        `Saving quiz attempt for user: ${attempt.userId}, quiz: ${attempt.quizId}`,
       );
 
       const docRef = this.firebaseStore
@@ -115,23 +115,23 @@ export class QuizRepository {
       logger.info(`Quiz attempt saved successfully with id: ${docRef.id}`);
       return savedAttempt;
     } catch (error) {
-      logger.error('Error in QuizRepository.saveAttempt:', error);
+      logger.error("Error in QuizRepository.saveAttempt:", error);
       throw error;
     }
   }
 
   async getUserAttempts(
     userId: string,
-    quizId: string
+    quizId: string,
   ): Promise<QuizAttempt[]> {
     try {
       logger.info(`Fetching attempts for user: ${userId}, quiz: ${quizId}`);
 
       const querySnapshot = await this.firebaseStore
         .collection(this.ATTEMPTS_COLLECTION)
-        .where('userId', '==', userId)
-        .where('quizId', '==', quizId)
-        .orderBy('completedAt', 'desc')
+        .where("userId", "==", userId)
+        .where("quizId", "==", quizId)
+        .orderBy("completedAt", "desc")
         .get();
 
       if (querySnapshot.empty) {
@@ -144,10 +144,10 @@ export class QuizRepository {
           ({
             id: doc.id,
             ...doc.data(),
-          } as QuizAttempt)
+          }) as QuizAttempt,
       );
     } catch (error) {
-      logger.error('Error in QuizRepository.getUserAttempts:', error);
+      logger.error("Error in QuizRepository.getUserAttempts:", error);
       throw error;
     }
   }
@@ -171,7 +171,7 @@ export class QuizRepository {
         ...doc.data(),
       } as QuizAttempt;
     } catch (error) {
-      logger.error('Error in QuizRepository.getAttemptById:', error);
+      logger.error("Error in QuizRepository.getAttemptById:", error);
       throw error;
     }
   }

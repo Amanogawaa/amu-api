@@ -1,11 +1,11 @@
-import type { PromptMode } from '../../utils/prompts/types';
+import type { PromptMode } from "../../utils/prompts/types";
 
 export interface Lesson {
   id: string;
   chapterId: string;
   lessonOrder: number;
   lessonName: string;
-  type: 'video' | 'article' | 'quiz';
+  type: "video" | "article" | "quiz";
   duration: string;
   lessonDescription: string;
   content: string | null;
@@ -22,7 +22,7 @@ export interface Lesson {
 export interface LessonResource {
   title: string;
   url: string;
-  type: 'documentation' | 'article' | 'tool' | 'github' | 'reference';
+  type: "documentation" | "article" | "tool" | "github" | "reference";
   description: string;
 }
 
@@ -51,7 +51,7 @@ export interface LessonResponse {
 export interface UpdateLessonRequest {
   lessonOrder?: number;
   lessonName?: string;
-  type?: 'video' | 'article' | 'quiz';
+  type?: "video" | "article" | "quiz";
   duration?: string;
   lessonDescription?: string;
   content?: string | null;
@@ -66,69 +66,69 @@ export interface UpdateLessonRequest {
 }
 
 export const lessonsSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     lessons: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          lessonOrder: { type: 'integer', minimum: 1 },
-          lessonName: { type: 'string' },
+          lessonOrder: { type: "integer", minimum: 1 },
+          lessonName: { type: "string" },
           type: {
-            type: 'string',
-            enum: ['video', 'article', 'quiz', 'exercise'],
+            type: "string",
+            enum: ["video", "article", "quiz", "exercise"],
           },
-          duration: { type: 'string', pattern: '^\\d+m$' },
-          lessonDescription: { type: 'string' },
+          duration: { type: "string", pattern: "^\\d+m$" },
+          lessonDescription: { type: "string" },
           content: {
-            type: ['string', 'null'],
+            type: ["string", "null"],
             minLength: 100,
           },
-          videoSearchQuery: { type: ['string', 'null'] },
+          videoSearchQuery: { type: ["string", "null"] },
           resources: {
-            type: 'array',
+            type: "array",
             items: {
-              type: 'object',
+              type: "object",
               properties: {
-                title: { type: 'string' },
-                url: { type: 'string' },
+                title: { type: "string" },
+                url: { type: "string" },
                 type: {
-                  type: 'string',
+                  type: "string",
                   enum: [
-                    'documentation',
-                    'article',
-                    'tool',
-                    'github',
-                    'video',
-                    'interactive',
+                    "documentation",
+                    "article",
+                    "tool",
+                    "github",
+                    "video",
+                    "interactive",
                   ],
                 },
-                description: { type: 'string' },
+                description: { type: "string" },
               },
-              required: ['title', 'url', 'type'],
+              required: ["title", "url", "type"],
             },
           },
-          learningOutcome: { type: 'string' },
+          learningOutcome: { type: "string" },
           prerequisites: {
-            type: 'array',
-            items: { type: 'string' },
+            type: "array",
+            items: { type: "string" },
           },
         },
         required: [
-          'lessonOrder',
-          'lessonName',
-          'type',
-          'duration',
-          'lessonDescription',
-          'content',
-          'videoSearchQuery',
-          'resources',
-          'learningOutcome',
-          'prerequisites',
+          "lessonOrder",
+          "lessonName",
+          "type",
+          "duration",
+          "lessonDescription",
+          "content",
+          "videoSearchQuery",
+          "resources",
+          "learningOutcome",
+          "prerequisites",
         ],
       },
     },
   },
-  required: ['lessons'],
+  required: ["lessons"],
 };

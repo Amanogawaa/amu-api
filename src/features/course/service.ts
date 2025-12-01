@@ -52,9 +52,9 @@ export class CourseService {
           duration: request.duration,
           noOfModules: request.noOfModules,
           language: request.language,
-          userInstructions: request.userInstructions ?? '',
+          userInstructions: request.userInstructions ?? "",
         },
-        promptMode
+        promptMode,
       );
 
       const result = await geminiCall(userPrompt, {
@@ -85,16 +85,15 @@ export class CourseService {
 
       const nameExist = await this.courseRepository.courseNameExists(
         courseData.name,
-        courseData.uid
+        courseData.uid,
       );
 
       if (nameExist) {
         courseData.name = `${courseData.name} (${Date.now()})`;
       }
 
-      const createdCourse = await this.courseRepository.createCourse(
-        courseData
-      );
+      const createdCourse =
+        await this.courseRepository.createCourse(courseData);
 
       return createdCourse;
     } catch (error) {
@@ -139,7 +138,7 @@ export class CourseService {
 
       let hasChapters = false;
       let chaptersCount = 0;
-      let chapterIds: string[] = [];
+      const chapterIds: string[] = [];
 
       if (moduleIds.length > 0) {
         const chapterPromises = [];
@@ -149,7 +148,7 @@ export class CourseService {
             firestore
               .collection("chapters")
               .where("moduleId", "in", batch)
-              .get()
+              .get(),
           );
         }
 
@@ -173,7 +172,7 @@ export class CourseService {
             firestore
               .collection("lessons")
               .where("chapterId", "in", batch)
-              .get()
+              .get(),
           );
         }
 
@@ -195,7 +194,7 @@ export class CourseService {
       logger.info(
         `Capstone validation for course ${courseId}: ${
           capstoneProject ? "Found" : "Not found"
-        }`
+        }`,
       );
 
       const missingComponents: string[] = [];
@@ -230,9 +229,9 @@ export class CourseService {
       if (!validation.isComplete) {
         throw new AppError(
           `Cannot publish course. Missing: ${validation.missingComponents.join(
-            ", "
+            ", ",
           )}`,
-          400
+          400,
         );
       }
 

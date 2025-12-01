@@ -1,40 +1,41 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ServerToClientEvents {
-  'course:joined': (data: { courseId: string }) => void;
-  'course:left': (data: { courseId: string }) => void;
-  'course:created': (data: { course: any; timestamp: string }) => void;
-  'course:updated': (data: { course: any; timestamp: string }) => void;
-  'course:deleted': (data: { courseId: string; timestamp: string }) => void;
+  "course:joined": (data: { courseId: string }) => void;
+  "course:left": (data: { courseId: string }) => void;
+  "course:created": (data: { course: any; timestamp: string }) => void;
+  "course:updated": (data: { course: any; timestamp: string }) => void;
+  "course:deleted": (data: { courseId: string; timestamp: string }) => void;
 
-  'module:joined': (data: { moduleId: string }) => void;
-  'module:left': (data: { moduleId: string }) => void;
-  'module:created': (data: { module: any; timestamp: string }) => void;
-  'module:updated': (data: { module: any; timestamp: string }) => void;
-  'module:deleted': (data: { moduleId: string; timestamp: string }) => void;
+  "module:joined": (data: { moduleId: string }) => void;
+  "module:left": (data: { moduleId: string }) => void;
+  "module:created": (data: { module: any; timestamp: string }) => void;
+  "module:updated": (data: { module: any; timestamp: string }) => void;
+  "module:deleted": (data: { moduleId: string; timestamp: string }) => void;
 
-  'lesson:created': (data: { lesson: any; timestamp: string }) => void;
-  'lesson:updated': (data: { lesson: any; timestamp: string }) => void;
-  'lesson:deleted': (data: { lessonId: string; timestamp: string }) => void;
+  "lesson:created": (data: { lesson: any; timestamp: string }) => void;
+  "lesson:updated": (data: { lesson: any; timestamp: string }) => void;
+  "lesson:deleted": (data: { lessonId: string; timestamp: string }) => void;
 
-  'progress:updated': (data: {
+  "progress:updated": (data: {
     lessonId: string;
     progress: number;
     timestamp: string;
   }) => void;
 
-  'comment:created': (data: {
+  "comment:created": (data: {
     comment: any;
     userId: string;
     timestamp: string;
   }) => void;
-  'comment:updated': (data: { comment: any; timestamp: string }) => void;
-  'comment:deleted': (data: { commentId: string; timestamp: string }) => void;
+  "comment:updated": (data: { comment: any; timestamp: string }) => void;
+  "comment:deleted": (data: { commentId: string; timestamp: string }) => void;
 
-  'like:added': (data: {
+  "like:added": (data: {
     resourceId: string;
     userId: string;
     timestamp: string;
   }) => void;
-  'like:removed': (data: {
+  "like:removed": (data: {
     resourceId: string;
     userId: string;
     timestamp: string;
@@ -47,11 +48,11 @@ export interface ServerToClientEvents {
     timestamp: string;
   }) => void;
 
-  'generation:progress': (data: {
+  "generation:progress": (data: {
     jobId: string;
     userId: string;
-    status: 'pending' | 'in_progress' | 'completed' | 'failed';
-    currentStep: 'course' | 'modules' | 'chapters' | 'lessons';
+    status: "pending" | "in_progress" | "completed" | "failed";
+    currentStep: "course" | "modules" | "chapters" | "lessons";
     progress: number;
     message: string;
     data?: any;
@@ -59,7 +60,7 @@ export interface ServerToClientEvents {
     timestamp: string;
   }) => void;
 
-  'generation:completed': (data: {
+  "generation:completed": (data: {
     jobId: string;
     courseId: string;
     modulesCount: number;
@@ -69,7 +70,7 @@ export interface ServerToClientEvents {
     timestamp: string;
   }) => void;
 
-  'generation:failed': (data: {
+  "generation:failed": (data: {
     jobId: string;
     error: string;
     currentStep: string;
@@ -78,30 +79,30 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  'course:join': (courseId: string) => void;
-  'course:leave': (courseId: string) => void;
+  "course:join": (courseId: string) => void;
+  "course:leave": (courseId: string) => void;
 
-  'module:join': (moduleId: string) => void;
-  'module:leave': (moduleId: string) => void;
+  "module:join": (moduleId: string) => void;
+  "module:leave": (moduleId: string) => void;
 
-  'lesson:join': (lessonId: string) => void;
-  'lesson:leave': (lessonId: string) => void;
+  "lesson:join": (lessonId: string) => void;
+  "lesson:leave": (lessonId: string) => void;
 
-  'progress:lesson': (data: { lessonId: string; progress: number }) => void;
+  "progress:lesson": (data: { lessonId: string; progress: number }) => void;
 
-  'comment:new': (data: {
+  "comment:new": (data: {
     resourceId: string;
     resourceType: string;
     comment: any;
   }) => void;
 
-  'typing:start': (data: { resourceId: string; resourceType: string }) => void;
-  'typing:stop': (data: { resourceId: string; resourceType: string }) => void;
+  "typing:start": (data: { resourceId: string; resourceType: string }) => void;
+  "typing:stop": (data: { resourceId: string; resourceType: string }) => void;
 
-  'presence:active': () => void;
-  'presence:away': () => void;
+  "presence:active": () => void;
+  "presence:away": () => void;
 
-  'generation:start': (data: {
+  "generation:start": (data: {
     category: string;
     topic: string;
     level: string;
@@ -110,7 +111,7 @@ export interface ClientToServerEvents {
     language: string;
   }) => void;
 
-  'generation:cancel': (data: { jobId: string }) => void;
+  "generation:cancel": (data: { jobId: string }) => void;
 }
 
 export interface SocketData {
@@ -121,7 +122,7 @@ export interface SocketData {
   };
 }
 
-export type RoomType = 'user' | 'course' | 'module' | 'lesson' | 'chapter';
+export type RoomType = "user" | "course" | "module" | "lesson" | "chapter";
 
 export interface RoomName {
   type: RoomType;
@@ -164,7 +165,7 @@ export interface CommentCreatedPayload {
 }
 
 export interface NotificationPayload {
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   message: string;
   data?: any;
   timestamp: string;

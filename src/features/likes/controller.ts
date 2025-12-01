@@ -1,7 +1,7 @@
-import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
-import { logger } from '../../utils/loggers';
-import type { LikesService } from './service';
+import type { Response, NextFunction } from "express";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
+import { logger } from "../../utils/loggers";
+import type { LikesService } from "./service";
 
 export class LikesController {
   private service: LikesService;
@@ -13,18 +13,18 @@ export class LikesController {
   async toggleLike(
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const userId = request.user?.uid;
       if (!userId) {
-        response.status(401).json({ message: 'Unauthorized' });
+        response.status(401).json({ message: "Unauthorized" });
         return;
       }
 
       const { courseId } = request.params;
       if (!courseId) {
-        response.status(400).json({ message: 'Course ID is required' });
+        response.status(400).json({ message: "Course ID is required" });
         return;
       }
 
@@ -32,10 +32,10 @@ export class LikesController {
 
       response.status(200).json({
         data: result,
-        message: result.liked ? 'Course liked' : 'Course unliked',
+        message: result.liked ? "Course liked" : "Course unliked",
       });
     } catch (error) {
-      logger.error('Error in LikesController.toggleLike:', error);
+      logger.error("Error in LikesController.toggleLike:", error);
       next(error);
     }
   }
@@ -43,18 +43,18 @@ export class LikesController {
   async getLikeStatus(
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const userId = request.user?.uid;
       if (!userId) {
-        response.status(401).json({ message: 'Unauthorized' });
+        response.status(401).json({ message: "Unauthorized" });
         return;
       }
 
       const { courseId } = request.params;
       if (!courseId) {
-        response.status(400).json({ message: 'Course ID is required' });
+        response.status(400).json({ message: "Course ID is required" });
         return;
       }
 
@@ -62,10 +62,10 @@ export class LikesController {
 
       response.status(200).json({
         data: status,
-        message: 'Like status retrieved successfully',
+        message: "Like status retrieved successfully",
       });
     } catch (error) {
-      logger.error('Error in LikesController.getLikeStatus:', error);
+      logger.error("Error in LikesController.getLikeStatus:", error);
       next(error);
     }
   }
@@ -73,12 +73,12 @@ export class LikesController {
   async getLikesForCourse(
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const { courseId } = request.params;
       if (!courseId) {
-        response.status(400).json({ message: 'Course ID is required' });
+        response.status(400).json({ message: "Course ID is required" });
         return;
       }
 
@@ -88,15 +88,15 @@ export class LikesController {
       const result = await this.service.getLikesForCourse(
         courseId,
         limit,
-        offset
+        offset,
       );
 
       response.status(200).json({
         data: result,
-        message: 'Likes retrieved successfully',
+        message: "Likes retrieved successfully",
       });
     } catch (error) {
-      logger.error('Error in LikesController.getLikesForCourse:', error);
+      logger.error("Error in LikesController.getLikesForCourse:", error);
       next(error);
     }
   }
@@ -104,12 +104,12 @@ export class LikesController {
   async getMyLikes(
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       const userId = request.user?.uid;
       if (!userId) {
-        response.status(401).json({ message: 'Unauthorized' });
+        response.status(401).json({ message: "Unauthorized" });
         return;
       }
 
@@ -117,11 +117,11 @@ export class LikesController {
 
       response.status(200).json({
         data: likes,
-        message: 'User likes retrieved successfully',
+        message: "User likes retrieved successfully",
         total: likes.length,
       });
     } catch (error) {
-      logger.error('Error in LikesController.getMyLikes:', error);
+      logger.error("Error in LikesController.getMyLikes:", error);
       next(error);
     }
   }

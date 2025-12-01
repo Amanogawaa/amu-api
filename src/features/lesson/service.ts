@@ -1,19 +1,19 @@
-import { geminiCall } from '../../utils/geminiCall';
-import { logger } from '../../utils/loggers';
+import { geminiCall } from "../../utils/geminiCall";
+import { logger } from "../../utils/loggers";
 import {
   buildLessonsPrompt,
   type LessonPromptMode,
-} from '../../utils/prompts/lesson-temp';
-import { LessonRepository } from './repository';
+} from "../../utils/prompts/lesson-temp";
+import { LessonRepository } from "./repository";
 import {
   lessonsSchema,
   type GenerateLessonRequest,
   type Lesson,
-} from './types';
-import { backgroundJobService } from '../../utils/service/background-job.service';
-import { youtubeService } from '../../utils/service/youtube.service';
-import { youtubeTranscriptService } from '../../utils/service/youtube-transcript.service';
-import type { QuizService } from '../quiz/service';
+} from "./types";
+import { backgroundJobService } from "../../utils/service/background-job.service";
+import { youtubeService } from "../../utils/service/youtube.service";
+import { youtubeTranscriptService } from "../../utils/service/youtube-transcript.service";
+import type { QuizService } from "../quiz/service";
 
 export class LessonService {
   private lessonRepository: LessonRepository;
@@ -29,14 +29,14 @@ export class LessonService {
       const lessons = await this.lessonRepository.getLessons(chapterId);
       return lessons;
     } catch (error) {
-      logger.error('Error in LessonService.getLessons:', error);
+      logger.error("Error in LessonService.getLessons:", error);
       throw error;
     }
   }
 
   public async generateLessons(request: GenerateLessonRequest) {
     try {
-      const promptMode: LessonPromptMode = request.promptMode ?? 'legacy';
+      const promptMode: LessonPromptMode = request.promptMode ?? "legacy";
       const { userPrompt, systemPrompt } = buildLessonsPrompt(
         {
           chapterId: request.chapterId,
@@ -52,7 +52,7 @@ export class LessonService {
           language: request.language,
           userInstructions: request.userInstructions,
         },
-        { mode: promptMode }
+        { mode: promptMode },
       );
 
       const result = await geminiCall(userPrompt, {
@@ -67,60 +67,59 @@ export class LessonService {
         },
       });
 
-      logger.info('Lessons generated via Gemini', {
+      logger.info("Lessons generated via Gemini", {
         chapterId: request.chapterId,
         mode: promptMode,
         lessonCount: result?.lessons?.length ?? 0,
       });
 
       if (!result.lessons || !Array.isArray(result.lessons)) {
-        throw new Error('Invalid response from Gemini: missing lessons array');
+        throw new Error("Invalid response from Gemini: missing lessons array");
       }
 
       const createdLessons = await this.lessonRepository.createLessons(
         request.chapterId,
-        result.lessons
+        result.lessons,
       );
 
       logger.info(`Successfully created ${createdLessons.length} lessons`);
 
       backgroundJobService.enqueue(
         `lesson:${request.chapterId}:transcripts`,
-        () => this.autoFetchTranscriptsForVideoLessons(createdLessons)
+        () => this.autoFetchTranscriptsForVideoLessons(createdLessons),
       );
 
-      backgroundJobService.enqueue(
-        `lesson:${request.chapterId}:quizzes`,
-        () => this.autoGenerateQuizzes(createdLessons, request.chapterId)
+      backgroundJobService.enqueue(`lesson:${request.chapterId}:quizzes`, () =>
+        this.autoGenerateQuizzes(createdLessons, request.chapterId),
       );
 
       return createdLessons;
     } catch (error) {
-      logger.error('Error in LessonService.generateLessons:', error);
+      logger.error("Error in LessonService.generateLessons:", error);
       throw error;
     }
   }
 
   private async autoFetchTranscriptsForVideoLessons(
-    lessons: Lesson[]
+    lessons: Lesson[],
   ): Promise<void> {
-    logger.info('Starting auto-fetch transcripts for video lessons...');
+    logger.info("Starting auto-fetch transcripts for video lessons...");
 
     for (const lesson of lessons) {
-      if (lesson.type === 'video' && lesson.videoSearchQuery) {
+      if (lesson.type === "video" && lesson.videoSearchQuery) {
         try {
           logger.info(
-            `Fetching video and transcript for lesson: ${lesson.lessonName}`
+            `Fetching video and transcript for lesson: ${lesson.lessonName}`,
           );
 
           const videos = await youtubeService.searchVideos(
             lesson.videoSearchQuery,
-            1
+            1,
           );
 
           if (videos.videos.length === 0) {
             logger.warn(
-              `No videos found for lesson ${lesson.id}: ${lesson.videoSearchQuery}`
+              `No videos found for lesson ${lesson.id}: ${lesson.videoSearchQuery}`,
             );
             continue;
           }
@@ -133,11 +132,11 @@ export class LessonService {
           }
 
           logger.info(
-            `Selected video: ${topVideo.title} (${topVideo.videoId})`
+            `Selected video: ${topVideo.title} (${topVideo.videoId})`,
           );
 
           const transcript = await youtubeTranscriptService.getTranscript(
-            topVideo.videoId
+            topVideo.videoId,
           );
 
           if (transcript) {
@@ -152,11 +151,11 @@ export class LessonService {
             const stats =
               youtubeTranscriptService.getTranscriptStats(transcript);
             logger.info(
-              `✅ Transcript fetched for lesson ${lesson.id}: ${stats.wordCount} words, ${stats.duration}s duration`
+              `✅ Transcript fetched for lesson ${lesson.id}: ${stats.wordCount} words, ${stats.duration}s duration`,
             );
           } else {
             logger.warn(
-              `No transcript available for video ${topVideo.videoId} (lesson ${lesson.id})`
+              `No transcript available for video ${topVideo.videoId} (lesson ${lesson.id})`,
             );
 
             await this.updateLesson(lesson.id, {
@@ -166,53 +165,53 @@ export class LessonService {
         } catch (error) {
           logger.error(
             `Failed to fetch transcript for lesson ${lesson.id}:`,
-            error
+            error,
           );
         }
       }
     }
 
-    logger.info('Completed auto-fetch transcripts');
+    logger.info("Completed auto-fetch transcripts");
   }
 
   private async autoGenerateQuizzes(
     lessons: Lesson[],
-    chapterId: string
+    chapterId: string,
   ): Promise<void> {
     if (!this.quizService) {
-      logger.warn('Quiz service not available, skipping quiz generation');
+      logger.warn("Quiz service not available, skipping quiz generation");
       return;
     }
 
-    logger.info('Starting auto-generation of quizzes for quiz lessons...');
+    logger.info("Starting auto-generation of quizzes for quiz lessons...");
 
-    const quizLessons = lessons.filter((lesson) => lesson.type === 'quiz');
+    const quizLessons = lessons.filter((lesson) => lesson.type === "quiz");
 
     if (quizLessons.length === 0) {
-      logger.info('No quiz lessons to generate');
+      logger.info("No quiz lessons to generate");
       return;
     }
 
     const allLessons = await this.lessonRepository.getLessons(chapterId);
     const sortedLessons = allLessons.sort(
-      (a, b) => a.lessonOrder - b.lessonOrder
+      (a, b) => a.lessonOrder - b.lessonOrder,
     );
 
     for (const quizLesson of quizLessons) {
       try {
         logger.info(
-          `Generating quiz for lesson: ${quizLesson.lessonName} (order: ${quizLesson.lessonOrder})`
+          `Generating quiz for lesson: ${quizLesson.lessonName} (order: ${quizLesson.lessonOrder})`,
         );
 
         const previousLessons = sortedLessons.filter(
           (lesson) =>
             lesson.lessonOrder < quizLesson.lessonOrder &&
-            lesson.type !== 'quiz'
+            lesson.type !== "quiz",
         );
 
         if (previousLessons.length === 0) {
           logger.warn(
-            `No previous lessons found for quiz ${quizLesson.id}, skipping`
+            `No previous lessons found for quiz ${quizLesson.id}, skipping`,
           );
           continue;
         }
@@ -233,13 +232,13 @@ export class LessonService {
 
             return content;
           })
-          .join('\n\n---\n\n');
+          .join("\n\n---\n\n");
 
-        let difficulty: 'easy' | 'medium' | 'hard' = 'medium';
+        let difficulty: "easy" | "medium" | "hard" = "medium";
         if (quizLesson.lessonOrder <= 3) {
-          difficulty = 'easy';
+          difficulty = "easy";
         } else if (quizLesson.lessonOrder >= 7) {
-          difficulty = 'hard';
+          difficulty = "hard";
         }
 
         const quiz = await this.quizService.generateQuiz({
@@ -251,44 +250,44 @@ export class LessonService {
         });
 
         logger.info(
-          `✅ Quiz generated for lesson ${quizLesson.id}: ${quiz.questions.length} questions, ${difficulty} difficulty`
+          `✅ Quiz generated for lesson ${quizLesson.id}: ${quiz.questions.length} questions, ${difficulty} difficulty`,
         );
       } catch (error) {
         logger.error(
           `Failed to generate quiz for lesson ${quizLesson.id}:`,
-          error
+          error,
         );
       }
     }
 
-    logger.info('Completed auto-generation of quizzes');
+    logger.info("Completed auto-generation of quizzes");
   }
 
   public async getLessonById(lessonId: string) {
     try {
       const lesson = await this.lessonRepository.getLessonById(lessonId);
       if (!lesson) {
-        throw new Error('Lesson not found');
+        throw new Error("Lesson not found");
       }
       return lesson;
     } catch (error) {
-      logger.error('Error in LessonService.getLessonById:', error);
+      logger.error("Error in LessonService.getLessonById:", error);
       throw error;
     }
   }
 
   public async updateLesson(
     lessonId: string,
-    lessonData: Partial<Omit<Lesson, 'id' | 'chapterId' | 'createdAt'>>
+    lessonData: Partial<Omit<Lesson, "id" | "chapterId" | "createdAt">>,
   ) {
     try {
       const updatedLesson = await this.lessonRepository.updateLesson(
         lessonId,
-        lessonData
+        lessonData,
       );
       return updatedLesson;
     } catch (error) {
-      logger.error('Error in LessonService.updateLesson:', error);
+      logger.error("Error in LessonService.updateLesson:", error);
       throw error;
     }
   }
@@ -297,7 +296,7 @@ export class LessonService {
     try {
       await this.lessonRepository.deleteLesson(lessonId);
     } catch (error) {
-      logger.error('Error in LessonService.deleteLesson:', error);
+      logger.error("Error in LessonService.deleteLesson:", error);
       throw error;
     }
   }

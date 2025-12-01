@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import type { CourseController } from './controller';
-import { validateCourseId, validateGenerateCourse } from './validation';
-import { authMiddleware } from '../../middlewares/auth.middleware';
-import { courseOwnershipMiddleware } from '../../middlewares/ownership.middle';
+import { Router } from "express";
+import type { CourseController } from "./controller";
+import { validateCourseId, validateGenerateCourse } from "./validation";
+import { authMiddleware } from "../../middlewares/auth.middleware";
+import { courseOwnershipMiddleware } from "../../middlewares/ownership.middle";
 
 export class CourseRoute {
   public router: Router;
@@ -65,9 +65,9 @@ export class CourseRoute {
      *         description: Internal server error
      */
     this.router.get(
-      '/my-courses',
+      "/my-courses",
       authMiddleware,
-      this.controller.getCourses.bind(this.controller)
+      this.controller.getCourses.bind(this.controller),
     );
 
     /**
@@ -91,10 +91,10 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.get(
-      '/my-courses/:id',
+      "/my-courses/:id",
       authMiddleware,
       courseOwnershipMiddleware,
-      this.controller.getCourseById.bind(this.controller)
+      this.controller.getCourseById.bind(this.controller),
     );
 
     /**
@@ -155,10 +155,10 @@ export class CourseRoute {
      *         description: Invalid request body
      */
     this.router.post(
-      '/courses',
+      "/courses",
       authMiddleware,
       validateGenerateCourse,
-      this.controller.generateCourse.bind(this.controller)
+      this.controller.generateCourse.bind(this.controller),
     );
 
     /**
@@ -242,10 +242,10 @@ export class CourseRoute {
      *         description: Service not available
      */
     this.router.post(
-      '/courses/generate-full',
+      "/courses/generate-full",
       authMiddleware,
       validateGenerateCourse,
-      this.controller.generateFullCourse.bind(this.controller)
+      this.controller.generateFullCourse.bind(this.controller),
     );
 
     /**
@@ -299,11 +299,11 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.delete(
-      '/courses/:id',
+      "/courses/:id",
       authMiddleware,
       courseOwnershipMiddleware,
       validateCourseId,
-      this.controller.deleteCourse.bind(this.controller)
+      this.controller.deleteCourse.bind(this.controller),
     );
 
     // public route no need auth here
@@ -368,8 +368,8 @@ export class CourseRoute {
      *         description: Internal server error
      */
     this.router.get(
-      '/courses',
-      this.controller.getCourses.bind(this.controller)
+      "/courses",
+      this.controller.getCourses.bind(this.controller),
     );
 
     /**
@@ -393,9 +393,9 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.get(
-      '/courses/:id',
+      "/courses/:id",
       validateCourseId,
-      this.controller.getCourseById.bind(this.controller)
+      this.controller.getCourseById.bind(this.controller),
     );
 
     /**
@@ -451,11 +451,11 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.get(
-      '/courses/:id/validate',
+      "/courses/:id/validate",
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
-      this.controller.validateCourseCompleteness.bind(this.controller)
+      this.controller.validateCourseCompleteness.bind(this.controller),
     );
 
     /**
@@ -482,11 +482,11 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.patch(
-      '/courses/:id/publish',
+      "/courses/:id/publish",
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
-      this.controller.publishCourse.bind(this.controller)
+      this.controller.publishCourse.bind(this.controller),
     );
 
     /**
@@ -511,11 +511,11 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.patch(
-      '/courses/:id/unpublish',
+      "/courses/:id/unpublish",
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
-      this.controller.unpublishCourse.bind(this.controller)
+      this.controller.unpublishCourse.bind(this.controller),
     );
 
     /**
@@ -540,11 +540,11 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.patch(
-      '/courses/:id/draft',
+      "/courses/:id/draft",
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
-      this.controller.draftCourse.bind(this.controller)
+      this.controller.draftCourse.bind(this.controller),
     );
 
     /**
@@ -569,11 +569,11 @@ export class CourseRoute {
      *         description: Course not found
      */
     this.router.patch(
-      '/courses/:id/undraft',
+      "/courses/:id/undraft",
       authMiddleware,
       validateCourseId,
       courseOwnershipMiddleware,
-      this.controller.undraftCourse.bind(this.controller)
+      this.controller.undraftCourse.bind(this.controller),
     );
   }
 

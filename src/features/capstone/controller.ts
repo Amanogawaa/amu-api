@@ -1,7 +1,7 @@
-import { type Request, type Response, type NextFunction } from 'express';
-import { logger } from '../../utils/loggers';
-import type { CapstoneService } from './service';
-import type { AuthenticatedRequest } from '../../middlewares/auth.middleware';
+import { type Request, type Response, type NextFunction } from "express";
+import { logger } from "../../utils/loggers";
+import type { CapstoneService } from "./service";
+import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
   validateCreateCapstoneSubmission,
   validateUpdateCapstoneSubmission,
@@ -9,7 +9,7 @@ import {
   validateUpdateCapstoneReview,
   capstoneSubmissionQuerySchema,
   capstoneReviewQuerySchema,
-} from './validation';
+} from "./validation";
 import type {
   CreateCapstoneSubmissionRequest,
   UpdateCapstoneSubmissionRequest,
@@ -17,7 +17,7 @@ import type {
   UpdateCapstoneReviewRequest,
   CapstoneSubmissionQueryParams,
   CapstoneReviewQueryParams,
-} from './types';
+} from "./types";
 
 export class CapstoneController {
   private service: CapstoneService;
@@ -31,7 +31,7 @@ export class CapstoneController {
   generateGuideline = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { courseId } = request.params;
@@ -39,25 +39,25 @@ export class CapstoneController {
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       if (!courseId) {
         response.status(400).json({
-          message: 'Course ID is required',
+          message: "Course ID is required",
         });
         return;
       }
 
-      logger.info('Generating capstone guideline', { courseId, userId });
+      logger.info("Generating capstone guideline", { courseId, userId });
 
       const guideline = await this.service.generateGuideline(courseId);
 
       response.status(201).send(guideline);
     } catch (error) {
-      logger.error('Error in CapstoneController.generateGuideline:', error);
+      logger.error("Error in CapstoneController.generateGuideline:", error);
       next(error);
     }
   };
@@ -65,14 +65,14 @@ export class CapstoneController {
   getGuidelineByCourseId = async (
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { courseId } = request.params;
 
       if (!courseId) {
         response.status(400).json({
-          message: 'Course ID is required',
+          message: "Course ID is required",
         });
         return;
       }
@@ -82,8 +82,8 @@ export class CapstoneController {
       response.status(200).send(guideline);
     } catch (error) {
       logger.error(
-        'Error in CapstoneController.getGuidelineByCourseId:',
-        error
+        "Error in CapstoneController.getGuidelineByCourseId:",
+        error,
       );
       next(error);
     }
@@ -92,14 +92,14 @@ export class CapstoneController {
   getGuidelineById = async (
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
 
       if (!id) {
         response.status(400).json({
-          message: 'Guideline ID is required',
+          message: "Guideline ID is required",
         });
         return;
       }
@@ -108,7 +108,7 @@ export class CapstoneController {
 
       response.status(200).send(guideline);
     } catch (error) {
-      logger.error('Error in CapstoneController.getGuidelineById:', error);
+      logger.error("Error in CapstoneController.getGuidelineById:", error);
       next(error);
     }
   };
@@ -118,33 +118,33 @@ export class CapstoneController {
   createSubmission = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const userId = request.user?.uid;
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       const validatedData = validateCreateCapstoneSubmission(
-        request.body
+        request.body,
       ) as CreateCapstoneSubmissionRequest;
 
       const submission = await this.service.createSubmission(
         userId,
-        validatedData
+        validatedData,
       );
 
       response.status(201).json({
         data: submission,
-        message: 'Capstone submission created successfully',
+        message: "Capstone submission created successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.createSubmission:', error);
+      logger.error("Error in CapstoneController.createSubmission:", error);
       next(error);
     }
   };
@@ -152,7 +152,7 @@ export class CapstoneController {
   getSubmissions = async (
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const validatedQuery = capstoneSubmissionQuerySchema.parse(request.query);
@@ -169,10 +169,10 @@ export class CapstoneController {
 
       response.status(200).json({
         data: result,
-        message: 'Capstone submissions retrieved successfully',
+        message: "Capstone submissions retrieved successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.getSubmissions:', error);
+      logger.error("Error in CapstoneController.getSubmissions:", error);
       next(error);
     }
   };
@@ -180,14 +180,14 @@ export class CapstoneController {
   getSubmissionById = async (
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
 
       if (!id) {
         response.status(400).json({
-          message: 'Submission ID is required',
+          message: "Submission ID is required",
         });
         return;
       }
@@ -197,15 +197,15 @@ export class CapstoneController {
 
       const submission = await this.service.getSubmissionById(
         id,
-        incrementView
+        incrementView,
       );
 
       response.status(200).json({
         data: submission,
-        message: 'Capstone submission retrieved successfully',
+        message: "Capstone submission retrieved successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.getSubmissionById:', error);
+      logger.error("Error in CapstoneController.getSubmissionById:", error);
       next(error);
     }
   };
@@ -213,7 +213,7 @@ export class CapstoneController {
   updateSubmission = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -221,34 +221,34 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Submission ID is required',
+          message: "Submission ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       const validatedData = validateUpdateCapstoneSubmission(
-        request.body
+        request.body,
       ) as UpdateCapstoneSubmissionRequest;
 
       const submission = await this.service.updateSubmission(
         id,
         userId,
-        validatedData
+        validatedData,
       );
 
       response.status(200).json({
         data: submission,
-        message: 'Capstone submission updated successfully',
+        message: "Capstone submission updated successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.updateSubmission:', error);
+      logger.error("Error in CapstoneController.updateSubmission:", error);
       next(error);
     }
   };
@@ -256,7 +256,7 @@ export class CapstoneController {
   deleteSubmission = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -264,14 +264,14 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Submission ID is required',
+          message: "Submission ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
@@ -279,10 +279,10 @@ export class CapstoneController {
       await this.service.deleteSubmission(id, userId);
 
       response.status(200).json({
-        message: 'Capstone submission deleted successfully',
+        message: "Capstone submission deleted successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.deleteSubmission:', error);
+      logger.error("Error in CapstoneController.deleteSubmission:", error);
       next(error);
     }
   };
@@ -292,37 +292,37 @@ export class CapstoneController {
   createReview = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const userId = request.user?.uid;
       const userEmail = request.user?.email;
-      const userName = request.user?.name || request.user?.email || 'Anonymous';
+      const userName = request.user?.name || request.user?.email || "Anonymous";
 
       if (!userId || !userEmail) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       const validatedData = validateCreateCapstoneReview(
-        request.body
+        request.body,
       ) as CreateCapstoneReviewRequest;
 
       const review = await this.service.createReview(
         userId,
         userEmail,
         userName,
-        validatedData
+        validatedData,
       );
 
       response.status(201).json({
         data: review,
-        message: 'Review created successfully',
+        message: "Review created successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.createReview:', error);
+      logger.error("Error in CapstoneController.createReview:", error);
       next(error);
     }
   };
@@ -330,7 +330,7 @@ export class CapstoneController {
   getReviews = async (
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const validatedQuery = capstoneReviewQuerySchema.parse(request.query);
@@ -341,9 +341,10 @@ export class CapstoneController {
         parentReviewId:
           validatedQuery.parentReviewId === undefined
             ? undefined
-            : validatedQuery.parentReviewId === null || validatedQuery.parentReviewId === ''
-            ? null
-            : validatedQuery.parentReviewId,
+            : validatedQuery.parentReviewId === null ||
+                validatedQuery.parentReviewId === ""
+              ? null
+              : validatedQuery.parentReviewId,
         limit: validatedQuery.limit,
         offset: validatedQuery.offset,
       };
@@ -352,10 +353,10 @@ export class CapstoneController {
 
       response.status(200).json({
         data: result,
-        message: 'Reviews retrieved successfully',
+        message: "Reviews retrieved successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.getReviews:', error);
+      logger.error("Error in CapstoneController.getReviews:", error);
       next(error);
     }
   };
@@ -363,14 +364,14 @@ export class CapstoneController {
   getReviewById = async (
     request: Request,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
 
       if (!id) {
         response.status(400).json({
-          message: 'Review ID is required',
+          message: "Review ID is required",
         });
         return;
       }
@@ -379,10 +380,10 @@ export class CapstoneController {
 
       response.status(200).json({
         data: review,
-        message: 'Review retrieved successfully',
+        message: "Review retrieved successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.getReviewById:', error);
+      logger.error("Error in CapstoneController.getReviewById:", error);
       next(error);
     }
   };
@@ -390,7 +391,7 @@ export class CapstoneController {
   updateReview = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -398,30 +399,30 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Review ID is required',
+          message: "Review ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       const validatedData = validateUpdateCapstoneReview(
-        request.body
+        request.body,
       ) as UpdateCapstoneReviewRequest;
 
       const review = await this.service.updateReview(id, userId, validatedData);
 
       response.status(200).json({
         data: review,
-        message: 'Review updated successfully',
+        message: "Review updated successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.updateReview:', error);
+      logger.error("Error in CapstoneController.updateReview:", error);
       next(error);
     }
   };
@@ -429,7 +430,7 @@ export class CapstoneController {
   deleteReview = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -437,14 +438,14 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Review ID is required',
+          message: "Review ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
@@ -452,10 +453,10 @@ export class CapstoneController {
       await this.service.deleteReview(id, userId);
 
       response.status(200).json({
-        message: 'Review deleted successfully',
+        message: "Review deleted successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.deleteReview:', error);
+      logger.error("Error in CapstoneController.deleteReview:", error);
       next(error);
     }
   };
@@ -465,7 +466,7 @@ export class CapstoneController {
   toggleLike = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -473,14 +474,14 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Submission ID is required',
+          message: "Submission ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
@@ -489,10 +490,10 @@ export class CapstoneController {
 
       response.status(200).json({
         data: result,
-        message: result.liked ? 'Submission liked' : 'Submission unliked',
+        message: result.liked ? "Submission liked" : "Submission unliked",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.toggleLike:', error);
+      logger.error("Error in CapstoneController.toggleLike:", error);
       next(error);
     }
   };
@@ -500,7 +501,7 @@ export class CapstoneController {
   getLikeStatus = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -508,14 +509,14 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Submission ID is required',
+          message: "Submission ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
@@ -524,10 +525,10 @@ export class CapstoneController {
 
       response.status(200).json({
         data: result,
-        message: 'Like status retrieved successfully',
+        message: "Like status retrieved successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.getLikeStatus:', error);
+      logger.error("Error in CapstoneController.getLikeStatus:", error);
       next(error);
     }
   };
@@ -537,7 +538,7 @@ export class CapstoneController {
   uploadScreenshot = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -545,36 +546,36 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Submission ID is required',
+          message: "Submission ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       if (!request.file) {
         response.status(400).json({
-          message: 'No file uploaded',
+          message: "No file uploaded",
         });
         return;
       }
 
       // Validate file type
       const allowedMimeTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
       ];
       if (!allowedMimeTypes.includes(request.file.mimetype)) {
         response.status(400).json({
           message:
-            'Invalid file type. Only JPEG, PNG, and WebP images are allowed',
+            "Invalid file type. Only JPEG, PNG, and WebP images are allowed",
         });
         return;
       }
@@ -583,7 +584,7 @@ export class CapstoneController {
       const maxSize = 10 * 1024 * 1024; // 10MB
       if (request.file.size > maxSize) {
         response.status(400).json({
-          message: 'File size too large. Maximum size is 10MB',
+          message: "File size too large. Maximum size is 10MB",
         });
         return;
       }
@@ -591,15 +592,15 @@ export class CapstoneController {
       const screenshotUrl = await this.service.uploadScreenshot(
         id,
         userId,
-        request.file
+        request.file,
       );
 
       response.status(200).json({
         data: { screenshotUrl },
-        message: 'Screenshot uploaded successfully',
+        message: "Screenshot uploaded successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.uploadScreenshot:', error);
+      logger.error("Error in CapstoneController.uploadScreenshot:", error);
       next(error);
     }
   };
@@ -607,7 +608,7 @@ export class CapstoneController {
   deleteScreenshot = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -616,21 +617,21 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Submission ID is required',
+          message: "Submission ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       if (!screenshotUrl) {
         response.status(400).json({
-          message: 'Screenshot URL is required',
+          message: "Screenshot URL is required",
         });
         return;
       }
@@ -638,10 +639,10 @@ export class CapstoneController {
       await this.service.deleteScreenshot(id, userId, screenshotUrl);
 
       response.status(200).json({
-        message: 'Screenshot deleted successfully',
+        message: "Screenshot deleted successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.deleteScreenshot:', error);
+      logger.error("Error in CapstoneController.deleteScreenshot:", error);
       next(error);
     }
   };
@@ -651,7 +652,7 @@ export class CapstoneController {
   uploadReviewImage = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -659,36 +660,36 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Review ID is required',
+          message: "Review ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       if (!request.file) {
         response.status(400).json({
-          message: 'No file uploaded',
+          message: "No file uploaded",
         });
         return;
       }
 
       // Validate file type
       const allowedMimeTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/jpg',
-        'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
       ];
       if (!allowedMimeTypes.includes(request.file.mimetype)) {
         response.status(400).json({
           message:
-            'Invalid file type. Only JPEG, PNG, and WebP images are allowed',
+            "Invalid file type. Only JPEG, PNG, and WebP images are allowed",
         });
         return;
       }
@@ -697,7 +698,7 @@ export class CapstoneController {
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (request.file.size > maxSize) {
         response.status(400).json({
-          message: 'File size too large. Maximum size is 5MB',
+          message: "File size too large. Maximum size is 5MB",
         });
         return;
       }
@@ -705,15 +706,15 @@ export class CapstoneController {
       const imageUrl = await this.service.uploadReviewImage(
         id,
         userId,
-        request.file
+        request.file,
       );
 
       response.status(200).json({
         data: { imageUrl },
-        message: 'Review image uploaded successfully',
+        message: "Review image uploaded successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.uploadReviewImage:', error);
+      logger.error("Error in CapstoneController.uploadReviewImage:", error);
       next(error);
     }
   };
@@ -721,7 +722,7 @@ export class CapstoneController {
   deleteReviewImage = async (
     request: AuthenticatedRequest,
     response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> => {
     try {
       const { id } = request.params;
@@ -730,21 +731,21 @@ export class CapstoneController {
 
       if (!id) {
         response.status(400).json({
-          message: 'Review ID is required',
+          message: "Review ID is required",
         });
         return;
       }
 
       if (!userId) {
         response.status(401).json({
-          message: 'User not authenticated',
+          message: "User not authenticated",
         });
         return;
       }
 
       if (!imageUrl) {
         response.status(400).json({
-          message: 'Image URL is required',
+          message: "Image URL is required",
         });
         return;
       }
@@ -752,10 +753,10 @@ export class CapstoneController {
       await this.service.deleteReviewImage(id, userId, imageUrl);
 
       response.status(200).json({
-        message: 'Review image deleted successfully',
+        message: "Review image deleted successfully",
       });
     } catch (error) {
-      logger.error('Error in CapstoneController.deleteReviewImage:', error);
+      logger.error("Error in CapstoneController.deleteReviewImage:", error);
       next(error);
     }
   };

@@ -45,7 +45,7 @@ export const RATE_LIMIT_CONFIG = {
  */
 export const getCurrentTierConfig = () => {
   const tier = (
-    process.env.GEMINI_TIER || 'PAID'
+    process.env.GEMINI_TIER || "PAID"
   ).toUpperCase() as keyof typeof RATE_LIMIT_CONFIG.TIER_PRESETS;
   return (
     RATE_LIMIT_CONFIG.TIER_PRESETS[tier] || RATE_LIMIT_CONFIG.TIER_PRESETS.PAID

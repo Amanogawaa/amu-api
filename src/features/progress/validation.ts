@@ -1,8 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const progressUpdateSchema = z.object({
-  courseId: z.string().min(1, 'Course ID is required'),
-  lessonId: z.string().min(1, 'Lesson ID is required'),
+  courseId: z.string().min(1, "Course ID is required"),
+  lessonId: z.string().min(1, "Lesson ID is required"),
   completed: z.boolean(),
   totalLessons: z.number().int().positive().optional(),
 });

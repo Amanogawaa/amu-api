@@ -16,9 +16,10 @@ export const GENERATION_LIMITS = {
 export function enforceLimit(
   requested: number,
   max: number,
-  itemName: string
+  itemName: string,
 ): number {
   if (requested > max) {
+    // eslint-disable-next-line no-console
     console.warn(`Requested ${requested} ${itemName}, limiting to ${max}`);
     return max;
   }
