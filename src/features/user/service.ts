@@ -26,6 +26,22 @@ export class UserService {
       throw error;
     }
   }
+  async getPublicUserProfile(uid: string): Promise<Partial<UserProfile>> {
+    try {
+      const profile = await this.userRepository.getUserProfile(uid);
+
+      if (!profile) {
+        throw new UserNotFoundError("User profile not found");
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { email, ...publicProfile } = profile;
+      return publicProfile;
+    } catch (error) {
+      logger.error("Error in UserService.getPublicUserProfile:", error);
+      throw error;
+    }
+  }
 
   async updateUserProfile(
     uid: string,
@@ -90,6 +106,7 @@ export class UserService {
           const oldFilePath = path.join(uploadDir, oldFilename);
           try {
             await fs.unlink(oldFilePath);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
             logger.warn(`Failed to delete old profile picture: ${oldFilePath}`);
           }

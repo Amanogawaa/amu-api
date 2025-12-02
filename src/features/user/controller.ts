@@ -1,4 +1,4 @@
-import type { Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { AppError } from "../../utils/errors";
 import type { UserService } from "./service";
 import type { UpdateUserProfile } from "./types";
@@ -29,6 +29,49 @@ export class UserController {
         data: profile,
         message: "User profile retrieved successfully",
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getOtherUserProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { userId } = req.params;
+
+      if (!userId) {
+        throw new AppError("User ID is required", 400);
+      }
+
+      const profile = await this.userService.getPublicUserProfile(userId);
+
+      res.status(200).json({
+        data: profile,
+        message: "User profile retrieved successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getOtherUserAnalytics = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { userId } = req.params;
+
+      if (!userId) {
+        throw new AppError("User ID is required", 400);
+      }
+
+      const analytics = await this.userService.getUserAnalytics(userId);
+
+      res.status(200).send(analytics);
     } catch (error) {
       next(error);
     }

@@ -16,7 +16,7 @@ export class UserRoute {
   public upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB
+      fileSize: 5 * 1024 * 1024,
     },
     fileFilter: (req, file, cb) => {
       const allowedMimeTypes = [
@@ -58,6 +58,68 @@ export class UserRoute {
       "/user/profile",
       authMiddleware,
       this.userContoller.getUserProfile,
+    );
+
+    /**
+     * @swagger
+     * /user/profile/{userId}:
+     *   get:
+     *     summary: Get another user's public profile
+     *     tags: [User]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: userId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The user ID to fetch profile for
+     *     responses:
+     *       200:
+     *         description: User profile retrieved successfully (excludes sensitive data like email)
+     *       400:
+     *         description: User ID is required
+     *       401:
+     *         description: Unauthorized
+     *       404:
+     *         description: User not found
+     */
+    this.router.get(
+      "/user/profile/:userId",
+      authMiddleware,
+      this.userContoller.getOtherUserProfile,
+    );
+
+    /**
+     * @swagger
+     * /user/analytics/{userId}:
+     *   get:
+     *     summary: Get another user's public analytics
+     *     tags: [User]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: userId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: The user ID to fetch analytics for
+     *     responses:
+     *       200:
+     *         description: User analytics retrieved successfully
+     *       400:
+     *         description: User ID is required
+     *       401:
+     *         description: Unauthorized
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.get(
+      "/user/analytics/:userId",
+      authMiddleware,
+      this.userContoller.getOtherUserAnalytics,
     );
 
     /**

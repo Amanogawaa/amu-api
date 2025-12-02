@@ -119,10 +119,10 @@ export class UserRepository {
 
   async getUserAnalytics(uid: string): Promise<UserAnalytics> {
     try {
-      // Get all courses created by the user
       const coursesSnapshot = await this.firebaseStore
         .collection("courses")
         .where("uid", "==", uid)
+        .where("publish", "==", true)
         .get();
 
       const courseAnalytics: CourseAnalytics[] = [];
