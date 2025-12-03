@@ -48,15 +48,6 @@ export class UserService {
     updates: UpdateUserProfile,
   ): Promise<UserProfile> {
     try {
-      // Validate at least one field is being updated
-      if (!updates.firstName && !updates.lastName && !updates.photoURL) {
-        throw new AppError(
-          "At least one field must be provided for update",
-          400,
-        );
-      }
-
-      // Check if user exists
       const existingProfile = await this.userRepository.getUserProfile(uid);
       if (!existingProfile) {
         throw new UserNotFoundError("User profile not found");

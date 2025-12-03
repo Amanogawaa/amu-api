@@ -12,13 +12,29 @@ export class ProgressRepository {
     return `${courseId}_${userId}`;
   }
 
-  async getProgressByUser(userId: string): Promise<UserProgress[]> {
-    const snapshot = await this.db
+  async getProgressByUser(
+    userId: string,
+    filters?: {
+      isPublished?: boolean;
+      status?: string;
+      minProgress?: number;
+    },
+  ): Promise<UserProgress[]> {
+    let query: FirebaseFirestore.Query = this.db
       .collection(this.collectionName)
-      .where("userId", "==", userId)
-      .get();
+      .where("userId", "==", userId);
 
-    return snapshot.docs.map((doc) => ({
+    if (filters?.isPublished !== undefined) {
+      query = query.where("isPublished", "==", filters.isPublished);
+    }
+
+    if (filters?.status) {
+      query = query.where("status", "==", filters.status);
+    }
+
+    const snapshot = await query.get();
+
+    let results = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate(),
@@ -26,6 +42,14 @@ export class ProgressRepository {
       lastActivityAt: doc.data().lastActivityAt?.toDate(),
       enrolledAt: doc.data().enrolledAt?.toDate(),
     })) as UserProgress[];
+
+    if (filters?.minProgress !== undefined) {
+      results = results.filter(
+        (p) => p.percentComplete >= filters.minProgress!,
+      );
+    }
+
+    return results;
   }
 
   async getProgressByCourse(
@@ -108,13 +132,29 @@ export class ProgressRepository {
     await this.db.collection(this.collectionName).doc(progressId).delete();
   }
 
-  async getAllProgressForCourse(courseId: string): Promise<UserProgress[]> {
-    const snapshot = await this.db
+  async getAllProgressForCourse(
+    courseId: string,
+    filters?: {
+      isPublished?: boolean;
+      status?: string;
+      minProgress?: number;
+    },
+  ): Promise<UserProgress[]> {
+    let query: FirebaseFirestore.Query = this.db
       .collection(this.collectionName)
-      .where("courseId", "==", courseId)
-      .get();
+      .where("courseId", "==", courseId);
 
-    return snapshot.docs.map((doc) => ({
+    if (filters?.isPublished !== undefined) {
+      query = query.where("isPublished", "==", filters.isPublished);
+    }
+
+    if (filters?.status) {
+      query = query.where("status", "==", filters.status);
+    }
+
+    const snapshot = await query.get();
+
+    let results = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate(),
@@ -122,5 +162,13 @@ export class ProgressRepository {
       lastActivityAt: doc.data().lastActivityAt?.toDate(),
       enrolledAt: doc.data().enrolledAt?.toDate(),
     })) as UserProgress[];
+
+    if (filters?.minProgress !== undefined) {
+      results = results.filter(
+        (p) => p.percentComplete >= filters.minProgress!,
+      );
+    }
+
+    return results;
   }
 }

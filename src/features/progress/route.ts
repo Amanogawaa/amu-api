@@ -1,6 +1,7 @@
 import { Router } from "express";
 import type { ProgressController } from "./controller";
 import { authMiddleware } from "../../middlewares/auth.middleware";
+import { courseOwnershipMiddleware } from "middlewares/ownership.middle";
 
 export class ProgressRoute {
   public router: Router;

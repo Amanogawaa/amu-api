@@ -1,6 +1,7 @@
 import { AppError } from "../../utils/errors";
 import type { ProgressRepository } from "./repository";
 import type {
+  ProgressFilters,
   ProgressSummary,
   ProgressUpdateRequest,
   UserProgress,
@@ -222,8 +223,14 @@ export class ProgressService {
     return this.repository.getProgressByUser(userId);
   }
 
-  async getProgressSummary(userId: string): Promise<ProgressSummary> {
-    const allProgress = await this.repository.getProgressByUser(userId);
+  async getProgressSummary(
+    userId: string,
+    filters?: ProgressFilters,
+  ): Promise<ProgressSummary> {
+    const allProgress = await this.repository.getProgressByUser(
+      userId,
+      filters,
+    );
 
     const coursesInProgress = allProgress.filter(
       (p) => p.percentComplete > 0 && p.percentComplete < 100,
@@ -238,11 +245,9 @@ export class ProgressService {
       0,
     );
 
-    // Note: We'd ideally fetch course names from the course service/repository
-    // For now, just return IDs and let frontend resolve names
     const progressByCourseName = allProgress.map((p) => ({
       courseId: p.courseId,
-      courseName: "", // TODO: Resolve from course service
+      courseName: "",
       percentComplete: p.percentComplete,
       lessonsCompleted: p.lessonsCompleted.length,
       totalLessons: p.totalLessons,

@@ -13,7 +13,7 @@ export interface UserProfile {
   firstName?: string;
   lastName?: string;
   photoURL?: string;
-  status: string;
+  isPrivate?: boolean;
   githubUsername?: string;
   githubId?: string;
   githubConnectedAt?: Date;

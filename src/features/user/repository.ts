@@ -33,6 +33,7 @@ export class UserRepository {
           firstName: userRecord.displayName?.split(" ")[0] || "",
           lastName: userRecord.displayName?.split(" ")[1] || "",
           photoURL: userRecord.photoURL || "",
+          status: "public",
           createdAt: new Date(),
           updatedAt: new Date(),
         };

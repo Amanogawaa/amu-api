@@ -1,14 +1,20 @@
 export interface UserProgress {
-  id: string; // composite: `${courseId}_${userId}`
+  id: string;
   courseId: string;
   userId: string;
-  lessonsCompleted: string[]; // array of lessonIds
-  totalLessons: number; // denormalized for quick calc
+  lessonsCompleted: string[];
+  totalLessons: number;
   percentComplete: number;
   lastActivityAt: Date;
   enrolledAt: Date;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ProgressFilters {
+  isPublished?: boolean;
+  status?: string;
+  minProgress?: number;
 }
 
 export interface ProgressUpdateRequest {

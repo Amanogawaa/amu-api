@@ -25,10 +25,7 @@ export class UserController {
 
       const profile = await this.userService.getUserProfile(uid);
 
-      res.status(200).json({
-        data: profile,
-        message: "User profile retrieved successfully",
-      });
+      res.status(200).send(profile);
     } catch (error) {
       next(error);
     }
@@ -48,10 +45,7 @@ export class UserController {
 
       const profile = await this.userService.getPublicUserProfile(userId);
 
-      res.status(200).json({
-        data: profile,
-        message: "User profile retrieved successfully",
-      });
+      res.status(200).send(profile);
     } catch (error) {
       next(error);
     }
