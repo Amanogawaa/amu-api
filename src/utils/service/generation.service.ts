@@ -33,7 +33,9 @@ export class FullCourseGenerationService {
     req: AuthenticatedRequest,
     request: GenerateCourseRequest,
   ): Promise<FullCourseGenerationResult> {
-    const jobId = createGenerationJobId();
+    const jobId = (req as any).generationJobId || createGenerationJobId();
+    const startTime =
+      (req as any).generationStartTime || new Date().toISOString();
     const userId = req.user!.uid;
     let currentStep = GenerationStep.COURSE;
 
@@ -44,7 +46,7 @@ export class FullCourseGenerationService {
         request,
       });
 
-      emitGenerationStarted(req, jobId, userId);
+      emitGenerationStarted(req, jobId, userId, startTime);
 
       currentStep = GenerationStep.COURSE;
       emitCourseGenerationProgress(
@@ -52,6 +54,8 @@ export class FullCourseGenerationService {
         jobId,
         userId,
         "Generating course metadata...",
+        undefined,
+        startTime,
       );
 
       const course = await this.courseService.generateCourse(request);
@@ -68,6 +72,7 @@ export class FullCourseGenerationService {
         userId,
         `Course "${course.name}" created successfully!`,
         { courseId: course.id, courseName: course.name },
+        startTime,
       );
 
       currentStep = GenerationStep.MODULES;
@@ -77,6 +82,7 @@ export class FullCourseGenerationService {
         userId,
         course,
         request,
+        startTime,
       );
 
       currentStep = GenerationStep.CHAPTERS;
@@ -87,6 +93,7 @@ export class FullCourseGenerationService {
         course,
         modules,
         request,
+        startTime,
       );
 
       currentStep = GenerationStep.LESSONS;
@@ -97,6 +104,7 @@ export class FullCourseGenerationService {
         course,
         modules,
         request,
+        startTime,
       );
 
       const result: FullCourseGenerationResult = {
@@ -135,6 +143,7 @@ export class FullCourseGenerationService {
     userId: string,
     course: any,
     courseRequest: GenerateCourseRequest,
+    startTime: string,
   ): Promise<Module[]> {
     try {
       emitModulesGenerationProgress(
@@ -144,6 +153,8 @@ export class FullCourseGenerationService {
         0,
         1,
         "Generating course modules...",
+        undefined,
+        startTime,
       );
 
       const modulesRequest = {
@@ -178,6 +189,7 @@ export class FullCourseGenerationService {
         1,
         `Generated ${modules.length} modules successfully!`,
         { modulesCount: modules.length },
+        startTime,
       );
 
       return modules;
@@ -198,6 +210,7 @@ export class FullCourseGenerationService {
     course: any,
     modules: Module[],
     courseRequest: GenerateCourseRequest,
+    startTime: string,
   ): Promise<number> {
     let totalChapters = 0;
 
@@ -224,6 +237,7 @@ export class FullCourseGenerationService {
                 modules.length
               }: "${module.moduleName}"...`,
               { moduleId: module.id, moduleName: module.moduleName },
+              startTime,
             );
 
             const requestedChapters = module.estimatedChapterCount;
@@ -272,6 +286,7 @@ export class FullCourseGenerationService {
                 moduleName: module.moduleName,
                 chaptersCount: chapters.length,
               },
+              startTime,
             );
             return chapters.length;
           }),
@@ -304,6 +319,7 @@ export class FullCourseGenerationService {
     course: any,
     modules: Module[],
     courseRequest: GenerateCourseRequest,
+    startTime: string,
   ): Promise<number> {
     let totalLessons = 0;
 
@@ -363,9 +379,8 @@ export class FullCourseGenerationService {
               {
                 chapterId: chapter.id,
                 chapterTitle: chapter.chapterName,
-                moduleId: module.id,
-                moduleName: module.moduleName,
               },
+              startTime,
             );
 
             const requestedLessons = chapter.estimatedLessonCount || 5;
@@ -408,6 +423,7 @@ export class FullCourseGenerationService {
                 chapterTitle: chapter.chapterName,
                 lessonsCount: lessons.length,
               },
+              startTime,
             );
 
             return lessons.length;
@@ -432,9 +448,6 @@ export class FullCourseGenerationService {
       throw error;
     }
   }
-
-  // NOTE: Removed generateCapstoneGuideline method - capstone generation
-  // is now handled separately via the capstone service's dedicated endpoint
 
   private async applyBatchDelay(
     completed: number,

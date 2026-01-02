@@ -12,6 +12,7 @@ export enum GenerationStatus {
 }
 
 export enum GenerationStep {
+  VALIDATING = "validating",
   COURSE = "course",
   MODULES = "modules",
   CHAPTERS = "chapters",
@@ -28,6 +29,8 @@ export interface GenerationProgress {
   data?: any;
   error?: string;
   timestamp: string;
+  startTime?: string;
+  estimatedTimeRemaining?: string;
 }
 
 export interface FullCourseGenerationResult {
@@ -62,10 +65,53 @@ export function emitGenerationProgress(
   }
 }
 
+function calculateEstimatedTime(progress: number, startTime: string): string {
+  if (progress === 0 || progress >= 100) return "Calculating...";
+
+  const now = Date.now();
+  const start = new Date(startTime).getTime();
+  const elapsed = now - start;
+  const estimatedTotal = (elapsed / progress) * 100;
+  const remaining = estimatedTotal - elapsed;
+
+  if (remaining <= 0) return "Almost done...";
+
+  const minutes = Math.ceil(remaining / 60000);
+  if (minutes < 1) return "Less than a minute";
+  if (minutes === 1) return "About 1 minute";
+  if (minutes < 60) return `About ${minutes} minutes`;
+
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) return `About ${hours} hour${hours > 1 ? "s" : ""}`;
+  return `About ${hours}h ${mins}m`;
+}
+
+export function emitValidationProgress(
+  req: AuthenticatedRequest,
+  jobId: string,
+  userId: string,
+): void {
+  const startTime = new Date().toISOString();
+  const progress: GenerationProgress = {
+    jobId,
+    userId,
+    status: GenerationStatus.IN_PROGRESS,
+    currentStep: GenerationStep.VALIDATING,
+    progress: 0,
+    message: "Validating request...",
+    timestamp: startTime,
+    startTime,
+    estimatedTimeRemaining: "Calculating...",
+  };
+  emitGenerationProgress(req, progress);
+}
+
 export function emitGenerationStarted(
   req: AuthenticatedRequest,
   jobId: string,
   userId: string,
+  startTime: string,
 ): void {
   const progress: GenerationProgress = {
     jobId,
@@ -75,6 +121,8 @@ export function emitGenerationStarted(
     progress: 0,
     message: "Starting course generation...",
     timestamp: new Date().toISOString(),
+    startTime,
+    estimatedTimeRemaining: "Calculating...",
   };
   emitGenerationProgress(req, progress);
 }
@@ -85,6 +133,7 @@ export function emitCourseGenerationProgress(
   userId: string,
   message: string,
   data?: any,
+  startTime?: string,
 ): void {
   const progress: GenerationProgress = {
     jobId,
@@ -95,6 +144,10 @@ export function emitCourseGenerationProgress(
     message,
     data,
     timestamp: new Date().toISOString(),
+    startTime,
+    estimatedTimeRemaining: startTime
+      ? calculateEstimatedTime(10, startTime)
+      : "Calculating...",
   };
   emitGenerationProgress(req, progress);
 }
@@ -107,6 +160,7 @@ export function emitModulesGenerationProgress(
   total: number,
   message: string,
   data?: any,
+  startTime?: string,
 ): void {
   const stepProgress = 10 + Math.floor((completed / total) * 30);
   const progress: GenerationProgress = {
@@ -118,6 +172,10 @@ export function emitModulesGenerationProgress(
     message,
     data,
     timestamp: new Date().toISOString(),
+    startTime,
+    estimatedTimeRemaining: startTime
+      ? calculateEstimatedTime(stepProgress, startTime)
+      : "Calculating...",
   };
   emitGenerationProgress(req, progress);
 }
@@ -130,6 +188,7 @@ export function emitChaptersGenerationProgress(
   total: number,
   message: string,
   data?: any,
+  startTime?: string,
 ): void {
   const stepProgress = 40 + Math.floor((completed / total) * 30);
   const progress: GenerationProgress = {
@@ -141,6 +200,10 @@ export function emitChaptersGenerationProgress(
     message,
     data,
     timestamp: new Date().toISOString(),
+    startTime,
+    estimatedTimeRemaining: startTime
+      ? calculateEstimatedTime(stepProgress, startTime)
+      : "Calculating...",
   };
   emitGenerationProgress(req, progress);
 }
@@ -153,6 +216,7 @@ export function emitLessonsGenerationProgress(
   total: number,
   message: string,
   data?: any,
+  startTime?: string,
 ): void {
   const stepProgress = 70 + Math.floor((completed / total) * 25);
   const progress: GenerationProgress = {
@@ -164,6 +228,10 @@ export function emitLessonsGenerationProgress(
     message,
     data,
     timestamp: new Date().toISOString(),
+    startTime,
+    estimatedTimeRemaining: startTime
+      ? calculateEstimatedTime(stepProgress, startTime)
+      : "Calculating...",
   };
   emitGenerationProgress(req, progress);
 }

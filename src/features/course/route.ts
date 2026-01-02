@@ -3,6 +3,7 @@ import type { CourseController } from "./controller";
 import { validateCourseId, validateGenerateCourse } from "./validation";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { courseOwnershipMiddleware } from "../../middlewares/ownership.middle";
+import { validateCourseTopic } from "middlewares/validator.middleware";
 
 export class CourseRoute {
   public router: Router;
@@ -157,6 +158,7 @@ export class CourseRoute {
     this.router.post(
       "/courses",
       authMiddleware,
+      validateCourseTopic,
       validateGenerateCourse,
       this.controller.generateCourse.bind(this.controller),
     );
@@ -244,6 +246,7 @@ export class CourseRoute {
     this.router.post(
       "/courses/generate-full",
       authMiddleware,
+      validateCourseTopic,
       validateGenerateCourse,
       this.controller.generateFullCourse.bind(this.controller),
     );

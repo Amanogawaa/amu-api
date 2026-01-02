@@ -5,7 +5,7 @@ import { RATE_LIMIT_CONFIG } from "../config/rateLimit";
 import { logger } from "./loggers";
 
 interface GeminiConfig {
-  responseSchema: any;
+  responseSchema?: any;
   maxRetries?: number;
   temperature?: number;
   systemPrompt?: string;
