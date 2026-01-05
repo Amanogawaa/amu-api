@@ -8,6 +8,11 @@ import {
   emitValidationProgress,
   createGenerationJobId,
 } from "@utils/helper/generation.helpers";
+import { CourseRepository } from "@features/course";
+import {
+  SIMILARITY_CONFIG,
+  isDuplicateCourse,
+} from "@utils/helper/similarity.helpers";
 
 async function validateContentAndTopic(input: string): Promise<{
   isValid: boolean;
@@ -127,5 +132,77 @@ export const validateCourseTopic = async (
     next();
   } catch (error) {
     next(error);
+  }
+};
+
+export const checkDuplicateCourse = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { topic, level, category } = req.body;
+    const authReq = req as AuthenticatedRequest;
+    const uid = authReq.user?.uid;
+
+    if (!uid) {
+      return next();
+    }
+
+    if (!SIMILARITY_CONFIG.CHECK_ENABLED) {
+      logger.info("Duplicate course check is disabled in config");
+      return next();
+    }
+
+    const courseRepository = new CourseRepository();
+    const existingCourses = await courseRepository.getCourse({ uid });
+
+    if (existingCourses.length === 0) {
+      logger.info(
+        "No existing courses found for user, skipping duplicate check",
+      );
+      return next();
+    }
+
+    const duplicateCheck = isDuplicateCourse(
+      existingCourses,
+      topic,
+      level,
+      category,
+      0.85,
+    );
+
+    if (duplicateCheck.isDuplicate && duplicateCheck.similarCourse) {
+      const { similarCourse, score, reason } = duplicateCheck;
+
+      logger.warn(
+        `Duplicate course detected for user ${uid}: ${similarCourse.name} (${Math.round((score || 0) * 100)}% similar)`,
+      );
+
+      return res.status(409).json({
+        error: "Similar course already exists",
+        message:
+          "You already have a course with similar content. Consider continuing with the existing course instead of creating a duplicate.",
+        existingCourse: {
+          id: similarCourse.id,
+          name: similarCourse.name,
+          topic: similarCourse.topic,
+          level: similarCourse.level,
+          category: similarCourse.category,
+          duration: similarCourse.duration,
+          createdAt: similarCourse.createdAt,
+        },
+        similarityScore: Math.round((score || 0) * 100),
+        reason: reason || "Similar content detected",
+        suggestion:
+          "If you want to learn at a different level, try changing the difficulty. Otherwise, you can continue with your existing course.",
+      });
+    }
+
+    logger.info("No duplicate course found, proceeding with generation");
+    next();
+  } catch (error) {
+    logger.error("Error in duplicate course check:", error);
+    next();
   }
 };

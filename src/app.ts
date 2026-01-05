@@ -19,7 +19,6 @@ import { CourseContainer } from "./features/course/container";
 import { errorHandler } from "./middlewares/error.middleware";
 import { AppRoutes } from "./routes";
 import { LessonContainer } from "./features/lesson/container";
-import { ModuleContainer } from "./features/modules/container";
 import { ProgressContainer } from "./features/progress/container";
 import { LikesContainer } from "./features/likes/container";
 import { CommentsContainer } from "./features/comments/container";
@@ -42,7 +41,6 @@ class App {
   private courseContainer: CourseContainer;
   private chapterContainer: ChapterContainer;
   private lessonContainer: LessonContainer;
-  private moduleContainer: ModuleContainer;
   private progressContainer: ProgressContainer;
   private likesContainer: LikesContainer;
   private commentsContainer: CommentsContainer;
@@ -55,7 +53,6 @@ class App {
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
-    moduleContainer: ModuleContainer = new ModuleContainer(),
     chapterContainer: ChapterContainer = new ChapterContainer(),
     lessonContainer?: LessonContainer,
     courseContainer?: CourseContainer,
@@ -75,7 +72,6 @@ class App {
     this.socketHandlers.registerHandlers();
 
     this.authContainer = authContainer;
-    this.moduleContainer = moduleContainer;
     this.chapterContainer = chapterContainer;
     this.quizContainer = quizContainer;
 
@@ -88,7 +84,6 @@ class App {
       courseContainer ||
       new CourseContainer(
         undefined,
-        moduleContainer.service,
         chapterContainer.service,
         this.lessonContainer.service,
       );
@@ -97,7 +92,6 @@ class App {
     this.capstoneContainer = new CapstoneContainer(
       undefined,
       this.courseContainer.repository,
-      moduleContainer.repository,
       chapterContainer.repository,
       this.lessonContainer.repository,
     );
@@ -174,7 +168,6 @@ class App {
       this.courseContainer,
       this.chapterContainer,
       this.lessonContainer,
-      this.moduleContainer,
       this.progressContainer,
       this.likesContainer,
       this.commentsContainer,

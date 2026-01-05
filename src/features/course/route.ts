@@ -3,7 +3,10 @@ import type { CourseController } from "./controller";
 import { validateCourseId, validateGenerateCourse } from "./validation";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import { courseOwnershipMiddleware } from "../../middlewares/ownership.middle";
-import { validateCourseTopic } from "middlewares/validator.middleware";
+import {
+  validateCourseTopic,
+  checkDuplicateCourse,
+} from "../../middlewares/validator.middleware";
 
 export class CourseRoute {
   public router: Router;
@@ -159,6 +162,7 @@ export class CourseRoute {
       "/courses",
       authMiddleware,
       validateCourseTopic,
+      checkDuplicateCourse,
       validateGenerateCourse,
       this.controller.generateCourse.bind(this.controller),
     );
@@ -247,6 +251,7 @@ export class CourseRoute {
       "/courses/generate-full",
       authMiddleware,
       validateCourseTopic,
+      checkDuplicateCourse,
       validateGenerateCourse,
       this.controller.generateFullCourse.bind(this.controller),
     );
