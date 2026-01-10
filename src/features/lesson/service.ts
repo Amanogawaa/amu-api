@@ -46,7 +46,6 @@ export class LessonService {
           learningObjectives: request.learningObjectives,
           keyTopics: request.keyTopics,
           estimatedDuration: request.estimatedDuration,
-          moduleName: request.moduleName,
           courseName: request.courseName,
           level: request.level,
           language: request.language,

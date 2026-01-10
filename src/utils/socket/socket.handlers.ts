@@ -21,8 +21,6 @@ export class SocketHandlers {
 
       this.handleCourseEvents(socket);
 
-      this.handleModuleEvents(socket);
-
       this.handleProgressEvents(socket);
 
       this.handleCommentEvents(socket);
@@ -46,20 +44,6 @@ export class SocketHandlers {
       socket.leave(`course:${courseId}`);
       logger.info(`User ${socket.userId} left course ${courseId}`);
       socket.emit("course:left", { courseId });
-    });
-  }
-
-  private handleModuleEvents(socket: AuthenticatedSocket): void {
-    socket.on("module:join", (moduleId: string) => {
-      socket.join(`module:${moduleId}`);
-      logger.info(`User ${socket.userId} joined module ${moduleId}`);
-      socket.emit("module:joined", { moduleId });
-    });
-
-    socket.on("module:leave", (moduleId: string) => {
-      socket.leave(`module:${moduleId}`);
-      logger.info(`User ${socket.userId} left module ${moduleId}`);
-      socket.emit("module:left", { moduleId });
     });
   }
 
@@ -115,10 +99,6 @@ export class SocketHandlers {
 
   public emitToCourse(courseId: string, event: string, data: any): void {
     this.io.to(`course:${courseId}`).emit(event, data);
-  }
-
-  public emitToModule(moduleId: string, event: string, data: any): void {
-    this.io.to(`module:${moduleId}`).emit(event, data);
   }
 
   public emitToChapter(chapterId: string, event: string, data: any): void {

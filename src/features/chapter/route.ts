@@ -214,139 +214,6 @@ export class ChapterRoute {
     /**
      * @openapi
      * /{moduleId}/chapter:
-     *   put:
-     *     tags:
-     *       - Chapters
-     *     summary: Regenerate chapters for a specific module
-     *     description: Regenerates chapter outlines for the given module ID using AI while preserving existing chapter IDs and relationships
-     *     parameters:
-     *       - in: path
-     *         name: moduleId
-     *         required: true
-     *         schema:
-     *           type: string
-     *         description: The ID of the module to regenerate chapters for
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             required:
-     *               - moduleName
-     *               - moduleDescription
-     *               - moduleLearningObjectives
-     *               - moduleKeySkills
-     *               - estimatedDuration
-     *               - estimatedChapterCount
-     *               - courseName
-     *               - level
-     *               - language
-     *               - moduleOrder
-     *             properties:
-     *               moduleName:
-     *                 type: string
-     *                 description: The name of the module
-     *               moduleDescription:
-     *                 type: string
-     *                 description: Detailed module description
-     *               moduleLearningObjectives:
-     *                 type: array
-     *                 items:
-     *                   type: string
-     *                 description: Array of learning objectives for the module
-     *               moduleKeySkills:
-     *                 type: array
-     *                 items:
-     *                   type: string
-     *                 description: Array of key skills taught in the module
-     *               estimatedDuration:
-     *                 type: string
-     *                 description: Total module duration (e.g., "6 hours")
-     *               estimatedChapterCount:
-     *                 type: integer
-     *                 description: Number of chapters to generate
-     *               courseName:
-     *                 type: string
-     *                 description: The name of the parent course
-     *               level:
-     *                 type: string
-     *                 enum: [beginner, intermediate, advanced]
-     *                 description: Course difficulty level
-     *               language:
-     *                 type: string
-     *                 description: Language of the module content
-     *               moduleOrder:
-     *                 type: integer
-     *                 description: The order of this module within the course
-     *               userInstructions:
-     *                 type: string
-     *                 description: Optional user instructions for regeneration
-     *     responses:
-     *       200:
-     *         description: Chapters regenerated successfully
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 data:
-     *                   type: array
-     *                   items:
-     *                     type: object
-     *                     properties:
-     *                       id:
-     *                         type: string
-     *                       moduleId:
-     *                         type: string
-     *                       chapterOrder:
-     *                         type: integer
-     *                       courseName:
-     *                         type: string
-     *                       moduleName:
-     *                         type: string
-     *                       chapterName:
-     *                         type: string
-     *                       chapterDescription:
-     *                         type: string
-     *                       estimatedDuration:
-     *                         type: string
-     *                         example: "1h 30m"
-     *                       learningObjectives:
-     *                         type: array
-     *                         items:
-     *                           type: string
-     *                       keyTopics:
-     *                         type: array
-     *                         items:
-     *                           type: string
-     *                       estimatedLessonCount:
-     *                         type: integer
-     *                       createdAt:
-     *                         type: string
-     *                         format: date-time
-     *                       updatedAt:
-     *                         type: string
-     *                         format: date-time
-     *                 message:
-     *                   type: string
-     *       400:
-     *         description: Invalid request body
-     *       404:
-     *         description: Module not found
-     *       500:
-     *         description: Internal server error
-     */
-    this.router.put(
-      "/:moduleId/chapter",
-      authMiddleware,
-      courseOwnershipMiddleware,
-      (req, res, next) => this.controller.regenerateChapters(req, res, next),
-    );
-
-    /**
-     * @openapi
-     * /{moduleId}/chapter:
      *   delete:
      *     tags:
      *       - Chapters
@@ -379,7 +246,7 @@ export class ChapterRoute {
       authMiddleware,
       courseOwnershipMiddleware,
       (req, res, next) =>
-        this.controller.deleteChaptersByModuleId(req, res, next),
+        this.controller.deleteChaptersByCourseId(req, res, next),
     );
   }
 

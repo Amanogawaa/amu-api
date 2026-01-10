@@ -2,15 +2,15 @@ import type { PromptMode } from "../../utils/prompts/types";
 
 export interface Chapter {
   id: string;
-  moduleId: string;
+  courseId: string;
   chapterOrder: number;
-  courseName: string;
-  moduleName: string;
   chapterName: string;
   chapterDescription: string;
   estimatedDuration: string;
   learningObjectives: string[];
   keyTopics: string[];
+  prerequisites: string[];
+  practicalApplication: string;
   estimatedLessonCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -23,17 +23,16 @@ export interface ChapterResponse {
 }
 
 export interface GenerateChaptersRequest {
-  moduleId: string;
-  moduleName: string;
-  moduleDescription: string;
-  moduleLearningObjectives: string[];
-  moduleKeySkills: string[];
-  estimatedDuration: string;
-  estimatedChapterCount: number;
+  courseId: string;
   courseName: string;
   level: string;
+  noOfChapters: number;
+  duration: string;
   language: string;
-  moduleOrder: number;
+  description: string;
+  learningOutcomes: string[];
+  skillsGained: string[];
+  prerequisites: string;
   userInstructions?: string;
   promptMode?: PromptMode;
 }

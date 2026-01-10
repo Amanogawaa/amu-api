@@ -1,22 +1,8 @@
+import type { GenerateChaptersRequest } from "@features/chapter/types";
 import { SYSTEM_PROMPTS } from "./system-prompts";
 import type { PromptIntent, PromptMode, PromptPayload } from "./types";
 
 export type ChapterPromptMode = PromptMode;
-
-interface ChapterPromptArgs {
-  moduleId: string;
-  moduleName: string;
-  moduleDescription: string;
-  moduleLearningObjectives: string[];
-  moduleKeySkills: string[];
-  estimatedDuration: string;
-  estimatedChapterCount: number;
-  courseName: string;
-  level: string;
-  language: string;
-  moduleOrder: number;
-  userInstructions?: string;
-}
 
 interface BuildChaptersPromptOptions {
   mode?: ChapterPromptMode;
@@ -24,19 +10,18 @@ interface BuildChaptersPromptOptions {
 }
 
 const legacyChaptersPrompt = (
-  args: ChapterPromptArgs,
+  args: GenerateChaptersRequest,
   intent: PromptIntent,
 ): string => {
-  const intro = `Create ${args.estimatedChapterCount} chapters for Module ${
-    args.moduleOrder
-  }: ${args.moduleName}
+  const intro = `Create ${args.noOfChapters} chapters for 
 
 Course: ${args.courseName} (${args.level})
 Language: ${args.language}
-Module: ${args.moduleDescription}
-Objectives: ${args.moduleLearningObjectives.join("; ")}
-Skills: ${args.moduleKeySkills.join(", ")}
-Duration: ${args.estimatedDuration}
+Course Description: ${args.description}
+Learning Outcomes: ${args.learningOutcomes.join("; ")}
+Skills to Gain: ${args.skillsGained.join(", ")}
+Prerequisites: ${args.prerequisites}
+Total Course Duration: ${args.duration}
 `;
 
   const regenNote =
@@ -55,68 +40,77 @@ Return valid JSON only:
   "chapters": [
     {
       "chapterOrder": 1,
-      "title": "string",
-      "description": "100-150 words: topics covered, why it matters, how it connects to objectives, what students will do",
+      "chapterName": "string",
+      "chapterDescription": "2-3 sentences: what this chapter covers and why it's important",
       "estimatedDuration": "Xh Ym",
-      "estimatedLessonCount": 4,
+      "estimatedLessonCount": 4-8,
       "learningObjectives": [
-        "Specific objective 1",
-        "Specific objective 2",
-        "Specific objective 3"
+        "Specific, measurable objective 1",
+        "Specific, measurable objective 2",
+        "Specific, measurable objective 3"
       ],
       "keyTopics": ["Topic 1", "Topic 2", "Topic 3"],
-      "prerequisites": ["Previous chapter or concept"],
-      "practicalApplication": "1-2 sentences on how students apply this knowledge"
+      "prerequisites": ["Previous chapter name or None"],
+      "practicalApplication": "How learners will apply this knowledge"
     }
   ]
 }
 
 Design Rules:
-- Each chapter = ONE focused concept (e.g., "useState Hook", "CSS Grid", "API Authentication")
-- Chapter 1: Intro to module topic, basics
-- Middle: Deep dives into specific aspects
-- Final: Integration, advanced techniques, real-world use
-- Duration: 45m-2h per chapter (shorter for intro, longer for core concepts)
-- Total must equal ${args.estimatedDuration} (±10%)
-- Lesson count: 30-45m chapters = 2-3 lessons | 1-1.5h = 4-5 lessons | 1.5-2h = 5-6 lessons
+- Each chapter focuses on ONE cohesive topic that progresses the course objectives
+- Chapter 1: Introduction and fundamentals (4-5 lessons, lighter content)
+- Middle chapters: Core skills and concepts (6-7 lessons, deeper content)
+- Final chapter: Integration, advanced application, or capstone-ready skills (5-8 lessons)
+- Duration per chapter: 1-3h (scales with lesson count)
+- Lesson count flexibility: 1h = 4-5 lessons | 2h = 6-7 lessons | 3h = 8 lessons
+- Total duration must equal ${args.duration} (±10%)
+- More lessons per chapter = more granular learning, better retention
 
-Learning objectives (1-3 per chapter):
-- More specific than module objectives
-- Use: Explain, Implement, Apply, Compare, Create, Debug
-- Must be achievable within chapter duration
-- Support module learning objectives
+Learning objectives (2-4 per chapter):
+- Use action verbs: Build, Implement, Apply, Create, Analyze, Design, Debug
+- Specific and achievable within chapter duration
+- Directly support course learning outcomes
+- Scale with chapter complexity (simpler chapters = 2-3 objectives, complex = 3-4 objectives)
 
-Key topics (1-3 per chapter):
-- Granular concepts, not broad categories
-- Example: "Flexbox container properties" NOT "CSS Layouts"
+Key topics (3-6 per chapter):
+- Concrete, specific concepts (e.g., "React useState Hook", "CSS Flexbox alignment")
+- Avoid broad/vague topics (e.g., "JavaScript Basics", "Web Development")
+- More topics for longer chapters with more lessons
+
+Prerequisites:
+- Chapter 1: ["None"] or basic prerequisites
+- Other chapters: Reference previous chapter names when concepts build on each other
+- Keep it simple, only list direct dependencies
 
 Level adjustments:
-- Beginner: 45m-1h chapters, gentle pacing, step-by-step
-- Intermediate: 1h-1.5h chapters, theory + practice mix
-- Advanced: 1h-2h chapters, dense content, assume knowledge`;
+- Beginner: Gentle pacing, foundational focus, more examples
+- Intermediate: Balance theory and practice, assume basic knowledge
+- Advanced: Dense technical content, complex scenarios, assume solid foundation`;
 };
 
 const systemChaptersPrompt = (
-  args: ChapterPromptArgs,
+  args: GenerateChaptersRequest,
   intent: PromptIntent,
 ): PromptPayload => {
   const lines = [
-    `Generate ${args.estimatedChapterCount} chapters for module "${args.moduleName}" (order ${args.moduleOrder}).`,
-    `Course: ${args.courseName} | Level: ${args.level} | Language: ${args.language}`,
-    `Module summary: ${args.moduleDescription}`,
-    `Module objectives: ${args.moduleLearningObjectives.join(" | ")}`,
-    `Module skills: ${args.moduleKeySkills.join(", ")}`,
-    `Module duration: ${args.estimatedDuration}`,
+    `Generate ${args.noOfChapters} chapters for the complete course "${args.courseName}".`,
+    `Level: ${args.level} | Language: ${args.language} | Duration: ${args.duration}`,
+    `Course description: ${args.description}`,
+    `Learning outcomes: ${args.learningOutcomes.join(" | ")}`,
+    `Skills to gain: ${args.skillsGained.join(", ")}`,
+    `Prerequisites: ${args.prerequisites}`,
+    "Chapters should have 4-8 lessons each, scaling with complexity and duration.",
+    "More lessons = more granular content and better learning progression.",
   ];
 
   if (intent === "regenerate") {
     lines.push(
-      "Regeneration request: keep chapter count/order but refresh narratives, objectives, and key topics.",
+      "Regeneration request: keep chapter count/order but refresh content.",
     );
   }
 
   if (args.userInstructions) {
-    lines.push("User feedback to apply:", args.userInstructions);
+    lines.push("User feedback:", args.userInstructions);
   }
 
   return {
@@ -126,7 +120,7 @@ const systemChaptersPrompt = (
 };
 
 export const buildChaptersPrompt = (
-  args: ChapterPromptArgs,
+  args: GenerateChaptersRequest,
   options: BuildChaptersPromptOptions = {},
 ): PromptPayload => {
   const mode = options.mode ?? "system";

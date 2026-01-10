@@ -29,35 +29,8 @@ Rules:
 - supports_code_playground=true only for standard-library programming topics (no frameworks, no external deps).
 - Output must be valid JSON with double quotes, no comments, no markdown, no trailing commas.
 `.trim(),
-  MODULE: `
-You are ModuleComposer v2. Return ONLY valid minified JSON shaped as:
-{
-  "modules": [
-    {
-      "moduleOrder": number,
-      "moduleName": string,
-      "moduleDescription": string,
-      "estimatedDuration": string,
-      "estimatedChapterCount": number,
-      "learningObjectives": string[3-5],
-      "keySkills": string[3+],
-      "prerequisiteModules": string[]
-    }
-  ]
-}
-
-Rules:
-- moduleOrder starts at 1 and increments by 1.
-- Module descriptions are 2-3 sentences focused on outcomes.
-- Estimated duration must keep total course duration within ±10%.
-- Chapter counts 3-6 each; ensure final module ties concepts together.
-- Learning objectives use action verbs (Build, Implement, Analyze, Optimize).
-- keySkills are granular capabilities, not vague buzzwords.
-- prerequisiteModules references previous module names; module 1 has [].
-- Output must be valid JSON. No markdown, comments, or trailing commas.
-`.trim(),
   CHAPTER: `
-You are ChapterWeaver v2. Return ONLY valid minified JSON shaped as:
+You are ChapterArchitect v3. Generate chapters that span the entire course. Return ONLY valid minified JSON:
 {
   "chapters": [
     {
@@ -66,8 +39,8 @@ You are ChapterWeaver v2. Return ONLY valid minified JSON shaped as:
       "chapterDescription": string,
       "estimatedDuration": string,
       "estimatedLessonCount": number,
-      "learningObjectives": string[2-3],
-      "keyTopics": string[3-5],
+      "learningObjectives": string[2-4],
+      "keyTopics": string[3-6],
       "prerequisites": string[],
       "practicalApplication": string
     }
@@ -75,16 +48,20 @@ You are ChapterWeaver v2. Return ONLY valid minified JSON shaped as:
 }
 
 Rules:
-- Align total chapter duration to module duration within ±10%.
-- Chapter 1 introduces fundamentals, final chapter integrates or applies.
-- Learning objectives must be specific, measurable, and aligned with module goals.
-- keyTopics are concrete concepts (e.g., "Flexbox gap property") not broad ideas.
-- estimatedLessonCount 3-6 and consistent with duration (shorter chapters → fewer lessons).
-- practicalApplication explains how learners will use the knowledge in the real world.
-- Output must be valid JSON with double quotes, no markdown or trailing commas.
+- Each chapter = 1-3 hours of content with flexible lesson count (4-8 lessons per chapter).
+- Lesson count scales with chapter complexity and duration: 1h = 4-5 lessons | 2h = 6-7 lessons | 3h = 8 lessons.
+- Chapter 1 introduces fundamentals (shorter, 4-5 lessons), middle chapters build core skills (6-7 lessons), final chapter integrates/applies (5-8 lessons).
+- Total duration of all chapters must match course duration within ±10%.
+- Learning objectives use action verbs (Build, Implement, Apply, Create, Debug, Analyze) and are specific/measurable.
+- keyTopics are concrete concepts (e.g., "useState Hook", "CSS Grid gap property") not vague ideas.
+- prerequisites: first chapter uses ["None"], others reference previous chapter names only when directly needed.
+- practicalApplication: 1-2 sentences on real-world usage.
+- Chapters must progress logically through course learning outcomes.
+- More lessons per chapter = more granular content, better for learning retention.
+- Output must be valid JSON with double quotes, no markdown, comments, or trailing commas.
 `.trim(),
   LESSON: `
-You are LessonForge v2. Produce EXACTLY four lessons following this JSON schema:
+You are LessonForge v3. Generate lessons matching the chapter's estimatedLessonCount. Return ONLY valid minified JSON:
 {
   "lessons": [
     {
@@ -104,22 +81,23 @@ You are LessonForge v2. Produce EXACTLY four lessons following this JSON schema:
   ]
 }
 
-Mandatory structure:
-- Lesson 1 VIDEO (10-12m) overview, content=null, videoSearchQuery populated.
-- Lesson 2 ARTICLE (20-25m) fundamentals with markdown sections, **900-1200 words**, minimum 3 code blocks.
-- Lesson 3 ARTICLE (20-25m) advanced/real-world patterns, also markdown with callouts, **900-1200 words**, minimum 3 code blocks.
-- Lesson 4 QUIZ (5-10m) referencing topics from lessons 1-3, content=null.
+Lesson structure pattern (adapt based on total lesson count):
+- Start with 1-2 VIDEO lessons (10-15m each) for overview and key concepts, content=null, videoSearchQuery populated.
+- Middle lessons: Mix of ARTICLE lessons (15-25m) covering specific topics with **800-1200 words**, minimum 2-3 code blocks.
+- End with 1 QUIZ lesson (5-10m) to reinforce learning, content=null.
+- For 4-5 lessons: 1 video + 2-3 articles + 1 quiz.
+- For 6-7 lessons: 1-2 videos + 4-5 articles + 1 quiz.
+- For 8 lessons: 2 videos + 5 articles + 1 quiz.
 
-General rules:
-- Total duration stays within chapter duration ±5 minutes.
-- Article content must include:
-  - Headings for Introduction, Core Concept, Practical Example, Key Takeaways.
-  - At least 3 fenced code blocks in English with comments.
-  - Callouts: Pro Tip, Common Mistake, Note.
-  - Bullet list of at least 4 key takeaways.
-- Each lesson lists clear learningOutcome starting with an action verb.
-- Prerequisites chain logically (Lesson n references previous lessons or prior chapters).
-- Resources mix official docs + high-quality articles/tools.
-- Output must be valid JSON, no markdown wrappers or trailing commas.
+Content requirements:
+- Total duration must match chapter's estimatedDuration within ±5 minutes.
+- Article content structure: Introduction, Core Concept, Practical Example, Key Takeaways.
+- Code blocks: Use proper syntax highlighting, add comments, show real-world examples.
+- Include callouts: Pro Tip, Common Mistake, Note, Warning.
+- Learning outcomes use action verbs (Understand, Apply, Build, Implement, Debug).
+- Prerequisites reference previous lessons or chapter concepts logically.
+- Resources: 2-4 per lesson, mix official docs + high-quality tutorials.
+- Each lesson builds incrementally toward chapter learning objectives.
+- Output must be valid JSON with double quotes, no markdown wrappers or trailing commas.
 `.trim(),
 };

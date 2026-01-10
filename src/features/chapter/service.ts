@@ -20,9 +20,9 @@ export class ChapterService {
     this.chapterRepository = chapterRepository;
   }
 
-  public async getChapters(moduleId: string) {
+  public async getChapters(courseId: string) {
     try {
-      const chapters = await this.chapterRepository.getChapters(moduleId);
+      const chapters = await this.chapterRepository.getChapters(courseId);
       return chapters;
     } catch (error) {
       logger.error("Error in ChapterService.getChapters:", error);
@@ -45,15 +45,14 @@ export class ChapterService {
       const promptMode: ChapterPromptMode = request.promptMode ?? "system";
       const { userPrompt, systemPrompt } = buildChaptersPrompt(
         {
-          moduleId: request.moduleId,
-          moduleName: request.moduleName,
-          moduleDescription: request.moduleDescription,
-          moduleLearningObjectives: request.moduleLearningObjectives,
-          moduleKeySkills: request.moduleKeySkills,
           courseName: request.courseName,
-          moduleOrder: request.moduleOrder,
-          estimatedChapterCount: request.estimatedChapterCount,
-          estimatedDuration: request.estimatedDuration,
+          courseId: request.courseId,
+          noOfChapters: request.noOfChapters,
+          duration: request.duration,
+          description: request.description,
+          learningOutcomes: request.learningOutcomes,
+          skillsGained: request.skillsGained,
+          prerequisites: request.prerequisites,
           level: request.level,
           language: request.language,
           userInstructions: request.userInstructions,
@@ -68,13 +67,13 @@ export class ChapterService {
         systemPrompt,
         benchmarkTag: `chapters:${promptMode}`,
         metadata: {
-          moduleId: request.moduleId,
+          courseId: request.courseId,
           courseName: request.courseName,
         },
       });
 
       logger.info("Chapters generated via Gemini", {
-        moduleId: request.moduleId,
+        courseId: request.courseId,
         mode: promptMode,
         chapterCount: result?.chapters?.length ?? 0,
       });
@@ -84,7 +83,7 @@ export class ChapterService {
       }
 
       const createdChapters = await this.chapterRepository.createChapters(
-        request.moduleId,
+        request.courseId,
         request.courseName,
         result.chapters,
       );
@@ -97,130 +96,11 @@ export class ChapterService {
     }
   }
 
-  public async regenerateChapters(request: RegenerateChaptersRequest) {
+  public async deleteChaptersByCourseId(courseId: string) {
     try {
-      const existingChapters = await this.chapterRepository.getChapters(
-        request.moduleId,
-      );
-
-      if (existingChapters.length === 0) {
-        throw new AppError(
-          "No existing chapters found. Use generateChapters instead.",
-          404,
-        );
-      }
-
-      logger.info(
-        `Found ${existingChapters.length} existing chapters for moduleId: ${request.moduleId}`,
-      );
-
-      existingChapters.sort((a, b) => a.chapterOrder - b.chapterOrder);
-
-      const promptMode: ChapterPromptMode = request.promptMode ?? "system";
-      const { userPrompt, systemPrompt } = buildChaptersPrompt(
-        {
-          moduleId: request.moduleId,
-          moduleName:
-            request.moduleName ||
-            existingChapters[0]?.moduleName ||
-            "Module Overview",
-          moduleDescription:
-            request.moduleDescription ||
-            "Refresh these chapters for clarity while keeping structure intact.",
-          moduleLearningObjectives:
-            request.moduleLearningObjectives?.length &&
-            request.moduleLearningObjectives.length > 0
-              ? request.moduleLearningObjectives
-              : existingChapters
-                  .flatMap((chapter) => chapter.learningObjectives.slice(0, 1))
-                  .slice(0, 3),
-          moduleKeySkills:
-            request.moduleKeySkills?.length &&
-            request.moduleKeySkills.length > 0
-              ? request.moduleKeySkills
-              : existingChapters
-                  .flatMap((chapter) => chapter.keyTopics.slice(0, 1))
-                  .slice(0, 3),
-          courseName: request.courseName,
-          moduleOrder: request.moduleOrder,
-          estimatedChapterCount:
-            request.estimatedChapterCount || existingChapters.length,
-          estimatedDuration:
-            request.estimatedDuration ||
-            existingChapters
-              .map((chapter) => chapter.estimatedDuration)
-              .filter(Boolean)
-              .join(" + ") ||
-            "Match previous pacing",
-          level: request.level,
-          language: request.language,
-          userInstructions: request.userInstructions,
-        },
-        { mode: promptMode, intent: "regenerate" },
-      );
-
-      const result = await geminiCall(userPrompt, {
-        responseSchema: chaptersSchema,
-        temperature: 0.8,
-        maxRetries: 3,
-        systemPrompt,
-        benchmarkTag: `chapters:${promptMode}`,
-        metadata: {
-          moduleId: request.moduleId,
-          intent: "regenerate",
-          mode: promptMode,
-        },
-      });
-
-      if (!result.chapters || !Array.isArray(result.chapters)) {
-        throw new Error("Invalid response from Gemini: missing chapters array");
-      }
-
-      if (result.chapters.length !== existingChapters.length) {
-        logger.warn(
-          `AI generated ${result.chapters.length} chapters but expected ${existingChapters.length}`,
-        );
-      }
-
-      const updatedChapters: Chapter[] = existingChapters.map(
-        (existing, index) => {
-          const newContent = result.chapters[index] || result.chapters[0];
-          return {
-            ...existing,
-            ...newContent,
-            id: existing.id,
-            moduleId: existing.moduleId,
-            courseName: existing.courseName,
-            moduleName: existing.moduleName,
-            chapterOrder: existing.chapterOrder,
-            createdAt: existing.createdAt,
-          };
-        },
-      );
-
-      const updateResult =
-        await this.chapterRepository.updateChaptersBatch(updatedChapters);
-
-      logger.info(
-        `Regenerated ${updateResult.updated} chapters. Errors: ${updateResult.errors.length}`,
-      );
-
-      return {
-        updated: updateResult.updated,
-        errors: updateResult.errors,
-        chapters: updatedChapters,
-      };
+      await this.chapterRepository.deleteChaptersByCourseId(courseId);
     } catch (error) {
-      logger.error("Error in ChapterService.regenerateChapters:", error);
-      throw error;
-    }
-  }
-
-  public async deleteChaptersByModuleId(moduleId: string) {
-    try {
-      await this.chapterRepository.deleteChaptersByModuleId(moduleId);
-    } catch (error) {
-      logger.error("Error in ChapterService.deleteChaptersByModuleId:", error);
+      logger.error("Error in ChapterService.deleteChaptersByCourseId:", error);
       throw error;
     }
   }

@@ -18,44 +18,16 @@ export function notifyCourseCreated(req: Request, courseData: any): void {
   }
 }
 
-export function notifyModuleCreated(
-  req: Request,
-  courseId: string,
-  moduleData: any,
-): void {
-  const socketHandlers = getSocketHandlers(req);
-  if (socketHandlers) {
-    socketHandlers.emitToCourse(courseId, "module:created", {
-      module: moduleData,
-      timestamp: new Date().toISOString(),
-    });
-  }
-}
-
 export function notifyChapterCreated(
   req: Request,
-  moduleId: string,
+  courseId: string,
   chapterData: any,
 ): void {
   const socketHandlers = getSocketHandlers(req);
 
   if (socketHandlers) {
-    socketHandlers.emitToModule(moduleId, "chapter:created", {
+    socketHandlers.emitToCourse(courseId, "chapter:created", {
       chapter: chapterData,
-      timestamp: new Date().toISOString(),
-    });
-  }
-}
-
-export function notifyModuleUpdated(
-  req: Request,
-  courseId: string,
-  moduleData: any,
-): void {
-  const socketHandlers = getSocketHandlers(req);
-  if (socketHandlers) {
-    socketHandlers.emitToCourse(courseId, "module:updated", {
-      module: moduleData,
       timestamp: new Date().toISOString(),
     });
   }
