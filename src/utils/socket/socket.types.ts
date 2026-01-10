@@ -6,12 +6,6 @@ export interface ServerToClientEvents {
   "course:updated": (data: { course: any; timestamp: string }) => void;
   "course:deleted": (data: { courseId: string; timestamp: string }) => void;
 
-  "module:joined": (data: { moduleId: string }) => void;
-  "module:left": (data: { moduleId: string }) => void;
-  "module:created": (data: { module: any; timestamp: string }) => void;
-  "module:updated": (data: { module: any; timestamp: string }) => void;
-  "module:deleted": (data: { moduleId: string; timestamp: string }) => void;
-
   "lesson:created": (data: { lesson: any; timestamp: string }) => void;
   "lesson:updated": (data: { lesson: any; timestamp: string }) => void;
   "lesson:deleted": (data: { lessonId: string; timestamp: string }) => void;
@@ -52,7 +46,7 @@ export interface ServerToClientEvents {
     jobId: string;
     userId: string;
     status: "pending" | "in_progress" | "completed" | "failed";
-    currentStep: "course" | "modules" | "chapters" | "lessons";
+    currentStep: "course" | "chapters" | "lessons";
     progress: number;
     message: string;
     data?: any;
@@ -63,7 +57,6 @@ export interface ServerToClientEvents {
   "generation:completed": (data: {
     jobId: string;
     courseId: string;
-    modulesCount: number;
     chaptersCount: number;
     lessonsCount: number;
     totalDuration: string;
@@ -81,9 +74,6 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   "course:join": (courseId: string) => void;
   "course:leave": (courseId: string) => void;
-
-  "module:join": (moduleId: string) => void;
-  "module:leave": (moduleId: string) => void;
 
   "lesson:join": (lessonId: string) => void;
   "lesson:leave": (lessonId: string) => void;
@@ -107,7 +97,7 @@ export interface ClientToServerEvents {
     topic: string;
     level: string;
     duration: string;
-    noOfModules: number;
+    noOfChapters: number;
     language: string;
   }) => void;
 
@@ -122,7 +112,7 @@ export interface SocketData {
   };
 }
 
-export type RoomType = "user" | "course" | "module" | "lesson" | "chapter";
+export type RoomType = "user" | "course" | "lesson" | "chapter";
 
 export interface RoomName {
   type: RoomType;
@@ -132,18 +122,6 @@ export interface RoomName {
 export const formatRoomName = (type: RoomType, id: string): string => {
   return `${type}:${id}`;
 };
-
-export interface ModuleCreatedPayload {
-  module: {
-    id: string;
-    moduleName: string;
-    moduleDescription: string;
-    moduleOrder: number;
-    estimatedDuration: string;
-    courseId: string;
-  };
-  timestamp: string;
-}
 
 export interface ProgressUpdatedPayload {
   lessonId: string;

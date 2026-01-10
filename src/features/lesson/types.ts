@@ -35,7 +35,6 @@ export interface GenerateLessonRequest {
   keyTopics: string[];
   estimatedDuration: string;
   courseName: string;
-  moduleName: string;
   level: string;
   language: string;
   userInstructions?: string;

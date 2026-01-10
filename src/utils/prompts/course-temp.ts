@@ -8,7 +8,7 @@ interface CoursePromptArgs {
   topic: string;
   level: string;
   duration: string;
-  noOfModules: number;
+  noOfChapters: number;
   language: string;
   userInstructions?: string;
 }
@@ -21,7 +21,7 @@ const legacyCoursePrompt = (args: CoursePromptArgs): string => {
 - Topic: ${args.topic}
 - Level: ${args.level}
 - Total Duration: ${args.duration}
-- Number of Modules: ${args.noOfModules}
+- Number of Chapters: ${args.noOfChapters}
 - Language: ${args.language}
 `;
 
@@ -47,7 +47,7 @@ Return valid JSON only:
   "publish": false,
   "draft": true,
   "duration": "${args.duration}",
-  "no_of_modules": ${args.noOfModules},
+  "no_of_chapters": ${args.noOfChapters},
   "target_audience": "Who this course is designed for (1-2 sentences)",
   "skills_gained": ["skill1", "skill2", "skill3"],
   "supports_code_playground": true or false
@@ -97,7 +97,7 @@ const systemCoursePrompt = (args: CoursePromptArgs): PromptPayload => {
     `Category: ${args.category}`,
     `Level: ${args.level}`,
     `Total duration: ${args.duration}`,
-    `Desired modules: ${args.noOfModules}`,
+    `Desired chapters: ${args.noOfChapters}`,
     `Language: ${args.language}`,
     "Return JSON that satisfies the schema described in the system prompt.",
   ];

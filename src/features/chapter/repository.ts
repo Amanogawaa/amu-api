@@ -12,11 +12,11 @@ export class ChapterRepository {
     this.firebaseStore = firestore;
   }
 
-  async getChapters(moduleId: string) {
+  async getChapters(courseId: string) {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where("moduleId", "==", moduleId)
+        .where("courseId", "==", courseId)
         .get();
 
       if (querySnapshot.empty) {
@@ -57,13 +57,10 @@ export class ChapterRepository {
   }
 
   async createChapters(
-    moduleId: string,
-    moduleName: string,
+    courseId: string,
+    courseName: string,
     chapters: Array<
-      Omit<
-        Chapter,
-        "id" | "moduleId" | "moduleName" | "createdAt" | "updatedAt"
-      >
+      Omit<Chapter, "id" | "courseId" | "createdAt" | "updatedAt">
     >,
   ): Promise<Chapter[]> {
     try {
@@ -76,8 +73,6 @@ export class ChapterRepository {
           .doc();
         const data = {
           ...chapter,
-          moduleId,
-          moduleName,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -85,13 +80,15 @@ export class ChapterRepository {
         batch.set(docRef, data);
         createdChapters.push({
           id: docRef.id,
+          courseName,
+          courseId,
           ...data,
         } as Chapter);
       }
 
       await batch.commit();
       logger.info(
-        `Created ${createdChapters.length} chapters for module ${moduleId}`,
+        `Created ${createdChapters.length} chapters for course ${courseId}`,
       );
 
       return createdChapters;
@@ -145,15 +142,15 @@ export class ChapterRepository {
     }
   }
 
-  async deleteChaptersByModuleId(moduleId: string): Promise<void> {
+  async deleteChaptersByCourseId(courseId: string): Promise<void> {
     try {
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
-        .where("moduleId", "==", moduleId)
+        .where("courseId", "==", courseId)
         .get();
 
       if (querySnapshot.empty) {
-        logger.info("No chapters found to delete for moduleId:", moduleId);
+        logger.info("No chapters found to delete for courseId:", courseId);
         return;
       }
 
@@ -165,7 +162,7 @@ export class ChapterRepository {
 
       await batch.commit();
       logger.info(
-        `Deleted ${querySnapshot.size} chapters for moduleId: ${moduleId}`,
+        `Deleted ${querySnapshot.size} chapters for courseId: ${courseId}`,
       );
     } catch (error) {
       logger.error(

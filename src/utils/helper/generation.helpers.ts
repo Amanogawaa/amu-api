@@ -35,7 +35,6 @@ export interface GenerationProgress {
 
 export interface FullCourseGenerationResult {
   courseId: string;
-  modulesCount: number;
   chaptersCount: number;
   lessonsCount: number;
   totalDuration: string;

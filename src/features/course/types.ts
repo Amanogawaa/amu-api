@@ -1,31 +1,37 @@
+import type { PromptMode } from "../../utils/prompts/types";
+
 export interface Course {
   id: string;
   uid: string;
-  skillsGained: string[];
-  targetAudience: string;
+
   topic: string;
+  level: "beginner" | "intermediate" | "advanced";
+  duration: string;
+  category: string;
+  language: string;
+
+  name: string;
+  description: string;
   subtitle?: string;
+  targetAudience: string;
+  prerequisites: string;
+  noOfChapters: number;
+  skillsGained: string[];
+  learning_outcomes: string[];
+
   publish: boolean;
   draft: boolean;
-  prerequisites: string;
-  noOfModules: number;
-  name: string;
-  level: "beginner" | "intermediate" | "advanced";
-  learning_outcomes: string[];
-  language: string;
-  duration: string;
-  description: string;
-  category: string;
   supportsCodePlayground?: boolean;
+
   likesCount?: number;
   commentsCount?: number;
+
   enrollmentCount?: number;
   isEnrolled?: boolean;
+
   createdAt?: Date;
   updatedAt?: Date;
 }
-
-import type { PromptMode } from "../../utils/prompts/types";
 
 export type CoursePromptMode = PromptMode;
 
@@ -35,7 +41,7 @@ export interface GenerateCourseRequest {
   topic: string;
   level: "beginner" | "intermediate" | "advanced";
   duration: string;
-  noOfModules: number;
+  noOfChapters: number;
   language: string;
   userInstructions?: string;
   promptMode?: CoursePromptMode;
@@ -93,7 +99,7 @@ export const courseSchema = {
     publish: { type: "boolean" },
     draft: { type: "boolean" },
     duration: { type: "string" },
-    noOfModules: { type: "integer" },
+    noOfChapters: { type: "integer" },
     targetAudience: { type: "string" },
     skillsGained: {
       type: "array",

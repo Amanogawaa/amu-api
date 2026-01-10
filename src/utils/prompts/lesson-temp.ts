@@ -11,7 +11,6 @@ interface LessonPromptArgs {
   learningObjectives: string[];
   keyTopics: string[];
   estimatedDuration: string;
-  moduleName: string;
   courseName: string;
   level: string;
   language: string;
@@ -32,7 +31,6 @@ const legacyLessonsPrompt = (args: LessonPromptArgs): string => {
   }
 
 Course: ${args.courseName} (${args.level})
-Module: ${args.moduleName}
 Context: ${args.chapterDescription}
 Topics: ${args.keyTopics.join(", ")}
 Duration: ${args.estimatedDuration}
@@ -130,7 +128,7 @@ Level adjustments:
 const systemLessonsPrompt = (args: LessonPromptArgs): PromptPayload => {
   const lines = [
     `Create four lessons for chapter "${args.chapterName}" (order ${args.chapterOrder}) within ${args.estimatedDuration}.`,
-    `Course: ${args.courseName} | Module: ${args.moduleName} | Level: ${args.level} | Language: ${args.language}`,
+    `Course: ${args.courseName} | Level: ${args.level} | Language: ${args.language}`,
     `Chapter summary: ${args.chapterDescription}`,
     `Learning objectives: ${args.learningObjectives.join(" | ")}`,
     `Key topics: ${args.keyTopics.join(", ")}`,

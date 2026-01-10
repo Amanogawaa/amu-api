@@ -50,7 +50,7 @@ export class CourseService {
           topic: request.topic,
           level: request.level,
           duration: request.duration,
-          noOfModules: request.noOfModules,
+          noOfChapters: request.noOfChapters,
           language: request.language,
           userInstructions: request.userInstructions ?? "",
         },

@@ -310,7 +310,7 @@ export class CourseController {
         "topic",
         "level",
         "duration",
-        "noOfModules",
+        "noOfChapters",
         "language",
       ];
       const missingFields = requiredFields.filter(

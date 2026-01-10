@@ -4,7 +4,6 @@ import { CourseRoute } from "./route";
 import { CourseService } from "./service";
 import { firebaseFirestore } from "../../config/firebase";
 import { FullCourseGenerationService } from "../../utils/service/generation.service";
-import type { ModuleService } from "../modules/service";
 import type { ChapterService } from "../chapter/service";
 import type { LessonService } from "../lesson/service";
 
@@ -17,17 +16,15 @@ export class CourseContainer {
 
   constructor(
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
-    moduleService?: ModuleService,
     chapterService?: ChapterService,
     lessonService?: LessonService,
   ) {
     this.repository = new CourseRepository(firestore);
     this.service = new CourseService(this.repository);
 
-    if (moduleService && chapterService && lessonService) {
+    if (chapterService && lessonService) {
       this.fullGenerationService = new FullCourseGenerationService(
         this.service,
-        moduleService,
         chapterService,
         lessonService,
       );

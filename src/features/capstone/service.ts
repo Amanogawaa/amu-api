@@ -21,7 +21,6 @@ import { geminiCall } from "../../utils/geminiCall";
 import { generateCapstonePrompt } from "../../utils/prompts/capstone-temp";
 import type { GitHubService } from "../github/service";
 import type { CourseRepository } from "../course/repository";
-import type { ModuleRepository } from "../modules/repository";
 import type { ChapterRepository } from "../chapter/repository";
 import type { LessonRepository } from "../lesson/repository";
 
@@ -29,7 +28,6 @@ export class CapstoneService {
   private repository: CapstoneRepository;
   private githubService: GitHubService;
   private courseRepository: CourseRepository;
-  private moduleRepository: ModuleRepository;
   private chapterRepository: ChapterRepository;
   private lessonRepository: LessonRepository;
 
@@ -37,14 +35,12 @@ export class CapstoneService {
     repository: CapstoneRepository,
     githubService: GitHubService,
     courseRepository: CourseRepository,
-    moduleRepository: ModuleRepository,
     chapterRepository: ChapterRepository,
     lessonRepository: LessonRepository,
   ) {
     this.repository = repository;
     this.githubService = githubService;
     this.courseRepository = courseRepository;
-    this.moduleRepository = moduleRepository;
     this.chapterRepository = chapterRepository;
     this.lessonRepository = lessonRepository;
   }
