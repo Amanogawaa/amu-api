@@ -14,7 +14,6 @@ export enum GenerationStatus {
 export enum GenerationStep {
   VALIDATING = "validating",
   COURSE = "course",
-  MODULES = "modules",
   CHAPTERS = "chapters",
   LESSONS = "lessons",
 }
@@ -146,34 +145,6 @@ export function emitCourseGenerationProgress(
     startTime,
     estimatedTimeRemaining: startTime
       ? calculateEstimatedTime(10, startTime)
-      : "Calculating...",
-  };
-  emitGenerationProgress(req, progress);
-}
-
-export function emitModulesGenerationProgress(
-  req: AuthenticatedRequest,
-  jobId: string,
-  userId: string,
-  completed: number,
-  total: number,
-  message: string,
-  data?: any,
-  startTime?: string,
-): void {
-  const stepProgress = 10 + Math.floor((completed / total) * 30);
-  const progress: GenerationProgress = {
-    jobId,
-    userId,
-    status: GenerationStatus.IN_PROGRESS,
-    currentStep: GenerationStep.MODULES,
-    progress: stepProgress,
-    message,
-    data,
-    timestamp: new Date().toISOString(),
-    startTime,
-    estimatedTimeRemaining: startTime
-      ? calculateEstimatedTime(stepProgress, startTime)
       : "Calculating...",
   };
   emitGenerationProgress(req, progress);

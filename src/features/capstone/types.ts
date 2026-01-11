@@ -13,7 +13,7 @@ export interface CapstoneGuideline {
     phase: string;
     duration: string;
     tasks: string[];
-    modules: string[];
+    chapters: string[];
   }>;
   requiredFeatures: string[];
   suggestedFeatures: string[];
@@ -39,8 +39,8 @@ export interface CapstoneGuideline {
   difficulty: "beginner" | "intermediate" | "advanced";
   resources: string[];
   examples: string[];
-  moduleMapping?: Array<{
-    moduleName: string;
+  chapterMapping?: Array<{
+    chapterName: string;
     skills: string[];
     application: string;
   }>;
@@ -276,7 +276,7 @@ export const capstoneSchema = {
       type: "array",
       items: { type: "string" },
       description:
-        "5-7 specific measurable objectives referencing course modules",
+        "5-7 specific measurable objectives referencing course chapters",
     },
     gettingStarted: {
       type: "object",
@@ -319,13 +319,13 @@ export const capstoneSchema = {
             items: { type: "string" },
             description: "List of tasks for this phase",
           },
-          modules: {
+          chapters: {
             type: "array",
             items: { type: "string" },
-            description: "Course modules to reference for this phase",
+            description: "Course chapters to reference for this phase",
           },
         },
-        required: ["phase", "duration", "tasks", "modules"],
+        required: ["phase", "duration", "tasks", "chapters"],
       },
       description: "At least 3 phases breaking down the implementation",
     },
@@ -441,29 +441,29 @@ export const capstoneSchema = {
       items: { type: "string" },
       description: "1-3 example projects or URLs demonstrating expected scope",
     },
-    moduleMapping: {
+    chapterMapping: {
       type: "array",
       items: {
         type: "object",
         properties: {
-          moduleName: {
+          chapterName: {
             type: "string",
-            description: "Name of the course module",
+            description: "Name of the course chapter",
           },
           skills: {
             type: "array",
             items: { type: "string" },
-            description: "Skills learned in this module",
+            description: "Skills learned in this chapter",
           },
           application: {
             type: "string",
             description: "How these skills are applied in the capstone project",
           },
         },
-        required: ["moduleName", "skills", "application"],
+        required: ["chapterName", "skills", "application"],
       },
       description:
-        "Mapping of course modules to capstone requirements showing synthesis",
+        "Mapping of course chapters to capstone requirements showing synthesis",
     },
   },
   required: [
@@ -483,6 +483,6 @@ export const capstoneSchema = {
     "difficulty",
     "resources",
     "examples",
-    "moduleMapping",
+    "chapterMapping",
   ],
 };

@@ -46,7 +46,7 @@ export class CapstoneRoute {
      *     tags:
      *       - Capstone
      *     summary: Generate capstone guideline for a course
-     *     description: Creates a capstone project guideline based on actual course content from the database. Should be called after course modules and lessons are generated.
+     *     description: Creates a capstone project guideline based on actual course content from the database. Should be called after course chapters and lessons are generated.
      *     security:
      *       - bearerAuth: []
      *     parameters:
@@ -60,7 +60,7 @@ export class CapstoneRoute {
      *       201:
      *         description: Capstone guideline generated successfully
      *       400:
-     *         description: Course has no modules/lessons yet
+     *         description: Course has no chapters/lessons yet
      *       401:
      *         description: User not authenticated
      *       404:

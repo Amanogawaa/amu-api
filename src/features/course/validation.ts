@@ -9,7 +9,7 @@ export const generateCourseSchema = z.object({
   duration: z.string().regex(/^\d+\s*(hour|hours|minute|minutes|day|days)$/i, {
     message: "Duration must be in format: \"X hours\" or 'X minutes'",
   }),
-  noOfModules: z.number().int().min(1).max(20),
+  noOfChapters: z.number().int().min(1).max(20),
   language: z.string().min(2).max(50),
   userInstructions: z.string().max(1000).optional(),
   promptMode: z.enum(["system", "legacy"]).optional(),

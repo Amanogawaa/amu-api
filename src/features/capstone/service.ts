@@ -14,7 +14,6 @@ import {
   type UpdateCapstoneReviewRequest,
   type CapstoneSubmissionQueryParams,
   type CapstoneReviewQueryParams,
-  type GitHubRepoMetadata,
   capstoneSchema,
 } from "./types";
 import { geminiCall } from "../../utils/geminiCall";
@@ -96,42 +95,37 @@ export class CapstoneService {
         throw new AppError("Course not found", 404);
       }
 
-      const modules = await this.moduleRepository.getModules(courseId);
+      const chapters = await this.chapterRepository.getChapters(courseId);
 
-      if (!modules || modules.length === 0) {
+      if (!chapters || chapters.length === 0) {
         throw new AppError(
-          "No modules found for this course. Generate course content first.",
+          "No chapters found for this course. Generate course content first.",
           400,
         );
       }
 
-      // Collect module summaries
-      const moduleSummaries = modules.map((module) => ({
-        title: module.moduleName,
-        description: module.moduleDescription,
-        learningOutcomes: module.learningObjectives || [],
-        duration: module.estimatedDuration,
-        order: module.moduleOrder,
+      // Collect chapter summaries
+      const chapterSummaries = chapters.map((chapter) => ({
+        title: chapter.chapterName,
+        description: chapter.chapterDescription,
+        learningObjectives: chapter.learningObjectives || [],
+        keyTopics: chapter.keyTopics || [],
+        duration: chapter.estimatedDuration,
+        order: chapter.chapterOrder,
       }));
 
-      const allChapters: any[] = [];
       const allLessons: any[] = [];
 
-      for (const module of modules) {
-        const chapters = await this.chapterRepository.getChapters(module.id);
-        allChapters.push(...chapters);
-
-        for (const chapter of chapters) {
-          const lessons = await this.lessonRepository.getLessons(chapter.id);
-          allLessons.push(
-            ...lessons.map((l) => ({ ...l, moduleId: module.id })),
-          );
-        }
+      for (const chapter of chapters) {
+        const lessons = await this.lessonRepository.getLessons(chapter.id);
+        allLessons.push(
+          ...lessons.map((l) => ({ ...l, chapterId: chapter.id })),
+        );
       }
 
-      const lessonsByModule = modules.map((module) => {
-        const moduleLessons = allLessons
-          .filter((lesson) => lesson.moduleId === module.id)
+      const lessonsByChapter = chapters.map((chapter) => {
+        const chapterLessons = allLessons
+          .filter((lesson) => lesson.chapterId === chapter.id)
           .map((lesson) => ({
             title: lesson.lessonName,
             type: lesson.type,
@@ -139,14 +133,14 @@ export class CapstoneService {
           }));
 
         return {
-          moduleTitle: module.moduleName,
-          lessonCount: moduleLessons.length,
-          lessons: moduleLessons.slice(0, 3),
+          chapterTitle: chapter.chapterName,
+          lessonCount: chapterLessons.length,
+          lessons: chapterLessons.slice(0, 3),
         };
       });
 
       const skillsGained = course.skillsGained || [];
-      const technologiesUsed = this.extractTechnologies(modules, allLessons);
+      const technologiesUsed = this.extractTechnologies(chapters, allLessons);
 
       return {
         courseId: course.id,
@@ -161,10 +155,10 @@ export class CapstoneService {
         prerequisites: course.prerequisites
           ? course.prerequisites.split(",").map((p) => p.trim())
           : [],
-        totalModules: modules.length,
+        totalChapters: chapters.length,
         totalLessons: allLessons.length,
-        moduleSummaries,
-        lessonsByModule,
+        chapterSummaries,
+        lessonsByChapter,
         technologiesUsed,
       };
     } catch (error) {
@@ -173,16 +167,18 @@ export class CapstoneService {
     }
   }
 
-  private extractTechnologies(modules: any[], lessons: any[]): string[] {
+  private extractTechnologies(chapters: any[], lessons: any[]): string[] {
     const technologies = new Set<string>();
 
-    modules.forEach((module) => {
-      const text = `${module.title} ${module.description}`.toLowerCase();
+    chapters.forEach((chapter) => {
+      const text =
+        `${chapter.chapterName} ${chapter.chapterDescription}`.toLowerCase();
       this.findTechnologiesInText(text, technologies);
     });
 
     lessons.forEach((lesson) => {
-      const text = `${lesson.title} ${lesson.description || ""}`.toLowerCase();
+      const text =
+        `${lesson.lessonName} ${lesson.lessonDescription || ""}`.toLowerCase();
       this.findTechnologiesInText(text, technologies);
     });
 
@@ -446,9 +442,7 @@ export class CapstoneService {
         reviewerId: userId,
         reviewerName: userName,
         reviewerEmail: userEmail,
-        // Ensure parentReviewId is null (not undefined) for top-level reviews
-        // This is important for Firestore queries to work correctly
-        parentReviewId: request.parentReviewId || null,
+        parentReviewId: request.parentReviewId ?? undefined,
         rating: request.rating,
         feedback: request.feedback,
         highlights: request.highlights || [],

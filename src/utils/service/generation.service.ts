@@ -8,12 +8,12 @@ import type { LessonService } from "../../features/lesson/service";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
   createGenerationJobId,
+  emitChaptersGenerationProgress,
   emitCourseGenerationProgress,
   emitGenerationCompleted,
   emitGenerationFailed,
   emitGenerationStarted,
   emitLessonsGenerationProgress,
-  emitModulesGenerationProgress,
   GenerationStep,
   type FullCourseGenerationResult,
 } from "../helper/generation.helpers";
@@ -71,16 +71,6 @@ export class FullCourseGenerationService {
         { courseId: course.id, courseName: course.name },
         startTime,
       );
-
-      // currentStep = GenerationStep.MODULES;
-      // const modules = await this.generateModules(
-      //   req,
-      //   jobId,
-      //   userId,
-      //   course,
-      //   request,
-      //   startTime,
-      // );
 
       currentStep = GenerationStep.CHAPTERS;
       const chaptersCount = await this.generateChapters(
@@ -140,13 +130,13 @@ export class FullCourseGenerationService {
     startTime: string,
   ): Promise<Chapter[]> {
     try {
-      emitModulesGenerationProgress(
+      emitChaptersGenerationProgress(
         req,
         jobId,
         userId,
         0,
         1,
-        "Generating course modules...",
+        "Generating course chapters...",
         undefined,
         startTime,
       );
@@ -176,20 +166,20 @@ export class FullCourseGenerationService {
         chaptersCount: chapters.length,
       });
 
-      emitModulesGenerationProgress(
+      emitChaptersGenerationProgress(
         req,
         jobId,
         userId,
         1,
         1,
         `Generated ${chapters.length} chapters successfully!`,
-        { modulesCount: chapters.length },
+        { chaptersCount: chapters.length },
         startTime,
       );
 
       return chapters;
     } catch (error: any) {
-      logger.error("Module generation failed", {
+      logger.error("Chapter generation failed", {
         jobId,
         courseId: course.id,
         error: error.message,

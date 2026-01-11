@@ -3,6 +3,7 @@ import type { PromptMode } from "../../utils/prompts/types";
 export interface Chapter {
   id: string;
   courseId: string;
+  courseName: string;
   chapterOrder: number;
   chapterName: string;
   chapterDescription: string;

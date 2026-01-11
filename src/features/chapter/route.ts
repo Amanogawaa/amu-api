@@ -16,19 +16,19 @@ export class ChapterRoute {
   private initializeRoutes(): void {
     /**
      * @openapi
-     * /{moduleId}/chapter:
+     * /{courseId}/chapters:
      *   get:
      *     tags:
      *       - Chapters
-     *     summary: Retrieve chapters for a specific module
-     *     description: Returns chapter details for the given module ID
+     *     summary: Retrieve chapters for a specific course
+     *     description: Returns chapter details for the given course ID
      *     parameters:
      *       - in: path
-     *         name: moduleId
+     *         name: courseId
      *         required: true
      *         schema:
      *           type: string
-     *         description: The ID of the module to retrieve chapters for
+     *         description: The ID of the course to retrieve chapters for
      *     responses:
      *       200:
      *         description: Chapter details retrieved successfully
@@ -44,13 +44,13 @@ export class ChapterRoute {
      *                     properties:
      *                       id:
      *                         type: string
-     *                       moduleId:
+     *                       courseId:
      *                         type: string
      *                       chapterOrder:
      *                         type: integer
      *                       courseName:
      *                         type: string
-     *                       moduleName:
+     *                       courseName:
      *                         type: string
      *                       chapterName:
      *                         type: string
@@ -84,7 +84,7 @@ export class ChapterRoute {
      *       500:
      *         description: Internal server error
      */
-    this.router.get("/:moduleId/chapter", (req, res, next) =>
+    this.router.get("/:courseId/chapters", (req, res, next) =>
       this.controller.getChapters(req, res, next),
     );
 
@@ -94,12 +94,12 @@ export class ChapterRoute {
 
     /**
      * @openapi
-     * /chapter:
+     * /chapters:
      *   post:
      *     tags:
      *       - Chapters
-     *     summary: Generate chapters for a module
-     *     description: Generates chapter outlines based on module details using AI
+     *     summary: Generate chapters for a course
+     *     description: Generates chapter outlines based on course details using AI
      *     requestBody:
      *       required: true
      *       content:
@@ -107,8 +107,8 @@ export class ChapterRoute {
      *           schema:
      *             type: object
      *             required:
-     *               - moduleId
-     *               - moduleName
+     *               - courseId
+     *               - courseName
      *               - moduleDescription
      *               - moduleLearningObjectives
      *               - moduleKeySkills
@@ -119,10 +119,10 @@ export class ChapterRoute {
      *               - language
      *               - moduleOrder
      *             properties:
-     *               moduleId:
+     *               courseId:
      *                 type: string
      *                 description: The ID of the module
-     *               moduleName:
+     *               courseName:
      *                 type: string
      *                 description: The name of the module
      *               moduleDescription:
@@ -172,13 +172,13 @@ export class ChapterRoute {
      *                     properties:
      *                       id:
      *                         type: string
-     *                       moduleId:
+     *                       courseId:
      *                         type: string
      *                       chapterOrder:
      *                         type: integer
      *                       courseName:
      *                         type: string
-     *                       moduleName:
+     *                       courseName:
      *                         type: string
      *                       chapterName:
      *                         type: string
@@ -205,7 +205,7 @@ export class ChapterRoute {
      *         description: Internal server error
      */
     this.router.post(
-      "/chapter",
+      "/chapters",
       // authMiddleware,
       // courseOwnershipMiddleware,
       (req, res, next) => this.controller.generateChapter(req, res, next),
@@ -213,19 +213,19 @@ export class ChapterRoute {
 
     /**
      * @openapi
-     * /{moduleId}/chapter:
+     * /{courseId}/chapters:
      *   delete:
      *     tags:
      *       - Chapters
-     *     summary: Delete chapters by module ID
-     *     description: Deletes all chapters associated with the specified module ID
+     *     summary: Delete chapters by course ID
+     *     description: Deletes all chapters associated with the specified course ID
      *     parameters:
      *       - in: path
-     *         name: moduleId
+     *         name: courseId
      *         required: true
      *         schema:
      *           type: string
-     *         description: The ID of the module whose chapters are to be deleted
+     *         description: The ID of the course whose chapters are to be deleted
      *     responses:
      *       200:
      *         description: Chapters deleted successfully
@@ -242,7 +242,7 @@ export class ChapterRoute {
      *         description: Internal server error
      */
     this.router.delete(
-      "/:moduleId/chapter",
+      "/:courseId/chapters",
       authMiddleware,
       courseOwnershipMiddleware,
       (req, res, next) =>
