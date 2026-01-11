@@ -115,8 +115,6 @@ export class CourseService {
     isComplete: boolean;
     missingComponents: string[];
     details: {
-      hasModules: boolean;
-      modulesCount: number;
       hasChapters: boolean;
       chaptersCount: number;
       hasLessons: boolean;
@@ -127,39 +125,15 @@ export class CourseService {
     try {
       const firestore = this.courseRepository["firebaseStore"];
 
-      const modulesSnapshot = await firestore
-        .collection("modules")
+      // Fetch chapters directly by courseId
+      const chaptersSnapshot = await firestore
+        .collection("chapters")
         .where("courseId", "==", courseId)
         .get();
-      const hasModules = !modulesSnapshot.empty;
-      const modulesCount = modulesSnapshot.size;
 
-      const moduleIds = modulesSnapshot.docs.map((doc) => doc.id);
-
-      let hasChapters = false;
-      let chaptersCount = 0;
-      const chapterIds: string[] = [];
-
-      if (moduleIds.length > 0) {
-        const chapterPromises = [];
-        for (let i = 0; i < moduleIds.length; i += 10) {
-          const batch = moduleIds.slice(i, i + 10);
-          chapterPromises.push(
-            firestore
-              .collection("chapters")
-              .where("moduleId", "in", batch)
-              .get(),
-          );
-        }
-
-        const chapterSnapshots = await Promise.all(chapterPromises);
-        chapterSnapshots.forEach((snapshot) => {
-          chaptersCount += snapshot.size;
-          chapterIds.push(...snapshot.docs.map((doc) => doc.id));
-        });
-
-        hasChapters = chaptersCount > 0;
-      }
+      const hasChapters = !chaptersSnapshot.empty;
+      const chaptersCount = chaptersSnapshot.size;
+      const chapterIds = chaptersSnapshot.docs.map((doc) => doc.id);
 
       let hasLessons = false;
       let lessonsCount = 0;
@@ -198,17 +172,14 @@ export class CourseService {
       );
 
       const missingComponents: string[] = [];
-      if (!hasModules) missingComponents.push("modules");
       if (!hasChapters) missingComponents.push("chapters");
       if (!hasLessons) missingComponents.push("lessons");
       if (!capstoneProject) missingComponents.push("capstone project");
 
       return {
-        isComplete: hasModules && hasChapters && hasLessons && capstoneProject,
+        isComplete: hasChapters && hasLessons && capstoneProject,
         missingComponents,
         details: {
-          hasModules,
-          modulesCount,
           hasChapters,
           chaptersCount,
           hasLessons,

@@ -109,19 +109,7 @@ export const lessonEnrollmentMiddleware = async (
       }
 
       const chapterData = chapterDoc.data();
-      const moduleId = chapterData?.moduleId;
-
-      const moduleDoc = await firebaseFirestore
-        .collection("modules")
-        .doc(moduleId)
-        .get();
-
-      if (!moduleDoc.exists) {
-        throw new AppError("Module not found", 404);
-      }
-
-      const moduleData = moduleDoc.data();
-      courseId = moduleData?.courseId;
+      courseId = chapterData?.courseId;
     } else if (chapterId) {
       const chapterDoc = await firebaseFirestore
         .collection("chapters")
@@ -133,19 +121,7 @@ export const lessonEnrollmentMiddleware = async (
       }
 
       const chapterData = chapterDoc.data();
-      const moduleId = chapterData?.moduleId;
-
-      const moduleDoc = await firebaseFirestore
-        .collection("modules")
-        .doc(moduleId)
-        .get();
-
-      if (!moduleDoc.exists) {
-        throw new AppError("Module not found", 404);
-      }
-
-      const moduleData = moduleDoc.data();
-      courseId = moduleData?.courseId;
+      courseId = chapterData?.courseId;
     }
 
     if (!courseId) {

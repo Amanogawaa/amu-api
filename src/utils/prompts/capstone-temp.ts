@@ -13,17 +13,18 @@ export const generateCapstonePrompt = (context: {
   learningOutcomes: string[];
   skillsGained: string[];
   prerequisites: string[];
-  totalModules: number;
+  totalChapters: number;
   totalLessons: number;
-  moduleSummaries: Array<{
+  chapterSummaries: Array<{
     title: string;
     description: string;
-    learningOutcomes: string[];
+    learningObjectives: string[];
+    keyTopics: string[];
     duration: string;
     order: number;
   }>;
-  lessonsByModule: Array<{
-    moduleTitle: string;
+  lessonsByChapter: Array<{
+    chapterTitle: string;
     lessonCount: number;
     lessons: Array<{
       title: string;
@@ -40,7 +41,7 @@ Category: ${context.category}
 Level: ${context.level}
 Duration: ${context.duration}
 Language: ${context.language}
-Total Modules: ${context.totalModules}
+Total Chapters: ${context.totalChapters}
 Total Lessons: ${context.totalLessons}
 
 **LEARNING OUTCOMES**
@@ -58,24 +59,25 @@ ${
     : "Based on course content"
 }
 
-**COURSE MODULES**
-${context.moduleSummaries
+**COURSE CHAPTERS**
+${context.chapterSummaries
   .map(
-    (module) => `
-Module ${module.order}: ${module.title}
-- ${module.description}
-- Duration: ${module.duration}
-- Learning Outcomes: ${module.learningOutcomes.join("; ")}
+    (chapter) => `
+Chapter ${chapter.order}: ${chapter.title}
+- ${chapter.description}
+- Duration: ${chapter.duration}
+- Learning Objectives: ${chapter.learningObjectives.join("; ")}
+- Key Topics: ${chapter.keyTopics.join(", ")}
 `,
   )
   .join("\n")}
 
-**LESSON BREAKDOWN BY MODULE**
-${context.lessonsByModule
+**LESSON BREAKDOWN BY CHAPTER**
+${context.lessonsByChapter
   .map(
-    (moduleData) => `
-${moduleData.moduleTitle} (${moduleData.lessonCount} lessons)
-Sample lessons: ${moduleData.lessons
+    (chapterData) => `
+${chapterData.chapterTitle} (${chapterData.lessonCount} lessons)
+Sample lessons: ${chapterData.lessons
       .map((l) => `"${l.title}" (${l.type}, ${l.duration})`)
       .join(", ")}
 `,
@@ -85,7 +87,7 @@ Sample lessons: ${moduleData.lessons
 **REQUIREMENTS**
 Create a capstone project that:
 - Synthesizes 80%+ of the course learning outcomes listed above
-- Incorporates skills from multiple modules
+- Incorporates skills from multiple chapters
 - Uses technologies covered in the lessons
 - Matches the ${context.level} difficulty level
 - Can be completed within a realistic timeframe
@@ -213,19 +215,19 @@ Return valid JSON only:
     "For ML: Kaggle notebooks or research papers",
     "1-3 inspiration examples at similar skill level"
   ],
-  "moduleMapping": [
-    {"moduleName": "Module name from above", "skills": ["Skill 1", "Skill 2"], "application": "How these skills are used in the capstone"}
+  "chapterMapping": [
+    {"chapterName": "Chapter name from above", "skills": ["Skill 1", "Skill 2"], "application": "How these skills are used in the capstone"}
   ]
 }
 
 **QUALITY CHECKLIST**
-- ✓ Project synthesizes content from all ${context.totalModules} modules
+- ✓ Project synthesizes content from all ${context.totalChapters} chapters
 - ✓ Features are specific and testable (e.g., "Implement JWT authentication" NOT "Add user management")
 - ✓ Evaluation criteria weights total exactly 100%
 - ✓ Technical requirements match technologies from course lessons
 - ✓ Title is exciting and action-oriented, not generic "Final Project"
 - ✓ Scope matches ${context.level} level and ${context.duration} course duration
-- ✓ moduleMapping shows clear connection between course content and capstone requirements
+- ✓ chapterMapping shows clear connection between course content and capstone requirements
 
 **CATEGORY-SPECIFIC FOCUS**
 ${getCategoryFocus(context.category)}

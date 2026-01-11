@@ -1,4 +1,3 @@
-import { AppError } from "../../utils/errors";
 import { geminiCall } from "../../utils/geminiCall";
 import { logger } from "../../utils/loggers";
 import {
@@ -6,12 +5,7 @@ import {
   type ChapterPromptMode,
 } from "../../utils/prompts/chapter-temp";
 import { ChapterRepository } from "./repository";
-import {
-  type GenerateChaptersRequest,
-  type RegenerateChaptersRequest,
-  type Chapter,
-  chaptersSchema,
-} from "./types";
+import { chaptersSchema, type GenerateChaptersRequest } from "./types";
 
 export class ChapterService {
   private chapterRepository: ChapterRepository;

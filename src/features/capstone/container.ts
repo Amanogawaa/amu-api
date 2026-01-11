@@ -6,7 +6,6 @@ import { GitHubService } from "../github/service";
 import { firebaseFirestore } from "../../config/firebase";
 import type { Firestore } from "firebase-admin/firestore";
 import type { CourseRepository } from "../course/repository";
-import type { ModuleRepository } from "../modules/repository";
 import type { ChapterRepository } from "../chapter/repository";
 import type { LessonRepository } from "../lesson/repository";
 
@@ -20,24 +19,17 @@ export class CapstoneContainer {
   constructor(
     firestore: Firestore = firebaseFirestore,
     courseRepository?: CourseRepository,
-    moduleRepository?: ModuleRepository,
     chapterRepository?: ChapterRepository,
     lessonRepository?: LessonRepository,
   ) {
     this.repository = new CapstoneRepository(firestore);
     this.githubService = new GitHubService();
 
-    if (
-      courseRepository &&
-      moduleRepository &&
-      chapterRepository &&
-      lessonRepository
-    ) {
+    if (courseRepository && chapterRepository && lessonRepository) {
       this.service = new CapstoneService(
         this.repository,
         this.githubService,
         courseRepository,
-        moduleRepository,
         chapterRepository,
         lessonRepository,
       );

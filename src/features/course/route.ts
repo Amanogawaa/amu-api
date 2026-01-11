@@ -119,7 +119,7 @@ export class CourseRoute {
      *               - topic
      *               - level
      *               - duration
-     *               - noOfModules
+     *               - noOfChapters
      *               - language
      *             properties:
      *               category:
@@ -135,7 +135,7 @@ export class CourseRoute {
      *               duration:
      *                 type: string
      *                 example: 6 hours
-     *               noOfModules:
+     *               noOfChapters:
      *                 type: integer
      *                 minimum: 1
      *                 maximum: 20
@@ -189,7 +189,7 @@ export class CourseRoute {
      *               - topic
      *               - level
      *               - duration
-     *               - noOfModules
+     *               - noOfChapters
      *               - language
      *             properties:
      *               category:
@@ -209,7 +209,7 @@ export class CourseRoute {
      *                 type: string
      *                 example: 40 hours
      *                 description: Total course duration
-     *               noOfModules:
+     *               noOfChapters:
      *                 type: integer
      *                 minimum: 1
      *                 maximum: 10

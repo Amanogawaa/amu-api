@@ -121,7 +121,6 @@ export class LessonRoute {
      *               - estimatedDuration
      *               - estimatedLessonCount
      *               - courseName
-     *               - moduleName
      *               - level
      *               - language
      *             properties:
@@ -147,8 +146,6 @@ export class LessonRoute {
      *               estimatedLessonCount:
      *                 type: integer
      *               courseName:
-     *                 type: string
-     *               moduleName:
      *                 type: string
      *               level:
      *                 type: string

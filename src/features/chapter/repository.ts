@@ -60,7 +60,10 @@ export class ChapterRepository {
     courseId: string,
     courseName: string,
     chapters: Array<
-      Omit<Chapter, "id" | "courseId" | "createdAt" | "updatedAt">
+      Omit<
+        Chapter,
+        "id" | "courseId" | "courseName" | "createdAt" | "updatedAt"
+      >
     >,
   ): Promise<Chapter[]> {
     try {
@@ -71,7 +74,10 @@ export class ChapterRepository {
         const docRef = this.firebaseStore
           .collection(this.COLLECTION_NAME)
           .doc();
+
         const data = {
+          courseId,
+          courseName,
           ...chapter,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -80,8 +86,6 @@ export class ChapterRepository {
         batch.set(docRef, data);
         createdChapters.push({
           id: docRef.id,
-          courseName,
-          courseId,
           ...data,
         } as Chapter);
       }
@@ -166,7 +170,7 @@ export class ChapterRepository {
       );
     } catch (error) {
       logger.error(
-        "Error in ChapterRepository.deleteChaptersByModuleId:",
+        "Error in ChapterRepository.deleteChaptersByCourseId:",
         error,
       );
       throw error;
