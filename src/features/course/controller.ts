@@ -283,7 +283,7 @@ export class CourseController {
   }
 
   /**
-   * Generate a complete course with modules, chapters, and lessons
+   * Generate a complete course with chapters, and lessons
    * Uses Socket.IO for real-time progress updates
    */
   async generateFullCourse(

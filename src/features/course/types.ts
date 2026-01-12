@@ -69,8 +69,6 @@ export interface CourseValidationResponse {
   isComplete: boolean;
   missingComponents: string[];
   details: {
-    hasModules: boolean;
-    modulesCount: number;
     hasChapters: boolean;
     chaptersCount: number;
     hasLessons: boolean;

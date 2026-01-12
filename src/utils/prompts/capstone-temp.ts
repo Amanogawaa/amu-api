@@ -1,6 +1,6 @@
 /**
  * Generate capstone project prompt using actual course data from the database.
- * This creates better context by using real module and lesson information.
+ * This creates better context by using real chapter and lesson information.
  */
 export const generateCapstonePrompt = (context: {
   courseId: string;
@@ -117,9 +117,9 @@ For data/ML languages (Python with libraries):
 Return valid JSON only:
 {
   "title": "Project-focused title matching the domain (e.g., 'Build a Banking System in C' for C programming, 'E-commerce API' for backend, 'Stock Price Predictor' for ML)",
-  "description": "1-2 paragraphs: what it is, why valuable, skills demonstrated, how it synthesizes course content from the modules above. Make it domain-appropriate.",
+  "description": "1-2 paragraphs: what it is, why valuable, skills demonstrated, how it synthesizes course content from the chapters above. Make it domain-appropriate.",
   "objectives": [
-    "Specific measurable objective referencing actual course modules (5-7 total)",
+    "Specific measurable objective referencing actual course chapters (5-7 total)",
     "Use action verbs: Implement, Build, Create, Apply, Integrate, Demonstrate"
   ],
   "gettingStarted": {
@@ -137,36 +137,36 @@ Return valid JSON only:
       "phase": "Phase 1: Foundation",
       "duration": "Estimated time",
       "tasks": ["Core task 1", "Core task 2"],
-      "modules": ["Which course modules to reference"]
+      "chapters": ["Which course chapters to reference"]
     },
     {
       "phase": "Phase 2: Core Features",
       "duration": "Estimated time", 
       "tasks": ["Feature implementation tasks"],
-      "modules": ["Relevant modules"]
+      "chapters": ["Relevant chapters"]
     },
     {
       "phase": "Phase 3: Enhancement",
       "duration": "Estimated time",
       "tasks": ["Advanced features"],
-      "modules": ["Advanced modules used"]
+      "chapters": ["Advanced chapters used"]
     }
   ],
   "requiredFeatures": [
-    "Core feature 1 (specific, testable, related to course modules, domain-appropriate)",
+    "Core feature 1 (specific, testable, related to course chapters, domain-appropriate)",
     "Core feature 2 (reference specific technologies from the course)",
-    "5-8 features covering major course topics and modules",
+    "5-8 features covering major course topics and chapters",
     "For C: file I/O, data structures, memory management",
     "For web: CRUD operations, authentication, database",
     "For ML: data preprocessing, model training, evaluation"
   ],
   "suggestedFeatures": [
-    "Optional enhancement 1 (advanced topics from later modules)",
+    "Optional enhancement 1 (advanced topics from later chapters)",
     "3-5 optional features for students who want to go beyond"
   ],
   "technicalRequirements": {
     "languages": ["${context.language}"],
-    "frameworks": ["Based on course content - extract from modules. Leave empty if not applicable (e.g., pure C projects)"],
+    "frameworks": ["Based on course content - extract from chapters. Leave empty if not applicable (e.g., pure C projects)"],
     "tools": ["Domain-specific tools: Git, IDE/Editor, compiler/interpreter, debugger, etc."],
     "apis": ["If applicable based on course lessons"],
     "database": "Specify if course covered databases. For C: 'File-based storage' or 'None'. For web: 'PostgreSQL/MongoDB/etc.'"
@@ -181,7 +181,7 @@ Return valid JSON only:
     "For compiled languages: Executable or build instructions",
     "For web: Deployed link or local setup guide",
     "For ML: Jupyter notebook or script + results visualization",
-    "Documentation of how each module's learning was applied",
+    "Documentation of how each chapter's learning was applied",
     "Test cases or usage examples"
   ],
   "evaluationCriteria": [
@@ -195,7 +195,7 @@ Return valid JSON only:
   ],
   "commonChallenges": [
     "Challenge students might face and how to overcome it",
-    "Reference to specific course modules for help",
+    "Reference to specific course chapters for help",
     "3-4 common pitfalls and solutions"
   ],
   "estimatedTime": "Realistic completion time based on course duration and ${

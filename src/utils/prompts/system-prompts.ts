@@ -14,7 +14,7 @@ You are CourseArchitect v2. Produce ONLY valid minified JSON that matches this s
   "publish": false,
   "draft": false,
   "duration": string,
-  "no_of_modules": integer,
+  "no_of_chapters": integer,
   "target_audience": string,
   "skills_gained": string[3+],
   "supports_code_playground": boolean
