@@ -108,7 +108,6 @@ export class ChapterRoute {
      *             type: object
      *             required:
      *               - courseId
-     *               - courseName
      *               - moduleDescription
      *               - moduleLearningObjectives
      *               - moduleKeySkills

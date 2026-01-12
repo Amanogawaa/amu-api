@@ -154,7 +154,6 @@ export class CourseRepository {
       };
 
       await Promise.all([
-        deleteCollection("modules"),
         deleteCollection("chapters"),
         deleteCollection("lessons"),
         deleteCollection("capstoneGuidelines"),
