@@ -13,6 +13,7 @@ import socketTestRoutes from "./features/socket/route";
 import type { UserContainer } from "./features/user/container";
 import type { CapstoneContainer } from "./features/capstone/container";
 import type { GitHubContainer } from "./features/github/container";
+import lessonAssistantRoutes from "./features/lesson-assistant/route";
 
 export class AppRoutes {
   private router: Router;
@@ -86,6 +87,7 @@ export class AppRoutes {
     this.router.use("/", this.codePlaygroundContainer.getRouter());
     this.router.use("/capstone", this.capstoneContainer.getRouter());
     this.router.use("/github", this.githubContainer.getRouter());
+    this.router.use("/assistant", lessonAssistantRoutes);
   }
 
   public getRouter(): Router {

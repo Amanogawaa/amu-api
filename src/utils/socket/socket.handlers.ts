@@ -27,6 +27,8 @@ export class SocketHandlers {
 
       this.handleChapterEvents(socket);
 
+      this.handleAssistantEvents(socket);
+
       socket.on("disconnect", (reason) => {
         logger.info(`User ${socket.userId} disconnected: ${reason}`);
       });
@@ -89,6 +91,79 @@ export class SocketHandlers {
             comment: data.comment,
             userId: socket.userId,
           });
+      },
+    );
+  }
+
+  private handleAssistantEvents(socket: AuthenticatedSocket): void {
+    const { lessonAssistantContainer } = require("../../features/lesson-assistant/container");
+
+    socket.on("chat:join", (data: { lessonId: string }) => {
+      socket.join(`lesson-chat:${data.lessonId}`);
+      logger.info(`User ${socket.userId} joined lesson chat ${data.lessonId}`);
+    });
+
+    socket.on("chat:leave", (data: { lessonId: string }) => {
+      socket.leave(`lesson-chat:${data.lessonId}`);
+      logger.info(`User ${socket.userId} left lesson chat ${data.lessonId}`);
+    });
+
+    socket.on(
+      "chat:ask",
+      async (data: { lessonId: string; question: string; chatId?: string }) => {
+        try {
+          if (!socket.userId) {
+            socket.emit("chat:error", { message: "Unauthorized" });
+            return;
+          }
+
+          const { lessonId, question, chatId } = data;
+
+          logger.info("Chat question received", {
+            userId: socket.userId,
+            lessonId,
+            questionLength: question.length,
+          });
+
+          // Create or get chat session
+          let sessionChatId = chatId;
+          if (!sessionChatId) {
+            const chat =
+              await lessonAssistantContainer.service.createOrGetChatSession(
+                lessonId,
+                socket.userId,
+              );
+            sessionChatId = chat.id;
+          }
+
+          // Stream the response
+          const assistantMessage =
+            await lessonAssistantContainer.service.streamResponse(
+              sessionChatId,
+              question,
+              socket.userId,
+              (chunk: string) => {
+                socket.emit("chat:chunk", { chunk });
+              },
+            );
+
+          // Send completion signal
+          socket.emit("chat:complete", {
+            message: assistantMessage,
+            chatId: sessionChatId,
+          });
+
+          logger.info("Chat response completed", {
+            userId: socket.userId,
+            chatId: sessionChatId,
+            responseLength: assistantMessage.content.length,
+          });
+        } catch (error: any) {
+          logger.error("Error in chat:ask handler:", error);
+          socket.emit("chat:error", {
+            message: error.message || "Failed to process question",
+          });
+        }
       },
     );
   }

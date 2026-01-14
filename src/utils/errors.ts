@@ -40,6 +40,12 @@ export class UserNotFoundError extends AppError {
   }
 }
 
+export class NotFoundError extends AppError {
+  constructor(message: string = "Resource not found") {
+    super(message, 404, "NOT_FOUND");
+  }
+}
+
 export class ValidationError extends AppError {
   fields?: Record<string, string>;
 

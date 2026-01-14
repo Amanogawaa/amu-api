@@ -197,4 +197,54 @@ export class LessonRepository {
       throw error;
     }
   }
+
+  async getLesson(lessonId: string): Promise<any | null> {
+    return this.getLessonById(lessonId);
+  }
+
+  async getChapterForLesson(chapterId: string): Promise<any | null> {
+    try {
+      const docRef = this.firebaseStore.collection("chapters").doc(chapterId);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    } catch (error) {
+      logger.error("Error fetching chapter for lesson:", error);
+      throw error;
+    }
+  }
+
+  async getCourseForLesson(chapterId: string): Promise<any | null> {
+    try {
+      // First get the chapter to find the courseId
+      const chapter = await this.getChapterForLesson(chapterId);
+      if (!chapter) {
+        return null;
+      }
+
+      const docRef = this.firebaseStore
+        .collection("courses")
+        .doc(chapter.courseId);
+      const doc = await docRef.get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      return {
+        id: doc.id,
+        ...doc.data(),
+      };
+    } catch (error) {
+      logger.error("Error fetching course for lesson:", error);
+      throw error;
+    }
+  }
 }

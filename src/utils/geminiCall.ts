@@ -11,6 +11,8 @@ interface GeminiConfig {
   systemPrompt?: string;
   benchmarkTag?: string;
   metadata?: Record<string, unknown>;
+  stream?: boolean;
+  onChunk?: (chunk: string) => void | Promise<void>;
 }
 
 // Counter for unique job IDs
@@ -88,7 +90,8 @@ const makeGeminiCall = async (
     apiKey: process.env.GEMINI_API_KEY as string,
   });
 
-  const model = "gemini-2.5-flash";
+  // const model = "gemini-2.5-flash";
+  const model = "gemini-3-flash-preview";
 
   const contents = [
     {
@@ -102,8 +105,10 @@ const makeGeminiCall = async (
     config: {
       temperature:
         config.temperature || RATE_LIMIT_CONFIG.GEMINI.DEFAULT_TEMPERATURE,
-      responseMimeType: "application/json",
-      responseSchema: config.responseSchema,
+      responseMimeType:
+        config.stream || !config.responseSchema ? "text/plain" : "application/json",
+      responseSchema:
+        config.stream || !config.responseSchema ? undefined : config.responseSchema,
     },
     contents,
   };
@@ -116,6 +121,32 @@ const makeGeminiCall = async (
   }
 
   const start = Date.now();
+
+  // Handle streaming
+  if (config.stream && config.onChunk) {
+    const stream = await ai.models.generateContentStream(requestPayload);
+    let fullResponse = "";
+
+    for await (const chunk of stream) {
+      const text = chunk.text;
+      if (text) {
+        fullResponse += text;
+        await config.onChunk(text);
+      }
+    }
+
+    const durationMs = Date.now() - start;
+
+    logger.info("Gemini API success (streaming)", {
+      durationMs,
+      benchmarkTag: config.benchmarkTag ?? "default",
+      metadata: config.metadata,
+    });
+
+    return fullResponse;
+  }
+
+  // Handle non-streaming (existing logic)
   const response = await ai.models.generateContent(requestPayload);
   const durationMs = Date.now() - start;
 
@@ -124,6 +155,21 @@ const makeGeminiCall = async (
     throw new Error("Empty response from Gemini");
   }
 
+  // If no schema provided, return plain text
+  if (!config.responseSchema) {
+    logger.info("Gemini API success (plain text)", {
+      promptTokens: response.usageMetadata?.promptTokenCount,
+      responseTokens: response.usageMetadata?.candidatesTokenCount,
+      totalTokens: response.usageMetadata?.totalTokenCount,
+      durationMs,
+      benchmarkTag: config.benchmarkTag ?? "default",
+      metadata: config.metadata,
+    });
+
+    return text;
+  }
+
+  // Parse JSON for schema-based responses
   let parsed;
   try {
     parsed = JSON.parse(text);
