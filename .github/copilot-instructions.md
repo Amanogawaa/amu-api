@@ -2,264 +2,166 @@
 
 ## Project Overview
 
-TypeScript/Express API for an AI-powered learning management system. Uses Firebase Firestore for data, Google Gemini for course generation, and follows a strict layered architecture pattern.
+Backend API for an AI-powered learning platform built with **Bun runtime**, Express, Firebase, and Google Gemini AI. The API generates intelligent course content (courses, chapters, lessons) using structured AI prompts with schema validation.
 
 ## Architecture Pattern: Container-Based Dependency Injection
 
-**Critical:** Every feature module (`src/features/*`) follows this exact structure:
-
-```
-feature/
-  ├── container.ts     # DI container - instantiates all layers
-  ├── route.ts         # Express routes with OpenAPI docs
-  ├── controller.ts    # Request/response handling
-  ├── service.ts       # Business logic
-  ├── repository.ts    # Firebase Firestore operations
-  ├── types.ts         # TypeScript interfaces & Zod schemas
-  └── validation.ts    # Zod middleware validators
-```
-
-**Data flow:** Route → Controller → Service → Repository → Firestore
-
-Example from `src/features/course/container.ts`:
+Every feature follows a strict **Container → Repository → Service → Controller → Route** pattern:
 
 ```typescript
+// Example: features/course/container.ts
 export class CourseContainer {
-  constructor(firestore: Firestore = firebaseFirestore) {
-    this.repository = new CourseRepository(firestore);
-    this.service = new CourseService(this.repository);
-    this.controller = new CourseController(this.service);
-    this.routes = new CourseRoute(this.controller);
-  }
-  getRouter() {
-    return this.routes.getRouter();
-  }
+  public readonly repository: CourseRepository; // Firestore data layer
+  public readonly service: CourseService; // Business logic + AI calls
+  public readonly controller: CourseController; // HTTP handlers
+  public readonly routes: CourseRoute; // Route definitions + OpenAPI docs
 }
 ```
 
-## Route Registration (CRITICAL for avoiding 404s)
+**Key principle**: Containers are instantiated in [src/app.ts](src/app.ts) and passed to [AppRoutes](src/routes.ts). Dependencies flow downward through constructor injection.
 
-Routes are mounted at `/api` via this chain:
+## Adding a New Feature
 
-1. `src/app.ts`: `app.use('/api', this.appRoutes.getRouter())`
-2. `src/routes.ts`: `AppRoutes` mounts containers at specific paths
-3. `src/features/*/route.ts`: Individual route definitions
+1. Create `src/features/your-feature/` with these files (all required):
+   - `container.ts` - DI container
+   - `repository.ts` - Firestore operations
+   - `service.ts` - Business logic
+   - `controller.ts` - Request/response handlers
+   - `route.ts` - Express routes with OpenAPI JSDoc comments
+   - `types.ts` - TypeScript interfaces + Zod schemas
+   - `validation.ts` - Input validation middleware
 
-**Current route mappings in `AppRoutes`:**
+2. Register in [src/app.ts](src/app.ts) constructor:
 
-- Auth: `this.router.use('/', authContainer.getRouter())` → `/api/auth/*`
-- Courses: `this.router.use('/', courseContainer.getRouter())` → `/api/courses/*`
+   ```typescript
+   private yourFeatureContainer: YourFeatureContainer;
+   // ...
+   this.yourFeatureContainer = new YourFeatureContainer();
+   ```
 
-**Example:** Course routes define `this.router.get('/', ...)` which becomes `/api/courses` NOT `/api/courses/courses`.
-
-## OpenAPI/Swagger Documentation
-
-**Location:** All API docs generated from JSDoc comments in route files.
-
-**Required format:**
-
-```typescript
-/**
- * @openapi
- * /courses:              # Path relative to /api
- *   get:
- *     tags: [Courses]
- *     summary: Brief description
- *     description: Detailed info
- *     parameters:        # For query/path params
- *       - in: query
- *         name: level
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success response
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Course'
- */
-```
-
-**Common pitfall:** YAML colons in descriptions break parsing. Use block scalars:
-
-```yaml
-description: |
-  Multi-line description
-  Can include colons: like this
-```
-
-**Schema definitions:** Add to `src/config/swagger.ts` under `components.schemas`.
-
-**Access docs:** `http://localhost:8080/api/docs`
-
-## Firebase Integration
-
-**Config:** `src/config/firebase.ts` exports:
-
-- `firebaseAuth` - Authentication
-- `firebaseFirestore` - Database
-- `admin` - Full SDK
-
-**Repository pattern:**
-
-- Always inject Firestore instance in constructor
-- Collection names as constants: `private readonly COLLECTION_NAME = 'courses'`
-- Parse JSON fields on read: `learning_outcomes` stored as JSON string, return as array
-- Add timestamps: `createdAt`, `updatedAt` as `new Date()`
-
-Example query pattern:
-
-```typescript
-let query = this.firebaseStore.collection(this.COLLECTION_NAME);
-if (params?.level) {
-  query = query.where("level", "==", params.level) as any;
-}
-const snapshot = await query.get();
-```
-
-## AI Integration (Google Gemini)
-
-**Centralized helper:** `src/utils/geminiCall.ts` handles all Gemini API calls.
-
-**Usage pattern:**
-
-```typescript
-const result = await geminiCall(prompt, {
-  responseSchema: courseSchema, // Zod schema for structured output
-  temperature: 0.7,
-  maxRetries: 3,
-});
-```
-
-**Features:**
-
-- Automatic retry with exponential backoff
-- Structured JSON output via `responseSchema`
-- Token usage logging
-- Returns parsed JSON directly
-
-**Prompts:** Stored in `src/utils/prompts/*-temp.ts`
-
-## Error Handling
-
-**Custom errors:** `src/utils/errors.ts` defines typed errors:
-
-- `AppError(message, statusCode, code)` - Base class
-- `ValidationError(message, fields)` - 400 with field details
-- `UnauthorizedError()` - 401
-- `UserNotFoundError()` - 404
-- `ConflictError()` - 409
-
-**Middleware:** `src/middlewares/error.middleware.ts` catches all errors, logs with request ID, and formats responses.
-
-**Usage in services:**
-
-```typescript
-throw new AppError("Course not found", 404);
-```
-
-## Validation with Zod
-
-**Pattern:** Define schema in `validation.ts`, export middleware:
-
-```typescript
-export const generateCourseSchema = z.object({
-  category: z.string().min(2).max(50),
-  level: z.enum(["beginner", "intermediate", "advanced"]),
-});
-
-export const validateGenerateCourse = (req, res, next) => {
-  try {
-    generateCourseSchema.parse(req.body);
-    next();
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      throw new ValidationError(
-        error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", "),
-      );
-    }
-    next(error);
-  }
-};
-```
-
-Apply in routes: `this.router.post('/courses', validateGenerateCourse, ...)`
+3. Pass to AppRoutes in [src/routes.ts](src/routes.ts) and mount routes.
 
 ## Development Workflow
 
-**Start dev server:**
+- **Run dev server**: `bun run dev` (uses nodemon with hot reload)
+- **Run production**: `bun run src/server.ts`
+- **Lint**: `bun run eslint-check-only` or `bun run eslint-fix`
+- **API docs**: `http://localhost:8080/api/docs` (Swagger UI)
 
-```bash
-bun run dev  # Uses nodemon with tsx, watches src/**/*.ts
-```
+**Critical**: Bun is the primary runtime. Do not run `npm install` or `node` commands.
 
-**Environment:**
+## Type System & Validation
 
-- Bun runtime (not Node.js)
-- TypeScript with `moduleResolution: "bundler"`
-- No build step - tsx transpiles on the fly
+- **Path aliases** (tsconfig.json): `@features/*`, `@utils/*`, `@config/*`
+- **Zod schemas** in `types.ts` files define both TypeScript types AND AI response schemas
+- Example from [features/course/types.ts](src/features/course/types.ts):
+  ```typescript
+  export const courseSchema = {
+    type: "object",
+    properties: { name: { type: "string" } /* ... */ },
+  };
+  ```
 
-**Key files:**
+## AI Integration (Google Gemini)
 
-- `nodemon.json`: Watch config, runs `tsx ./src/server.ts`
-- `tsconfig.json`: Strict mode enabled, bundler resolution
-- `src/server.ts`: Entry point, starts app on port 8080
-
-## Logging
-
-**Logger:** `src/utils/loggers.ts` uses Pino with pretty printing.
-
-**Usage:**
+All AI calls use [utils/geminiCall.ts](src/utils/geminiCall.ts) with **Bottleneck rate limiting**:
 
 ```typescript
-import { logger } from "../../utils/loggers";
-
-logger.info("Message", { contextData });
-logger.error("Error occurred:", error);
-logger.warn("Warning:", { details });
+const result = await geminiCall(userPrompt, {
+  responseSchema: courseSchema, // Zod schema for structured output
+  temperature: 0.7,
+  maxRetries: 3,
+  systemPrompt, // Optional system instructions
+  benchmarkTag: "course:system", // For logging/monitoring
+  metadata: { topic, level }, // Additional context
+});
 ```
 
-Logs include timestamps, levels, and structured data.
+- Prompts live in `utils/prompts/` (e.g., `course-temp.ts`, `lesson-temp.ts`)
+- Current model: `gemini-3-flash-preview` (configured in geminiCall.ts)
+- **Schema validation**: AI responses MUST match the Zod schema or call fails
 
-## Adding New Features
+## Authentication & Authorization
 
-1. Create folder: `src/features/new-feature/`
-2. Implement: `types.ts` → `repository.ts` → `service.ts` → `controller.ts` → `route.ts` → `validation.ts`
-3. Create container: `container.ts` wiring all layers
-4. Register in `src/routes.ts`: Add to `AppRoutes` constructor and `initializeRoutes()`
-5. Add schemas to `src/config/swagger.ts` if needed
-6. Add OpenAPI docs to route methods
+1. **authMiddleware** ([middlewares/auth.middleware.ts](src/middlewares/auth.middleware.ts)):
+   - Verifies Firebase ID token from `Authorization: Bearer <token>` header OR cookie
+   - Attaches `req.user = { uid, email, ... }` to request
+   - Use before ALL protected routes
+
+2. **Ownership middleware** ([middlewares/ownership.middle.ts](src/middlewares/ownership.middle.ts)):
+   - Example: `courseOwnershipMiddleware` checks `courseData.uid === req.user.uid`
+   - Apply AFTER authMiddleware for user-specific resources
+
+## Error Handling
+
+- Use custom errors from [utils/errors.ts](src/utils/errors.ts):
+  ```typescript
+  throw new AppError("Course not found", 404);
+  throw new ValidationError("Invalid input", { field: "message" });
+  throw new ForbiddenError("Access denied");
+  ```
+- Global error handler in [middlewares/error.middleware.ts](src/middlewares/error.middleware.ts) catches all
+- Always log with [utils/loggers.ts](src/utils/loggers.ts) (Pino logger)
+
+## Firestore Data Access
+
+- Firebase initialized in [config/firebase.ts](src/config/firebase.ts)
+- Repositories access `firebaseFirestore.collection("courses").doc(id).get()`
+- **Pattern**: Repositories return domain objects, not Firestore documents
+- Query batching: For `in` queries, batch in chunks of 10 (Firestore limit)
+
+## Real-time Features (Socket.IO)
+
+- Initialized in [config/socket.ts](src/config/socket.ts)
+- Auth middleware: [middlewares/socket.middleware.ts](src/middlewares/socket.middleware.ts)
+- Handlers in `utils/socket/socket.handlers.ts`
+- Typed events defined in `utils/socket/socket.types.ts`
+
+## Environment & Configuration
+
+- [config/environment.ts](src/config/environment.ts) exports validated `config` object
+- [config/validation.ts](src/config/validation.ts) validates ALL required env vars at startup
+- **Never access `process.env` directly** - use `config.*` instead
+- Required vars: GEMINI*API_KEY, FIREBASE*\*, JWT_SECRET, NEXTJS_FRONTEND_URL
+
+## Code Style & Conventions
+
+- **No unused imports**: ESLint enforces strict rules
+- **Bind controller methods**: `this.controller.getCourses.bind(this.controller)` in routes
+- **OpenAPI docs**: Every route MUST have JSDoc `@openapi` comment (see [features/course/route.ts](src/features/course/route.ts))
+- **Path imports**: Use TypeScript path aliases (`@features/auth/types`) not relative paths
+- **Async/await**: Preferred over promises. Always handle errors with try/catch in services
 
 ## Common Patterns
 
-**Controller method structure:**
+**Route definition with middleware chain**:
 
 ```typescript
-async method(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const data = await this.service.method(req.params.id);
-    res.status(200).json({ data });
-  } catch (error) {
-    logger.error('Error in Controller.method:', error);
-    next(error);  // Pass to error middleware
-  }
-}
+this.router.post(
+  "/course",
+  authMiddleware, // Authentication
+  validateGenerateCourse, // Input validation
+  validateCourseTopic, // Business validation
+  checkDuplicateCourse, // Duplicate check
+  this.controller.createCourse.bind(this.controller),
+);
 ```
 
-**Binding in routes:** Always bind controller methods:
+**Service with AI generation**:
 
 ```typescript
-this.router.get("/path", this.controller.method.bind(this.controller));
-```
-
-**Response format:** Return objects with metadata:
-
-```typescript
-res.status(200).send({
-  results: data,
-  count: total,
-  next: hasNext ? offset + limit : null,
-  previous: hasPrev ? offset - limit : null,
+const { userPrompt, systemPrompt } = buildCoursePrompt(params, "system");
+const result = await geminiCall(userPrompt, {
+  responseSchema: courseSchema,
+  temperature: 0.7,
+  maxRetries: 3,
+  systemPrompt,
+  benchmarkTag: "course:system",
 });
 ```
+
+## Testing & Deployment
+
+- Dockerized: See [Dockerfile](Dockerfile) and [podman-compose.yml](podman-compose.yml)
+- Deployment docs: [DEPLOYMENT.md](DEPLOYMENT.md), [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)
+- Health check: Available via configured routes

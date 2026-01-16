@@ -223,7 +223,6 @@ export class LessonRepository {
 
   async getCourseForLesson(chapterId: string): Promise<any | null> {
     try {
-      // First get the chapter to find the courseId
       const chapter = await this.getChapterForLesson(chapterId);
       if (!chapter) {
         return null;

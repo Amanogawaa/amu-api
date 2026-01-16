@@ -96,7 +96,9 @@ export class SocketHandlers {
   }
 
   private handleAssistantEvents(socket: AuthenticatedSocket): void {
-    const { lessonAssistantContainer } = require("../../features/lesson-assistant/container");
+    const {
+      lessonAssistantContainer,
+    } = require("../../features/lesson-assistant/container");
 
     socket.on("chat:join", (data: { lessonId: string }) => {
       socket.join(`lesson-chat:${data.lessonId}`);

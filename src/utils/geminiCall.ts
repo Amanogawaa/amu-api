@@ -15,7 +15,6 @@ interface GeminiConfig {
   onChunk?: (chunk: string) => void | Promise<void>;
 }
 
-// Counter for unique job IDs
 let jobCounter = 0;
 
 const geminiLimiter = new Bottleneck({
@@ -106,9 +105,13 @@ const makeGeminiCall = async (
       temperature:
         config.temperature || RATE_LIMIT_CONFIG.GEMINI.DEFAULT_TEMPERATURE,
       responseMimeType:
-        config.stream || !config.responseSchema ? "text/plain" : "application/json",
+        config.stream || !config.responseSchema
+          ? "text/plain"
+          : "application/json",
       responseSchema:
-        config.stream || !config.responseSchema ? undefined : config.responseSchema,
+        config.stream || !config.responseSchema
+          ? undefined
+          : config.responseSchema,
     },
     contents,
   };
@@ -122,7 +125,6 @@ const makeGeminiCall = async (
 
   const start = Date.now();
 
-  // Handle streaming
   if (config.stream && config.onChunk) {
     const stream = await ai.models.generateContentStream(requestPayload);
     let fullResponse = "";
@@ -146,7 +148,6 @@ const makeGeminiCall = async (
     return fullResponse;
   }
 
-  // Handle non-streaming (existing logic)
   const response = await ai.models.generateContent(requestPayload);
   const durationMs = Date.now() - start;
 
@@ -155,7 +156,6 @@ const makeGeminiCall = async (
     throw new Error("Empty response from Gemini");
   }
 
-  // If no schema provided, return plain text
   if (!config.responseSchema) {
     logger.info("Gemini API success (plain text)", {
       promptTokens: response.usageMetadata?.promptTokenCount,
@@ -169,7 +169,6 @@ const makeGeminiCall = async (
     return text;
   }
 
-  // Parse JSON for schema-based responses
   let parsed;
   try {
     parsed = JSON.parse(text);

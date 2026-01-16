@@ -1,37 +1,31 @@
 import { LessonAssistantRepository } from "./repository";
 import { LessonAssistantService } from "./service";
 import { LessonAssistantController } from "./controller";
+import { LessonAssistantRoute } from "./route";
 import { ContextBuilder } from "./context-builder";
 import { LessonRepository } from "../lesson/repository";
-
-// Initialize repositories
-const lessonRepository = new LessonRepository();
-const assistantRepository = new LessonAssistantRepository();
-
-// Initialize context builder
-const contextBuilder = new ContextBuilder(lessonRepository);
-
-// Initialize service
-const assistantService = new LessonAssistantService(
-  assistantRepository,
-  contextBuilder,
-);
-
-// Initialize controller
-const assistantController = new LessonAssistantController(assistantService);
-
-export const lessonAssistantContainer = {
-  repository: assistantRepository,
-  contextBuilder,
-  service: assistantService,
-  controller: assistantController,
-};
 
 export class LessonAssistantContainer {
   public readonly repository: LessonAssistantRepository;
   public readonly contextBuilder: ContextBuilder;
   public readonly service: LessonAssistantService;
   public readonly controller: LessonAssistantController;
+  public readonly routes: LessonAssistantRoute;
 
-  constructor() {}
+  constructor(lessonRepository?: LessonRepository) {
+    const lessonRepo = lessonRepository || new LessonRepository();
+
+    this.repository = new LessonAssistantRepository();
+    this.contextBuilder = new ContextBuilder(lessonRepo);
+    this.service = new LessonAssistantService(
+      this.repository,
+      this.contextBuilder,
+    );
+    this.controller = new LessonAssistantController(this.service);
+    this.routes = new LessonAssistantRoute(this.controller);
+  }
+
+  getRouter() {
+    return this.routes.getRouter();
+  }
 }

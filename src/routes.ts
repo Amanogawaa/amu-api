@@ -13,7 +13,7 @@ import socketTestRoutes from "./features/socket/route";
 import type { UserContainer } from "./features/user/container";
 import type { CapstoneContainer } from "./features/capstone/container";
 import type { GitHubContainer } from "./features/github/container";
-import lessonAssistantRoutes from "./features/lesson-assistant/route";
+import type { LessonAssistantContainer } from "./features/lesson-assistant/container";
 
 export class AppRoutes {
   private router: Router;
@@ -30,6 +30,7 @@ export class AppRoutes {
   private codePlaygroundContainer: CodePlaygroundContainer;
   private capstoneContainer: CapstoneContainer;
   private githubContainer: GitHubContainer;
+  private lessonAssistantContainer: LessonAssistantContainer;
 
   constructor(
     authContainer: AuthContainer,
@@ -45,6 +46,7 @@ export class AppRoutes {
     codePlaygroundContainer: CodePlaygroundContainer,
     capstoneContainer: CapstoneContainer,
     githubContainer: GitHubContainer,
+    lessonAssistantContainer: LessonAssistantContainer,
   ) {
     this.router = Router();
     this.authContainer = authContainer;
@@ -60,6 +62,7 @@ export class AppRoutes {
     this.codePlaygroundContainer = codePlaygroundContainer;
     this.capstoneContainer = capstoneContainer;
     this.githubContainer = githubContainer;
+    this.lessonAssistantContainer = lessonAssistantContainer;
     this.initializeRoutes();
   }
 
@@ -87,7 +90,7 @@ export class AppRoutes {
     this.router.use("/", this.codePlaygroundContainer.getRouter());
     this.router.use("/capstone", this.capstoneContainer.getRouter());
     this.router.use("/github", this.githubContainer.getRouter());
-    this.router.use("/assistant", lessonAssistantRoutes);
+    this.router.use("/assistant", this.lessonAssistantContainer.getRouter());
   }
 
   public getRouter(): Router {

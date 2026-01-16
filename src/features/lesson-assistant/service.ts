@@ -115,17 +115,14 @@ export class LessonAssistantService {
         throw new ValidationError("Unauthorized access to chat");
       }
 
-      // Build context
       const context = await this.contextBuilder.buildLessonContext(
         chat.lessonId,
       );
 
-      // Get conversation history
       const previousMessages = await this.repository.getMessages(chatId, 10);
       const conversationHistory =
         this.buildConversationHistory(previousMessages);
 
-      // Save user message
       const userMessage = await this.repository.saveMessage({
         chatId,
         lessonId: chat.lessonId,
@@ -135,17 +132,14 @@ export class LessonAssistantService {
         createdAt: new Date(),
       });
 
-      // Build system prompt
       const systemPrompt = buildAssistantSystemPrompt(context);
 
-      // Prepare user prompt with conversation history
       const userPrompt = conversationHistory
         ? `${conversationHistory}\n\nUser: ${question}`
         : question;
 
       const startTime = Date.now();
 
-      // Call Gemini (non-streaming for REST API)
       const response = await geminiCall(userPrompt, {
         stream: false,
         systemPrompt,
@@ -159,11 +153,9 @@ export class LessonAssistantService {
 
       const processingTime = Date.now() - startTime;
 
-      // The response is plain text when not using schema
       const assistantContent =
         typeof response === "string" ? response : JSON.stringify(response);
 
-      // Save assistant message
       const assistantMessage = await this.repository.saveMessage({
         chatId,
         lessonId: chat.lessonId,
@@ -208,17 +200,14 @@ export class LessonAssistantService {
         throw new ValidationError("Unauthorized access to chat");
       }
 
-      // Build context
       const context = await this.contextBuilder.buildLessonContext(
         chat.lessonId,
       );
 
-      // Get conversation history
       const previousMessages = await this.repository.getMessages(chatId, 10);
       const conversationHistory =
         this.buildConversationHistory(previousMessages);
 
-      // Save user message
       await this.repository.saveMessage({
         chatId,
         lessonId: chat.lessonId,
@@ -228,17 +217,14 @@ export class LessonAssistantService {
         createdAt: new Date(),
       });
 
-      // Build system prompt
       const systemPrompt = buildAssistantSystemPrompt(context);
 
-      // Prepare user prompt with conversation history
       const userPrompt = conversationHistory
         ? `${conversationHistory}\n\nUser: ${question}`
         : question;
 
       const startTime = Date.now();
 
-      // Call Gemini with streaming
       const fullResponse = await geminiCall(userPrompt, {
         stream: true,
         systemPrompt,
@@ -253,7 +239,6 @@ export class LessonAssistantService {
 
       const processingTime = Date.now() - startTime;
 
-      // Save assistant message
       const assistantMessage = await this.repository.saveMessage({
         chatId,
         lessonId: chat.lessonId,

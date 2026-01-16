@@ -1,9 +1,5 @@
 import { db } from "../../config/firebase";
-import type {
-  ChatMessage,
-  CreateChatData,
-  LessonChat,
-} from "./types";
+import type { ChatMessage, CreateChatData, LessonChat } from "./types";
 import { logger } from "../../utils/loggers";
 
 export class LessonAssistantRepository {

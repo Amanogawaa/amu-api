@@ -10,7 +10,7 @@ export class ContextBuilder {
     string,
     { context: LessonContext; timestamp: number }
   >;
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_TTL = 5 * 60 * 1000;
 
   constructor(lessonRepository: LessonRepository) {
     this.lessonRepository = lessonRepository;
@@ -19,7 +19,6 @@ export class ContextBuilder {
 
   async buildLessonContext(lessonId: string): Promise<LessonContext> {
     try {
-      // Check cache first
       const cached = this.contextCache.get(lessonId);
       if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
         logger.info("Context cache hit", { lessonId });
@@ -28,13 +27,11 @@ export class ContextBuilder {
 
       logger.info("Building lesson context", { lessonId });
 
-      // Fetch lesson data
       const lesson = await this.lessonRepository.getLesson(lessonId);
       if (!lesson) {
         throw new NotFoundError("Lesson not found");
       }
 
-      // Fetch chapter data
       const chapter = await this.lessonRepository.getChapterForLesson(
         lesson.chapterId,
       );
@@ -42,7 +39,6 @@ export class ContextBuilder {
         throw new NotFoundError("Chapter not found");
       }
 
-      // Fetch course data
       const course = await this.lessonRepository.getCourseForLesson(
         lesson.chapterId,
       );
@@ -50,7 +46,6 @@ export class ContextBuilder {
         throw new NotFoundError("Course not found");
       }
 
-      // Build context
       const context: LessonContext = {
         lesson: {
           id: lesson.id,

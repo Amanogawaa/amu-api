@@ -28,6 +28,7 @@ import { EnrollmentContainer } from "./features/enrollment/container";
 import { CodePlaygroundContainer } from "./features/code-playground/container";
 import { CapstoneContainer } from "./features/capstone/container";
 import { GitHubContainer } from "./features/github/container";
+import { LessonAssistantContainer } from "./features/lesson-assistant/container";
 import { config } from "./config/environment";
 
 class App {
@@ -50,6 +51,7 @@ class App {
   private codePlaygroundContainer: CodePlaygroundContainer;
   private capstoneContainer: CapstoneContainer;
   private githubContainer: GitHubContainer;
+  private lessonAssistantContainer: LessonAssistantContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
@@ -88,7 +90,6 @@ class App {
         this.lessonContainer.service,
       );
 
-    // Initialize capstone container with all required repositories
     this.capstoneContainer = new CapstoneContainer(
       undefined,
       this.courseContainer.repository,
@@ -98,8 +99,10 @@ class App {
 
     this.githubContainer = new GitHubContainer();
 
-    // Initialize progress container with quiz and lesson services
-    // Must be after lessonContainer is initialized
+    this.lessonAssistantContainer = new LessonAssistantContainer(
+      this.lessonContainer.repository,
+    );
+
     this.progressContainer =
       progressContainer ||
       new ProgressContainer(
@@ -177,6 +180,7 @@ class App {
       this.codePlaygroundContainer,
       this.capstoneContainer,
       this.githubContainer,
+      this.lessonAssistantContainer,
     );
 
     this.app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
