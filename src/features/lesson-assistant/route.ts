@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router } from "express";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import type { LessonAssistantController } from "./controller";
 import { askQuestionSchema, chatQuerySchema } from "./validation";
 
-// Validation middleware wrapper
 const validate = (schema: any, source: "body" | "query" = "body") => {
   return (req: any, res: any, next: any) => {
     const data = source === "query" ? req.query : req.body;

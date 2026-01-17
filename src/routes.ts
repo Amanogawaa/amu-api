@@ -90,7 +90,7 @@ export class AppRoutes {
     this.router.use("/", this.codePlaygroundContainer.getRouter());
     this.router.use("/capstone", this.capstoneContainer.getRouter());
     this.router.use("/github", this.githubContainer.getRouter());
-    this.router.use("/assistant", this.lessonAssistantContainer.getRouter());
+    this.router.use("/", this.lessonAssistantContainer.getRouter());
   }
 
   public getRouter(): Router {
