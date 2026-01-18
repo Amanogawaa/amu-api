@@ -86,6 +86,8 @@ export class ContextBuilder {
         hasTranscript: !!context.videoTranscript,
       });
 
+      console.log(lessonId, context);
+
       return context;
     } catch (error) {
       logger.error("Error building lesson context:", error);

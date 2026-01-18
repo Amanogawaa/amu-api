@@ -145,6 +145,44 @@ export class LessonAssistantRoute {
 
     /**
      * @openapi
+     * /assistant/chat/{chatId}/ask/stream:
+     *   post:
+     *     tags:
+     *       - Lesson Assistant
+     *     summary: Ask a question with streaming response
+     *     description: Send a question and receive answer via Server-Sent Events (SSE)
+     *     parameters:
+     *       - in: path
+     *         name: chatId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Chat session ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               question:
+     *                 type: string
+     *                 description: The question to ask
+     *     responses:
+     *       200:
+     *         description: Streaming response (text/event-stream)
+     *       401:
+     *         description: Unauthorized
+     */
+    this.router.post(
+      "/chat/:chatId/ask/stream",
+      authMiddleware,
+      validate(askQuestionSchema),
+      this.controller.askQuestionStream.bind(this.controller),
+    );
+
+    /**
+     * @openapi
      * /assistant/chat/{chatId}:
      *   delete:
      *     tags:
