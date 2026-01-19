@@ -14,6 +14,7 @@ import type { UserContainer } from "./features/user/container";
 import type { CapstoneContainer } from "./features/capstone/container";
 import type { GitHubContainer } from "./features/github/container";
 import type { LessonAssistantContainer } from "./features/lesson-assistant/container";
+import type { RecommendationContainer } from "./features/recommendation/container";
 
 export class AppRoutes {
   private router: Router;
@@ -31,6 +32,7 @@ export class AppRoutes {
   private capstoneContainer: CapstoneContainer;
   private githubContainer: GitHubContainer;
   private lessonAssistantContainer: LessonAssistantContainer;
+  private recommendationContainer: RecommendationContainer;
 
   constructor(
     authContainer: AuthContainer,
@@ -47,6 +49,7 @@ export class AppRoutes {
     capstoneContainer: CapstoneContainer,
     githubContainer: GitHubContainer,
     lessonAssistantContainer: LessonAssistantContainer,
+    recommendationContainer: RecommendationContainer,
   ) {
     this.router = Router();
     this.authContainer = authContainer;
@@ -63,6 +66,7 @@ export class AppRoutes {
     this.capstoneContainer = capstoneContainer;
     this.githubContainer = githubContainer;
     this.lessonAssistantContainer = lessonAssistantContainer;
+    this.recommendationContainer = recommendationContainer;
     this.initializeRoutes();
   }
 
@@ -88,9 +92,10 @@ export class AppRoutes {
     this.router.use("/", this.quizContainer.getRouter());
     this.router.use("/", this.enrollmentContainer.route.getRouter());
     this.router.use("/", this.codePlaygroundContainer.getRouter());
-    this.router.use("/capstone", this.capstoneContainer.getRouter());
-    this.router.use("/github", this.githubContainer.getRouter());
+    this.router.use("/", this.capstoneContainer.getRouter());
+    this.router.use("/", this.githubContainer.getRouter());
     this.router.use("/", this.lessonAssistantContainer.getRouter());
+    this.router.use("/", this.recommendationContainer.getRouter());
   }
 
   public getRouter(): Router {

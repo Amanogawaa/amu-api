@@ -1,6 +1,5 @@
 new features to implement: 
-    ☐ implement ai chatbot with context-based knowledge - ai agent that can answer questions related to the generated lesson 
-    ☐ Leaderboards with context: By skill level, by topic, by learning style (optional?)
+    ✔ implement ai chatbot with context-based knowledge - ai agent that can answer questions related to the generated lesson @done(26-01-18 22:32)
     ☐ Achievement trees: Not just badges, but skill trees showing progression
     ☐ Progress visualization: Beautiful skill trees and learning maps
     ☐ 5-minute challenges: Quick daily practice
@@ -28,6 +27,4 @@ note:
 duration concerns:
     ☐ rechecking of system and user prompt for lesson is needed - make sure the ai understands the duration and adjust the number of lessons accordingly
     ☐ recheck the chapter template for lesson generation - remove ung constraints and make it flexible
-    ☐ frontend refactor for removing module feature - course -> chapter -> lesson only (pending)
-
-generationprogressdisplay
+    ✔ frontend refactor for removing module feature - course -> chapter -> lesson only (pending) @done(26-01-18 22:32)
