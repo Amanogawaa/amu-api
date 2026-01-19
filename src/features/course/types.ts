@@ -29,6 +29,9 @@ export interface Course {
   enrollmentCount?: number;
   isEnrolled?: boolean;
 
+  tags?: string[];
+  nextCourses?: string[];
+
   createdAt?: Date;
   updatedAt?: Date;
 }

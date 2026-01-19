@@ -2,12 +2,15 @@
 import type { Server as SocketIOServer } from "socket.io";
 import { logger } from "../loggers";
 import type { AuthenticatedSocket } from "../../middlewares/socket.middleware";
+import { LessonAssistantContainer } from "../../features/lesson-assistant/container";
 
 export class SocketHandlers {
   public io: SocketIOServer;
+  private lessonAssistantContainer: LessonAssistantContainer;
 
   constructor(io: SocketIOServer) {
     this.io = io;
+    this.lessonAssistantContainer = new LessonAssistantContainer();
   }
 
   public registerHandlers(): void {
@@ -96,10 +99,6 @@ export class SocketHandlers {
   }
 
   private handleAssistantEvents(socket: AuthenticatedSocket): void {
-    const {
-      lessonAssistantContainer,
-    } = require("../../features/lesson-assistant/container");
-
     socket.on("chat:join", (data: { lessonId: string }) => {
       socket.join(`lesson-chat:${data.lessonId}`);
       logger.info(`User ${socket.userId} joined lesson chat ${data.lessonId}`);
@@ -131,7 +130,7 @@ export class SocketHandlers {
           let sessionChatId = chatId;
           if (!sessionChatId) {
             const chat =
-              await lessonAssistantContainer.service.createOrGetChatSession(
+              await this.lessonAssistantContainer.service.createOrGetChatSession(
                 lessonId,
                 socket.userId,
               );
@@ -140,7 +139,7 @@ export class SocketHandlers {
 
           // Stream the response
           const assistantMessage =
-            await lessonAssistantContainer.service.streamResponse(
+            await this.lessonAssistantContainer.service.streamResponse(
               sessionChatId,
               question,
               socket.userId,

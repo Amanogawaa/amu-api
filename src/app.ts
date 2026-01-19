@@ -29,6 +29,7 @@ import { CodePlaygroundContainer } from "./features/code-playground/container";
 import { CapstoneContainer } from "./features/capstone/container";
 import { GitHubContainer } from "./features/github/container";
 import { LessonAssistantContainer } from "./features/lesson-assistant/container";
+import { RecommendationContainer } from "./features/recommendation/container";
 import { config } from "./config/environment";
 
 class App {
@@ -52,6 +53,7 @@ class App {
   private capstoneContainer: CapstoneContainer;
   private githubContainer: GitHubContainer;
   private lessonAssistantContainer: LessonAssistantContainer;
+  private recommendationContainer: RecommendationContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
@@ -102,6 +104,8 @@ class App {
     this.lessonAssistantContainer = new LessonAssistantContainer(
       this.lessonContainer.repository,
     );
+
+    this.recommendationContainer = new RecommendationContainer();
 
     this.progressContainer =
       progressContainer ||
@@ -181,6 +185,7 @@ class App {
       this.capstoneContainer,
       this.githubContainer,
       this.lessonAssistantContainer,
+      this.recommendationContainer,
     );
 
     this.app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
