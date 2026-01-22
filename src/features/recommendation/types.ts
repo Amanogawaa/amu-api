@@ -25,6 +25,8 @@ export interface RecommendationWithCourse extends Recommendation {
   };
 }
 
+// export interface LikedBasedRecommendations extends Recommendation {}
+
 export interface RecommendationCache {
   id?: string;
   uid: string;
@@ -49,19 +51,46 @@ export interface LearningContinuityParams {
   limit?: number;
 }
 
+export interface LikedBasedParams {
+  userId: string;
+  limit?: number;
+}
+
 export interface ScoringFactors {
   isNextInSequence: boolean;
-  difficultyProgression: number; // 0-1 score
-  topicSimilarity: number; // 0-1 score
-  tagOverlap: number; // 0-1 score
+  difficultyProgression: number;
+  topicSimilarity: number;
+  tagOverlap: number;
   enrollmentCount: number;
   likesCount: number;
 }
 
 export interface ScoringWeights {
-  sequentialProgression: number; // default 0.5
-  topicSimilarity: number; // default 0.3
-  popularity: number; // default 0.2
+  sequentialProgression: number;
+  topicSimilarity: number;
+  popularity: number;
+}
+
+export interface UserLikeProfile {
+  categoryDistribution: Map<string, number>;
+  topCategories: string[];
+  topicKeywords: Map<string, number>;
+  dominantTopics: string[];
+  tagFrequency: Map<string, number>;
+  preferredTags: string[];
+  levelDistribution: Map<string, number>;
+  preferredLevel: string;
+  averageEnrollmentPreference: number;
+  totalLikes: number;
+  recentLikes: string[];
+}
+
+export interface LikedBasedScoringFactors {
+  categoryAffinity: number;
+  topicClustering: number;
+  tagAffinity: number;
+  levelPreference: number;
+  popularityBoost: number;
 }
 
 export const recommendationCacheSchema = {
