@@ -115,6 +115,98 @@ export class RecommendationRoute {
 
     /**
      * @openapi
+     * /api/recommendations/liked-based:
+     *   get:
+     *     summary: Get personalized recommendations based on liked courses
+     *     description: Returns course recommendations based on user's like history and preferences
+     *     tags:
+     *       - Recommendations
+     *     security:
+     *       - BearerAuth: []
+     *     parameters:
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           maximum: 50
+     *           default: 10
+     *         description: Maximum number of recommendations to return
+     *     responses:
+     *       200:
+     *         description: Successfully retrieved recommendations
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 recommendations:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       courseId:
+     *                         type: string
+     *                       course:
+     *                         type: object
+     *                         properties:
+     *                           name:
+     *                             type: string
+     *                           topic:
+     *                             type: string
+     *                           level:
+     *                             type: string
+     *                           description:
+     *                             type: string
+     *                           category:
+     *                             type: string
+     *                           authorId:
+     *                             type: string
+     *                           enrollmentCount:
+     *                             type: integer
+     *                           likesCount:
+     *                             type: integer
+     *                       score:
+     *                         type: number
+     *                         description: Relevance score (0-1)
+     *                       reason:
+     *                         type: string
+     *                         description: Explanation for recommendation
+     *                       metadata:
+     *                         type: object
+     *                         properties:
+     *                           categoryAffinity:
+     *                             type: number
+     *                           topicClustering:
+     *                             type: number
+     *                           tagAffinity:
+     *                             type: number
+     *                           levelMatch:
+     *                             type: boolean
+     *                 type:
+     *                   type: string
+     *                   enum: [liked-based]
+     *                 generatedAt:
+     *                   type: string
+     *                   format: date-time
+     *                 fromCache:
+     *                   type: boolean
+     *       401:
+     *         description: Unauthorized - Invalid or missing authentication token
+     *       400:
+     *         description: Insufficient liked courses (minimum 3 required)
+     *       500:
+     *         description: Internal server error
+     */
+    this.router.get(
+      "/liked-based",
+      authMiddleware,
+      validateLimitParam,
+      this.controller.getLikedBasedRecommendations.bind(this.controller),
+    );
+
+    /**
+     * @openapi
      * /api/recommendations/refresh:
      *   post:
      *     summary: Force refresh user's recommendation cache

@@ -14,12 +14,16 @@ import {
   isDuplicateCourse,
 } from "@utils/helper/similarity.helpers";
 
-async function validateContentAndTopic(input: string): Promise<{
+interface ValidationResult {
   isValid: boolean;
   isProgramming: boolean;
   isAppropriate: boolean;
   reason?: string;
-}> {
+}
+
+async function validateContentAndTopic(
+  input: string,
+): Promise<ValidationResult> {
   const prompt = `
 You are a content validator for an educational programming course platform.
 
@@ -54,13 +58,13 @@ Now validate:
 "${input}"
 `;
   try {
-    const result = await geminiCall(prompt, {});
+    const result = await geminiCall(prompt, { stream: false });
 
     const isProgramming = result.isProgramming === true;
     const isAppropriate = result.isAppropriate === true;
     const isValid = isProgramming && isAppropriate;
 
-    console.log("Content validation JSON:", result);
+    logger.log("Content validation JSON:", result);
 
     return {
       isValid,

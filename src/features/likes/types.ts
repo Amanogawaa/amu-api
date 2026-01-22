@@ -1,5 +1,5 @@
 export interface Like {
-  id: string; // composite: courseId_userId
+  id: string;
   courseId: string;
   userId: string;
   createdAt: Date;

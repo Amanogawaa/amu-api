@@ -6,16 +6,21 @@ import { AppError } from "../../utils/errors";
 import { RecommendationRepository } from "./repository";
 import type {
   LearningContinuityParams,
+  LikedBasedParams,
   Recommendation,
   RecommendationWithCourse,
   ScoringFactors,
   ScoringWeights,
+  UserLikeProfile,
+  LikedBasedScoringFactors,
 } from "./types";
+import type { LikesRepository } from "@features/likes/repository";
 
 export class RecommendationService {
   private recommendationRepo: RecommendationRepository;
   private courseRepo: CourseRepository;
   private progressRepo: ProgressRepository;
+  private likedRepo: LikesRepository;
 
   private defaultWeights: ScoringWeights = {
     sequentialProgression: 0.5,
@@ -27,10 +32,12 @@ export class RecommendationService {
     recommendationRepo: RecommendationRepository,
     courseRepo: CourseRepository,
     progressRepo: ProgressRepository,
+    likedRepo: LikesRepository,
   ) {
     this.recommendationRepo = recommendationRepo;
     this.courseRepo = courseRepo;
     this.progressRepo = progressRepo;
+    this.likedRepo = likedRepo;
   }
 
   async getLearningContinuityRecommendations(
@@ -127,6 +134,354 @@ export class RecommendationService {
       );
       throw error;
     }
+  }
+
+  async getLikedCoursesRecommendations(params: LikedBasedParams): Promise<{
+    recommendations: RecommendationWithCourse[];
+    fromCache: boolean;
+  }> {
+    const { userId, limit = 10 } = params;
+    try {
+      const cached = await this.getCachedRecommendations(userId, "liked-based");
+      if (cached) {
+        logger.info("Returning cached liked-based recommendations", {
+          userId,
+          count: cached.length,
+        });
+        return { recommendations: cached, fromCache: true };
+      }
+
+      const likes = await this.likedRepo.getLikesByUser(userId);
+      logger.info("User likes fetched", {
+        userId,
+        likeCount: likes.length,
+      });
+
+      if (likes.length < 3) {
+        logger.info("Insufficient likes for personalized recommendations", {
+          userId,
+          likeCount: likes.length,
+        });
+        return { recommendations: [], fromCache: false };
+      }
+
+      const likedCourses = await Promise.all(
+        likes.map((like) => this.courseRepo.getCourseById(like.courseId)),
+      );
+
+      const validLikedCourses = likedCourses.filter((course) => course != null);
+
+      logger.info("Liked courses fetched", {
+        userId,
+        likedCourseCount: validLikedCourses.length,
+      });
+
+      const userProfile = this.buildUserLikeProfile(
+        validLikedCourses,
+        likes.map((like) => like.courseId),
+      );
+
+      const allCourses = await this.courseRepo.getCourse({ publish: true });
+
+      const likedCourseIds = new Set(likes.map((like) => like.courseId));
+      const candidates = allCourses.filter(
+        (course) => !likedCourseIds.has(course.id),
+      );
+
+      const scoredRecommendations = candidates
+        .map((course) => {
+          const factors = this.calculateLikedBasedScoringFactors(
+            course,
+            userProfile,
+          );
+          const score = this.calculateLikedBasedScore(factors);
+          const reason = this.generateLikedBasedReason(course, userProfile);
+
+          return {
+            courseId: course.id,
+            score,
+            reason,
+            metadata: {
+              categoryAffinity: factors.categoryAffinity,
+              topicClustering: factors.topicClustering,
+              tagAffinity: factors.tagAffinity,
+              levelMatch: course.level === userProfile.preferredLevel,
+            },
+          } as Recommendation;
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+
+      const diversifiedResults = this.applyDiversityFilter(
+        scoredRecommendations,
+        allCourses,
+        limit,
+      );
+
+      await this.setCachedRecommendations(
+        userId,
+        "liked-based",
+        diversifiedResults,
+        12,
+      );
+
+      const enrichedRecommendations =
+        await this.enrichRecommendations(diversifiedResults);
+
+      logger.info("Generated liked-based recommendations", {
+        userId,
+        count: enrichedRecommendations.length,
+      });
+
+      return { recommendations: enrichedRecommendations, fromCache: false };
+    } catch (error) {
+      logger.error("Error generating liked-based recommendations:", error);
+      throw error;
+    }
+  }
+
+  private buildUserLikeProfile(
+    courses: Course[],
+    recentLikes: string[],
+  ): UserLikeProfile {
+    const categoryMap = new Map<string, number>();
+    const topicWords = new Map<string, number>();
+    const tagMap = new Map<string, number>();
+    const levelMap = new Map<string, number>();
+    const topics: string[] = [];
+    let totalEnrollment = 0;
+
+    courses.forEach((course) => {
+      categoryMap.set(
+        course.category,
+        (categoryMap.get(course.category) || 0) + 1,
+      );
+
+      topics.push(course.topic);
+      const words = this.tokenize(course.topic);
+      words.forEach((word) => {
+        topicWords.set(word, (topicWords.get(word) || 0) + 1);
+      });
+
+      course.tags?.forEach((tag) => {
+        tagMap.set(tag.toLowerCase(), (tagMap.get(tag.toLowerCase()) || 0) + 1);
+      });
+
+      levelMap.set(course.level, (levelMap.get(course.level) || 0) + 1);
+
+      totalEnrollment += course.enrollmentCount || 0;
+    });
+
+    const categoryDistribution = new Map<string, number>();
+    categoryMap.forEach((count, category) => {
+      categoryDistribution.set(category, count / courses.length);
+    });
+
+    const topCategories = Array.from(categoryMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([category]) => category);
+
+    const topicFrequency = new Map<string, number>();
+    topics.forEach((topic) => {
+      topicFrequency.set(topic, (topicFrequency.get(topic) || 0) + 1);
+    });
+    const dominantTopics = Array.from(topicFrequency.entries())
+      .filter(([_, count]) => count > 1)
+      .map(([topic]) => topic);
+
+    const preferredTags = Array.from(tagMap.entries())
+      .filter(([_, count]) => count >= 2)
+      .map(([tag]) => tag);
+
+    const levelDistribution = new Map<string, number>();
+    levelMap.forEach((count, level) => {
+      levelDistribution.set(level, count / courses.length);
+    });
+
+    const preferredLevel =
+      Array.from(levelMap.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+      "beginner";
+
+    return {
+      categoryDistribution,
+      topCategories,
+      topicKeywords: topicWords,
+      dominantTopics,
+      tagFrequency: tagMap,
+      preferredTags,
+      levelDistribution,
+      preferredLevel,
+      averageEnrollmentPreference:
+        courses.length > 0 ? totalEnrollment / courses.length : 0,
+      totalLikes: courses.length,
+      recentLikes: recentLikes.slice(-5),
+    };
+  }
+
+  private calculateLikedBasedScoringFactors(
+    course: Course,
+    profile: UserLikeProfile,
+  ): LikedBasedScoringFactors {
+    let categoryAffinity =
+      profile.categoryDistribution.get(course.category) || 0;
+    if (profile.topCategories.includes(course.category)) {
+      categoryAffinity = Math.min(categoryAffinity * 1.2, 1.0);
+    }
+
+    const candidateWords = this.tokenize(course.topic);
+    let matchScore = 0;
+    const totalKeywordWeight = Array.from(
+      profile.topicKeywords.values(),
+    ).reduce((sum, val) => sum + val, 0);
+
+    candidateWords.forEach((word) => {
+      if (profile.topicKeywords.has(word)) {
+        matchScore += profile.topicKeywords.get(word) || 0;
+      }
+    });
+
+    let topicClustering =
+      totalKeywordWeight > 0 ? matchScore / totalKeywordWeight : 0;
+
+    if (profile.dominantTopics.includes(course.topic)) {
+      topicClustering = Math.max(topicClustering, 0.8);
+    }
+
+    let tagAffinity = 0;
+    if (
+      course.tags &&
+      course.tags.length > 0 &&
+      profile.preferredTags.length > 0
+    ) {
+      const courseTags = new Set(course.tags.map((t) => t.toLowerCase()));
+      const preferredTagsSet = new Set(profile.preferredTags);
+
+      let weightedIntersection = 0;
+      courseTags.forEach((tag) => {
+        if (preferredTagsSet.has(tag)) {
+          const weight =
+            (profile.tagFrequency.get(tag) || 0) / profile.totalLikes;
+          weightedIntersection += weight;
+        }
+      });
+
+      const union = new Set([...courseTags, ...preferredTagsSet]).size;
+      tagAffinity = union > 0 ? weightedIntersection / union : 0;
+    }
+
+    let levelPreference = profile.levelDistribution.get(course.level) || 0;
+    if (course.level === profile.preferredLevel) {
+      levelPreference = Math.max(levelPreference, 0.8);
+    }
+
+    const enrollmentRatio =
+      course.enrollmentCount! / (profile.averageEnrollmentPreference || 100);
+    const likesRatio = (course.likesCount || 0) / 50;
+
+    const enrollmentScore = Math.min(enrollmentRatio / 2, 1);
+    const likesScore = Math.min(likesRatio, 1);
+    const popularityBoost = (enrollmentScore + likesScore) / 2;
+
+    return {
+      categoryAffinity,
+      topicClustering,
+      tagAffinity,
+      levelPreference,
+      popularityBoost,
+    };
+  }
+
+  private calculateLikedBasedScore(factors: LikedBasedScoringFactors): number {
+    const score =
+      factors.categoryAffinity * 0.3 +
+      factors.topicClustering * 0.25 +
+      factors.tagAffinity * 0.2 +
+      factors.levelPreference * 0.15 +
+      factors.popularityBoost * 0.1;
+
+    return Math.min(Math.max(score, 0), 1);
+  }
+
+  private generateLikedBasedReason(
+    course: Course,
+    profile: UserLikeProfile,
+  ): string {
+    const reasons: string[] = [];
+
+    if (profile.topCategories.includes(course.category)) {
+      const categoryPercent = Math.round(
+        (profile.categoryDistribution.get(course.category) || 0) * 100,
+      );
+      reasons.push(
+        `${categoryPercent}% of your likes are in ${course.category}`,
+      );
+    }
+
+    const candidateWords = new Set(this.tokenize(course.topic));
+    const hasTopicOverlap = Array.from(candidateWords).some((word) =>
+      profile.topicKeywords.has(word),
+    );
+    if (hasTopicOverlap) {
+      reasons.push("Similar to topics you've liked");
+    }
+
+    if (course.tags && course.tags.length > 0) {
+      const matchingTags = course.tags.filter((tag) =>
+        profile.preferredTags.includes(tag.toLowerCase()),
+      );
+      if (matchingTags.length > 0) {
+        reasons.push(`Tags: ${matchingTags.slice(0, 2).join(", ")}`);
+      }
+    }
+
+    if (course.level === profile.preferredLevel) {
+      reasons.push(`Matches your preferred ${course.level} level`);
+    }
+
+    if (
+      course.enrollmentCount &&
+      course.enrollmentCount > profile.averageEnrollmentPreference * 1.5
+    ) {
+      reasons.push("Highly popular course");
+    }
+
+    return reasons.length > 0
+      ? reasons.join(" • ")
+      : "Based on your liked courses";
+  }
+
+  private applyDiversityFilter(
+    recommendations: Recommendation[],
+    allCourses: Course[],
+    limit: number,
+  ): Recommendation[] {
+    const diversified: Recommendation[] = [];
+    const categoryCount = new Map<string, number>();
+    const categoryLimit = 3;
+
+    for (const rec of recommendations) {
+      const course = allCourses.find((c) => c.id === rec.courseId);
+      if (!course) continue;
+
+      const currentCount = categoryCount.get(course.category) || 0;
+
+      if (currentCount < categoryLimit || diversified.length < limit * 0.7) {
+        diversified.push(rec);
+        categoryCount.set(course.category, currentCount + 1);
+      }
+
+      if (diversified.length >= limit) break;
+    }
+
+    return diversified;
+  }
+
+  private tokenize(text: string): string[] {
+    return text
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 2);
   }
 
   private calculateScoringFactors(

@@ -97,6 +97,12 @@ export const courseSchema = {
       minItems: 5,
       maxItems: 8,
     },
+    tags: {
+      type: "array",
+      items: { type: "string" },
+      minItems: 5,
+      maxItems: 8,
+    },
     publish: { type: "boolean" },
     draft: { type: "boolean" },
     duration: { type: "string" },

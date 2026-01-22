@@ -45,6 +45,35 @@ export class RecommendationController {
     res.status(200).json(response);
   }
 
+  async getLikedBasedRecommendations(
+    req: Request,
+    res: Response,
+  ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userId = (req as any).user?.uid;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const { recommendations, fromCache } =
+      await this.service.getLikedCoursesRecommendations({
+        userId,
+        limit,
+      });
+
+    const response: RecommendationResponse = {
+      recommendations,
+      type: "liked-based",
+      generatedAt: new Date().toISOString(),
+      fromCache,
+    };
+
+    res.status(200).json(response);
+  }
+
   async refreshRecommendations(req: Request, res: Response): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (req as any).user?.uid;

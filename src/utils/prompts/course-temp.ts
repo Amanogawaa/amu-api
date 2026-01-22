@@ -50,6 +50,7 @@ Return valid JSON only:
   "no_of_chapters": ${args.noOfChapters},
   "target_audience": "Who this course is designed for (1-2 sentences)",
   "skills_gained": ["skill1", "skill2", "skill3"],
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
   "supports_code_playground": true or false
 }
 
@@ -71,6 +72,15 @@ Return valid JSON only:
 - Prerequisites are realistic for the target level
 - Learning outcomes are specific, not vague (avoid "understand" or "learn about")
 - Target audience is clearly defined
+
+**Tags**:
+Generate 5-8 relevant tags for the course:
+- Include the main technology/framework (e.g., "react", "python", "nodejs")
+- Add related technologies (e.g., "javascript", "typescript", "hooks")
+- Include skill types (e.g., "frontend", "backend", "fullstack", "data-science")
+- Add methodologies if relevant (e.g., "functional-programming", "oop", "testing")
+- Keep tags lowercase and hyphenated
+- Be specific and searchable
 
 **Code Playground Support**:
 Set "supports_code_playground" to true ONLY if the course:
