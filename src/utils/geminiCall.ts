@@ -89,8 +89,8 @@ const makeGeminiCall = async (
     apiKey: process.env.GEMINI_API_KEY as string,
   });
 
-  // const model = "gemini-2.5-flash";
-  const model = "gemini-3-flash-preview";
+  const model = "gemini-2.5-flash";
+  // const model = "gemini-3-flash-preview";
 
   const contents = [
     {

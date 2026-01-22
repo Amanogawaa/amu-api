@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { geminiCall } from "@utils/geminiCall";
 import { logger } from "@utils/loggers";
@@ -20,6 +19,16 @@ interface ValidationResult {
   isAppropriate: boolean;
   reason?: string;
 }
+
+const validationResultSchema = {
+  type: "object",
+  properties: {
+    isProgramming: { type: "boolean" },
+    isAppropriate: { type: "boolean" },
+    reason: { type: "string" },
+  },
+  required: ["isProgramming", "isAppropriate"],
+};
 
 async function validateContentAndTopic(
   input: string,
@@ -58,10 +67,17 @@ Now validate:
 "${input}"
 `;
   try {
-    const result = await geminiCall(prompt, { stream: false });
+    const result = await geminiCall(prompt, {
+      stream: false,
+      responseSchema: validationResultSchema,
+      temperature: 0.7,
+      maxRetries: 3,
+    });
 
-    const isProgramming = result.isProgramming === true;
-    const isAppropriate = result.isAppropriate === true;
+    const isProgramming =
+      result.isProgramming === true || result.is_programming === "true";
+    const isAppropriate =
+      result.isAppropriate === true || result.is_appropriate === "true";
     const isValid = isProgramming && isAppropriate;
 
     logger.log("Content validation JSON:", result);
