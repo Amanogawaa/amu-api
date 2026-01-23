@@ -43,7 +43,7 @@ Return valid JSON only:
       "chapterName": "string",
       "chapterDescription": "2-3 sentences: what this chapter covers and why it's important",
       "estimatedDuration": "Xh Ym",
-      "estimatedLessonCount": 4-8,
+      "estimatedLessonCount": "number (let AI decide optimal count based on topic complexity and duration, typically 3-10)",
       "learningObjectives": [
         "Specific, measurable objective 1",
         "Specific, measurable objective 2",
@@ -58,13 +58,17 @@ Return valid JSON only:
 
 Design Rules:
 - Each chapter focuses on ONE cohesive topic that progresses the course objectives
-- Chapter 1: Introduction and fundamentals (4-5 lessons, lighter content)
-- Middle chapters: Core skills and concepts (6-7 lessons, deeper content)
-- Final chapter: Integration, advanced application, or capstone-ready skills (5-8 lessons)
-- Duration per chapter: 1-3h (scales with lesson count)
-- Lesson count flexibility: 1h = 4-5 lessons | 2h = 6-7 lessons | 3h = 8 lessons
+- Let the AI determine the optimal number of lessons (typically 3-10) based on:
+  * Chapter complexity and depth required
+  * Course duration and topic breadth
+  * Natural topic divisions and learning progression
+  * Student comprehension and retention needs
+- Chapter 1: Introduction and fundamentals (lighter content, fewer lessons if simple)
+- Middle chapters: Core skills and concepts (adjust lesson count based on topic complexity)
+- Final chapter: Integration, advanced application, or capstone-ready skills
+- Duration per chapter: Flexible, should naturally fit the content (typically 1-4h)
 - Total duration must equal ${args.duration} (±10%)
-- More lessons per chapter = more granular learning, better retention
+- Quality over quantity: Better to have fewer well-crafted lessons than many rushed ones
 
 Learning objectives (2-4 per chapter):
 - Use action verbs: Build, Implement, Apply, Create, Analyze, Design, Debug
@@ -99,8 +103,8 @@ const systemChaptersPrompt = (
     `Learning outcomes: ${args.learningOutcomes.join(" | ")}`,
     `Skills to gain: ${args.skillsGained.join(", ")}`,
     `Prerequisites: ${args.prerequisites}`,
-    "Chapters should have 4-8 lessons each, scaling with complexity and duration.",
-    "More lessons = more granular content and better learning progression.",
+    "Determine optimal lesson count per chapter based on topic complexity, duration, and natural learning flow.",
+    "Focus on quality and effective knowledge transfer rather than hitting specific lesson counts.",
   ];
 
   if (intent === "regenerate") {

@@ -32,7 +32,7 @@ Rules:
 - Output must be valid JSON with double quotes, no comments, no markdown, no trailing commas.
 `.trim(),
   CHAPTER: `
-You are ChapterArchitect v3. Generate chapters that span the entire course. Return ONLY valid minified JSON:
+You are ChapterArchitect v4. Generate chapters that span the entire course. Return ONLY valid minified JSON:
 {
   "chapters": [
     {
@@ -50,20 +50,26 @@ You are ChapterArchitect v3. Generate chapters that span the entire course. Retu
 }
 
 Rules:
-- Each chapter = 1-3 hours of content with flexible lesson count (4-8 lessons per chapter).
-- Lesson count scales with chapter complexity and duration: 1h = 4-5 lessons | 2h = 6-7 lessons | 3h = 8 lessons.
-- Chapter 1 introduces fundamentals (shorter, 4-5 lessons), middle chapters build core skills (6-7 lessons), final chapter integrates/applies (5-8 lessons).
+- Let the AI determine optimal lesson count (typically 3-10 lessons per chapter) based on:
+  * Topic complexity and depth required
+  * Natural divisions in the subject matter
+  * Course duration constraints
+  * Learning progression and student comprehension
+- Each chapter = flexible duration based on content needs (typically 30m-4h).
+- Chapter 1 introduces fundamentals (adjust lesson count to what makes sense for the intro).
+- Middle chapters build core skills (let complexity dictate lesson count).
+- Final chapter integrates/applies knowledge (scale appropriately).
 - Total duration of all chapters must match course duration within ±10%.
+- Quality matters more than hitting arbitrary lesson counts - prioritize natural topic flow.
 - Learning objectives use action verbs (Build, Implement, Apply, Create, Debug, Analyze) and are specific/measurable.
 - keyTopics are concrete concepts (e.g., "useState Hook", "CSS Grid gap property") not vague ideas.
 - prerequisites: first chapter uses ["None"], others reference previous chapter names only when directly needed.
 - practicalApplication: 1-2 sentences on real-world usage.
 - Chapters must progress logically through course learning outcomes.
-- More lessons per chapter = more granular content, better for learning retention.
 - Output must be valid JSON with double quotes, no markdown, comments, or trailing commas.
 `.trim(),
   LESSON: `
-You are LessonForge v3. Generate lessons matching the chapter's estimatedLessonCount. Return ONLY valid minified JSON:
+You are LessonForge v4. Generate lessons that match the chapter's needs. Return ONLY valid minified JSON:
 {
   "lessons": [
     {
@@ -83,13 +89,21 @@ You are LessonForge v3. Generate lessons matching the chapter's estimatedLessonC
   ]
 }
 
-Lesson structure pattern (adapt based on total lesson count):
-- Start with 1-2 VIDEO lessons (10-15m each) for overview and key concepts, content=null, videoSearchQuery populated.
-- Middle lessons: Mix of ARTICLE lessons (15-25m) covering specific topics with **800-1200 words**, minimum 2-3 code blocks.
-- End with 1 QUIZ lesson (5-10m) to reinforce learning, content=null.
-- For 4-5 lessons: 1 video + 2-3 articles + 1 quiz.
-- For 6-7 lessons: 1-2 videos + 4-5 articles + 1 quiz.
-- For 8 lessons: 2 videos + 5 articles + 1 quiz.
+Lesson structure guidelines (be flexible and adaptive):
+- Create the optimal number of lessons based on:
+  * Chapter's topic complexity and breadth
+  * Estimated duration from chapter metadata
+  * Natural topic divisions and learning flow
+  * Student comprehension needs
+- Recommended lesson mix (adapt as needed):
+  * Start with 1-2 VIDEO lessons (10-15m each) for overview and key concepts, content=null, videoSearchQuery populated.
+  * Include ARTICLE lessons (15-30m each) covering specific topics with **800-1200 words**, minimum 2-3 code blocks.
+  * End with 1 QUIZ lesson (5-10m) to reinforce learning, content=null.
+- Common patterns:
+  * Short chapters (30m-1h): 3-5 lessons (e.g., 1 video + 2-3 articles + 1 quiz)
+  * Medium chapters (1-2h): 4-7 lessons (e.g., 1-2 videos + 3-5 articles + 1 quiz)
+  * Long chapters (2-3h): 6-10 lessons (e.g., 2 videos + 5-7 articles + 1 quiz)
+- Prioritize quality over quantity - better fewer comprehensive lessons than many shallow ones.
 
 Content requirements:
 - Total duration must match chapter's estimatedDuration within ±5 minutes.

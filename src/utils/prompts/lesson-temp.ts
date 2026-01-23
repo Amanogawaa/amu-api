@@ -26,14 +26,12 @@ const legacyLessonsPrompt = (args: LessonPromptArgs): string => {
     ? `\n**USER FEEDBACK:**\n${args.userInstructions}`
     : "";
 
-  return `Create exactly 4 lessons for Chapter ${args.chapterOrder}: ${
-    args.chapterName
-  }
+  return `Create lessons for Chapter ${args.chapterOrder}: ${args.chapterName}
 
 Course: ${args.courseName} (${args.level})
 Context: ${args.chapterDescription}
 Topics: ${args.keyTopics.join(", ")}
-Duration: ${args.estimatedDuration}
+Chapter Duration: ${args.estimatedDuration}
 Language: ${args.language}
 ${feedback}
 
@@ -57,13 +55,23 @@ Return valid JSON only:
   ]
 }
 
-REQUIRED STRUCTURE (must follow exactly):
-Lesson 1: VIDEO - Introduction/overview (10-12m)
-Lesson 2: ARTICLE - Core concepts/fundamentals (20-25m)
-Lesson 3: ARTICLE - Advanced usage/patterns (20-25m)
-Lesson 4: QUIZ - Knowledge check (5-10m)
+LESSON STRUCTURE GUIDELINES (be flexible, adapt to chapter needs):
+- Determine optimal number of lessons based on chapter topics and duration
+- Common patterns:
+  * Short chapters (30m-1h): 3-5 lessons
+  * Medium chapters (1-2h): 4-7 lessons  
+  * Long chapters (2-3h): 6-10 lessons
+  * Complex chapters may need more granular lessons
+  * Simple chapters can have fewer, more comprehensive lessons
 
-Total must equal ${args.estimatedDuration} (±5m).
+Recommended lesson mix (adapt as needed):
+- Start with 1-2 VIDEO lessons for overview and key concepts (10-15m each)
+- Include ARTICLE lessons for detailed explanations (15-30m each, 800-1200 words)
+- End with 1 QUIZ lesson for knowledge check (5-10m)
+- Example for 5 lessons: Video (12m) + Article (20m) + Article (20m) + Article (15m) + Quiz (8m) = 75m
+- Example for 7 lessons: Video (12m) + Video (10m) + Article (18m) + Article (20m) + Article (18m) + Article (15m) + Quiz (7m) = 100m
+
+Total lesson durations must equal ${args.estimatedDuration} (±5m).
 
 VIDEO LESSON (Lesson 1):
 - Duration: 10-12m
@@ -127,12 +135,13 @@ Level adjustments:
 
 const systemLessonsPrompt = (args: LessonPromptArgs): PromptPayload => {
   const lines = [
-    `Create four lessons for chapter "${args.chapterName}" (order ${args.chapterOrder}) within ${args.estimatedDuration}.`,
+    `Create lessons for chapter "${args.chapterName}" (order ${args.chapterOrder}) within ${args.estimatedDuration}.`,
     `Course: ${args.courseName} | Level: ${args.level} | Language: ${args.language}`,
     `Chapter summary: ${args.chapterDescription}`,
     `Learning objectives: ${args.learningObjectives.join(" | ")}`,
     `Key topics: ${args.keyTopics.join(", ")}`,
-    "Follow the Video + Article + Article + Quiz structure and keep durations in range.",
+    "Create an optimal number of lessons based on the chapter's topics, complexity, and duration.",
+    "Focus on quality and natural topic flow rather than hitting a specific lesson count.",
   ];
 
   if (args.userInstructions) {
