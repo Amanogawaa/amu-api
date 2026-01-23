@@ -51,6 +51,9 @@ export class CourseRepository {
         query = query.offset(params.offset) as any;
       }
 
+      // Sort by createdAt (newest first) by default
+      query = query.orderBy("createdAt", "desc") as any;
+
       const snapshot = await query.get();
 
       if (snapshot.empty) {
