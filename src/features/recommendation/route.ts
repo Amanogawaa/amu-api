@@ -115,7 +115,7 @@ export class RecommendationRoute {
 
     /**
      * @openapi
-     * /api/recommendations/liked-based:
+     * /recommendations/liked-based:
      *   get:
      *     summary: Get personalized recommendations based on liked courses
      *     description: Returns course recommendations based on user's like history and preferences

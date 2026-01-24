@@ -152,6 +152,7 @@ export class RecommendationService {
       }
 
       const likes = await this.likedRepo.getLikesByUser(userId);
+      console.log("Likes fetched for user:", userId, likes);
       logger.info("User likes fetched", {
         userId,
         likeCount: likes.length,
@@ -209,6 +210,7 @@ export class RecommendationService {
             },
           } as Recommendation;
         })
+        .filter((rec) => rec.score > 0.1)
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
 
@@ -341,8 +343,11 @@ export class RecommendationService {
       }
     });
 
+    // Safe division with zero check
     let topicClustering =
-      totalKeywordWeight > 0 ? matchScore / totalKeywordWeight : 0;
+      totalKeywordWeight > 0 && matchScore > 0
+        ? matchScore / totalKeywordWeight
+        : 0;
 
     if (profile.dominantTopics.includes(course.topic)) {
       topicClustering = Math.max(topicClustering, 0.8);
@@ -367,7 +372,11 @@ export class RecommendationService {
       });
 
       const union = new Set([...courseTags, ...preferredTagsSet]).size;
-      tagAffinity = union > 0 ? weightedIntersection / union : 0;
+      // Safe division with zero check
+      tagAffinity =
+        union > 0 && weightedIntersection > 0
+          ? weightedIntersection / union
+          : 0;
     }
 
     let levelPreference = profile.levelDistribution.get(course.level) || 0;
@@ -375,9 +384,14 @@ export class RecommendationService {
       levelPreference = Math.max(levelPreference, 0.8);
     }
 
-    const enrollmentRatio =
-      course.enrollmentCount! / (profile.averageEnrollmentPreference || 100);
-    const likesRatio = (course.likesCount || 0) / 50;
+    // Safe popularity calculation with dynamic normalization
+    const baseEnrollment =
+      profile.averageEnrollmentPreference > 0
+        ? profile.averageEnrollmentPreference
+        : 100;
+    const enrollmentRatio = (course.enrollmentCount || 0) / baseEnrollment;
+    const likesRatio =
+      (course.likesCount || 0) / Math.max(profile.totalLikes * 10, 50);
 
     const enrollmentScore = Math.min(enrollmentRatio / 2, 1);
     const likesScore = Math.min(likesRatio, 1);
@@ -481,7 +495,7 @@ export class RecommendationService {
     return text
       .toLowerCase()
       .split(/\s+/)
-      .filter((word) => word.length > 2);
+      .filter((word) => word.length > 2 && word.trim().length > 0);
   }
 
   private calculateScoringFactors(
@@ -524,12 +538,15 @@ export class RecommendationService {
 
     const topicScore = factors.topicSimilarity + factors.tagOverlap * 0.3;
 
-    const maxEnrollment = 10000;
-    const enrollmentScore = Math.min(
-      factors.enrollmentCount / maxEnrollment,
-      1,
-    );
-    const likesScore = Math.min(factors.likesCount / 1000, 1);
+    // Dynamic normalization: use the actual enrollment count with diminishing returns
+    const enrollmentScore =
+      factors.enrollmentCount > 0
+        ? Math.min(Math.log10(factors.enrollmentCount + 1) / 4, 1)
+        : 0;
+    const likesScore =
+      factors.likesCount > 0
+        ? Math.min(Math.log10(factors.likesCount + 1) / 3, 1)
+        : 0;
     const popularityScore = (enrollmentScore + likesScore) / 2;
 
     const finalScore =
@@ -604,7 +621,6 @@ export class RecommendationService {
     const completedSet = new Set(completedTags.map((tag) => tag.toLowerCase()));
     const candidateSet = new Set(candidateTags.map((tag) => tag.toLowerCase()));
 
-    // Calculate intersection
     const intersection = [...completedSet].filter((tag) =>
       candidateSet.has(tag),
     ).length;

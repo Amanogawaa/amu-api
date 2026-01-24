@@ -52,7 +52,11 @@ export class RecommendationController {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (req as any).user?.uid;
     const limit = req.query.limit ? Number(req.query.limit) : 10;
-
+    console.log(
+      "Received request for liked-based recommendations with limit:",
+      limit,
+    );
+    console.log("User ID from request:", userId);
     if (!userId) {
       res.status(401).json({ message: "Unauthorized" });
       return;

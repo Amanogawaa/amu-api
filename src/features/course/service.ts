@@ -102,6 +102,8 @@ export class CourseService {
     }
   }
 
+  public async generateCourseStream() {}
+
   public async deleteCourse(courseId: string): Promise<void> {
     try {
       await this.courseRepository.deleteCourse(courseId);
