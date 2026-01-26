@@ -152,7 +152,7 @@ export class RecommendationService {
       }
 
       const likes = await this.likedRepo.getLikesByUser(userId);
-      console.log("Likes fetched for user:", userId, likes);
+
       logger.info("User likes fetched", {
         userId,
         likeCount: likes.length,

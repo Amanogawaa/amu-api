@@ -10,12 +10,14 @@ import { firebaseFirestore } from "../../config/firebase";
 import { logger } from "../../utils/loggers";
 import type { QuizService } from "../quiz/service";
 import type { LessonService } from "../lesson/service";
+import type { LeaderboardsService } from "../leaderboards/service";
 
 export class ProgressService {
   constructor(
     private repository: ProgressRepository,
     private quizService?: QuizService,
     private lessonService?: LessonService,
+    private leaderboardsService?: LeaderboardsService,
   ) {}
 
   /**
@@ -207,6 +209,33 @@ export class ProgressService {
         userId,
         updates,
       );
+
+      // Check if course was just completed (reached 100%)
+      if (
+        percentComplete === 100 &&
+        progress.percentComplete !== 100 &&
+        this.leaderboardsService
+      ) {
+        try {
+          await this.leaderboardsService.incrementCourseCompletion(userId, 150);
+          logger.info(
+            `Course completed! Updated leaderboard stats for user ${userId}`,
+          );
+        } catch (error) {
+          logger.error("Error updating course completion stats:", error);
+        }
+      }
+    }
+
+    // Update leaderboard stats and streak when a lesson is completed
+    if (completed && this.leaderboardsService) {
+      try {
+        await this.leaderboardsService.incrementLessonCompletion(userId, 50);
+        logger.info(`Updated leaderboard stats for user ${userId}`);
+      } catch (error) {
+        logger.error("Error updating leaderboard stats:", error);
+        // Don't fail the progress update if leaderboard update fails
+      }
     }
 
     return progress;

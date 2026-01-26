@@ -5,6 +5,7 @@ import { ProgressRoute } from "./route";
 import { ProgressService } from "./service";
 import type { QuizService } from "../quiz/service";
 import type { LessonService } from "../lesson/service";
+import type { LeaderboardsService } from "../leaderboards/service";
 
 export class ProgressContainer {
   public readonly repository: ProgressRepository;
@@ -16,12 +17,14 @@ export class ProgressContainer {
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
     quizService?: QuizService,
     lessonService?: LessonService,
+    leaderboardsService?: LeaderboardsService,
   ) {
     this.repository = new ProgressRepository(firestore);
     this.service = new ProgressService(
       this.repository,
       quizService,
       lessonService,
+      leaderboardsService,
     );
     this.controller = new ProgressController(this.service);
     this.routes = new ProgressRoute(this.controller);

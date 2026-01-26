@@ -1,5 +1,6 @@
 import { Router } from "express";
 import type { LeaderboardsController } from "./controller";
+import { authMiddleware } from "middlewares/auth.middleware";
 
 export class LeaderboardsRoute {
   public router: Router;
@@ -12,9 +13,22 @@ export class LeaderboardsRoute {
   }
 
   private initializeRoutes() {
+    this.router.get("/", this.controller.getLeaderboards.bind(this.controller));
+
     this.router.get(
-      "/leaderboards",
-      this.controller.getLeaderboards.bind(this.controller),
+      "/stats",
+      this.controller.getLeaderboardStats.bind(this.controller),
+    );
+
+    this.router.get(
+      "/user/:userId?",
+      this.controller.getUserStats.bind(this.controller),
+    );
+
+    this.router.post(
+      "/streak",
+      authMiddleware,
+      this.controller.updateStreak.bind(this.controller),
     );
   }
 
