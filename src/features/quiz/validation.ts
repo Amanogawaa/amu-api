@@ -15,7 +15,10 @@ export const submitQuizSchema = z.object({
     .array(
       z.object({
         questionId: z.string().min(1, "Question ID is required"),
-        selectedAnswer: z.string().min(1, "Selected answer is required"),
+        selectedAnswer: z.union([
+          z.string().min(1, "Selected answer is required"),
+          z.array(z.string()).min(1, "At least one answer is required"),
+        ]),
       }),
     )
     .min(1, "At least one answer is required"),

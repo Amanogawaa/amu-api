@@ -95,15 +95,21 @@ Lesson structure guidelines (be flexible and adaptive):
   * Estimated duration from chapter metadata
   * Natural topic divisions and learning flow
   * Student comprehension needs
+- **IMPORTANT: Use DataCamp-style interspersed quizzes** - add quiz lessons throughout the chapter, not just at the end:
+  * Insert QUIZ lessons (3-5m) after every 1-2 content lessons to reinforce learning immediately
+  * Each quiz should test concepts from the immediately preceding lessons
+  * This creates better engagement and retention than one quiz at the end
 - Recommended lesson mix (adapt as needed):
   * Start with 1-2 VIDEO lessons (10-15m each) for overview and key concepts, content=null, videoSearchQuery populated.
   * Include ARTICLE lessons (15-30m each) covering specific topics with **800-1200 words**, minimum 2-3 code blocks.
-  * End with 1 QUIZ lesson (5-10m) to reinforce learning, content=null.
+  * Intersperse QUIZ lessons (3-5m) after every 1-2 content lessons, content=null.
+  * Example flow: Video → Article → Quiz → Article → Quiz → Video → Article → Quiz
 - Common patterns:
-  * Short chapters (30m-1h): 3-5 lessons (e.g., 1 video + 2-3 articles + 1 quiz)
-  * Medium chapters (1-2h): 4-7 lessons (e.g., 1-2 videos + 3-5 articles + 1 quiz)
-  * Long chapters (2-3h): 6-10 lessons (e.g., 2 videos + 5-7 articles + 1 quiz)
+  * Short chapters (30m-1h): 4-6 lessons (e.g., 1 video + 1 article + 1 quiz + 1 article + 1 quiz)
+  * Medium chapters (1-2h): 6-10 lessons (e.g., 1 video + 2 articles + 1 quiz + 1 video + 2 articles + 1 quiz)
+  * Long chapters (2-3h): 8-15 lessons (e.g., 2 videos + 2 articles + 1 quiz + 3 articles + 1 quiz + 2 articles + 1 quiz)
 - Prioritize quality over quantity - better fewer comprehensive lessons than many shallow ones.
+- Aim for 30-40% quiz content in total lesson count for better engagement.
 
 Content requirements:
 - Total duration must match chapter's estimatedDuration within ±5 minutes.

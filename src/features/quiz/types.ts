@@ -10,11 +10,27 @@ export interface Quiz {
 export interface QuizQuestion {
   questionId: string;
   questionText: string;
-  questionType: "multiple-choice" | "true-false";
+  questionType:
+    | "multiple-choice"
+    | "true-false"
+    | "fill-in-the-blank"
+    | "matching"
+    | "scenario-based";
   options?: QuizOption[];
-  correctAnswer: string;
+  correctAnswer: string | string[];
   explanation: string;
   points: number;
+  blanks?: {
+    blankId: string;
+    acceptableAnswers: string[];
+  }[];
+  matchPairs?: {
+    leftId: string;
+    leftText: string;
+    rightId: string;
+    rightText: string;
+  }[];
+  scenario?: string;
 }
 
 export interface QuizOption {
@@ -52,9 +68,9 @@ export interface QuizAttempt {
 
 export interface UserAnswer {
   questionId: string;
-  selectedAnswer: string;
+  selectedAnswer: string | string[]; // string[] for matching type
   isCorrect: boolean;
-  correctAnswer: string;
+  correctAnswer: string | string[];
   explanation: string;
 }
 
@@ -74,7 +90,13 @@ export const quizSchema = {
           questionText: { type: "string" as const },
           questionType: {
             type: "string" as const,
-            enum: ["multiple-choice", "true-false"],
+            enum: [
+              "multiple-choice",
+              "true-false",
+              "fill-in-the-blank",
+              "matching",
+              "scenario-based",
+            ],
           },
           options: {
             type: "array" as const,
@@ -87,9 +109,45 @@ export const quizSchema = {
               required: ["optionId", "optionText"],
             },
           },
-          correctAnswer: { type: "string" as const },
+          correctAnswer: {
+            anyOf: [
+              { type: "string" as const },
+              {
+                type: "array" as const,
+                items: { type: "string" as const },
+              },
+            ],
+          },
           explanation: { type: "string" as const },
           points: { type: "number" as const },
+          blanks: {
+            type: "array" as const,
+            items: {
+              type: "object" as const,
+              properties: {
+                blankId: { type: "string" as const },
+                acceptableAnswers: {
+                  type: "array" as const,
+                  items: { type: "string" as const },
+                },
+              },
+              required: ["blankId", "acceptableAnswers"],
+            },
+          },
+          matchPairs: {
+            type: "array" as const,
+            items: {
+              type: "object" as const,
+              properties: {
+                leftId: { type: "string" as const },
+                leftText: { type: "string" as const },
+                rightId: { type: "string" as const },
+                rightText: { type: "string" as const },
+              },
+              required: ["leftId", "leftText", "rightId", "rightText"],
+            },
+          },
+          scenario: { type: "string" as const },
         },
         required: [
           "questionId",

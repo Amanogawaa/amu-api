@@ -57,19 +57,20 @@ Return valid JSON only:
 
 LESSON STRUCTURE GUIDELINES (be flexible, adapt to chapter needs):
 - Determine optimal number of lessons based on chapter topics and duration
+- **IMPORTANT: Use DataCamp-style interspersed quizzes** throughout the chapter:
+  * Insert QUIZ lessons (3-5m) after every 1-2 content lessons
+  * Each quiz tests concepts from immediately preceding lessons
+  * Better engagement and retention than one quiz at the end
 - Common patterns:
-  * Short chapters (30m-1h): 3-5 lessons
-  * Medium chapters (1-2h): 4-7 lessons  
-  * Long chapters (2-3h): 6-10 lessons
-  * Complex chapters may need more granular lessons
-  * Simple chapters can have fewer, more comprehensive lessons
+  * Short chapters (30m-1h): 4-6 lessons
+  * Medium chapters (1-2h): 6-10 lessons  
+  * Long chapters (2-3h): 8-15 lessons
+  * Aim for 30-40% quiz content in total lesson count
 
-Recommended lesson mix (adapt as needed):
-- Start with 1-2 VIDEO lessons for overview and key concepts (10-15m each)
-- Include ARTICLE lessons for detailed explanations (15-30m each, 800-1200 words)
-- End with 1 QUIZ lesson for knowledge check (5-10m)
-- Example for 5 lessons: Video (12m) + Article (20m) + Article (20m) + Article (15m) + Quiz (8m) = 75m
-- Example for 7 lessons: Video (12m) + Video (10m) + Article (18m) + Article (20m) + Article (18m) + Article (15m) + Quiz (7m) = 100m
+Recommended lesson flow (adapt as needed):
+- Pattern 1: Video (12m) + Article (18m) + Quiz (5m) + Article (20m) + Quiz (5m) = 60m
+- Pattern 2: Video (10m) + Video (12m) + Quiz (5m) + Article (20m) + Article (18m) + Quiz (5m) + Article (15m) + Quiz (5m) = 90m
+- Pattern 3: Video (12m) + Article (20m) + Article (18m) + Quiz (5m) + Video (10m) + Article (20m) + Quiz (5m) + Article (15m) + Quiz (5m) = 110m
 
 Total lesson durations must equal ${args.estimatedDuration} (±5m).
 
@@ -113,19 +114,23 @@ Real-world application with complete code
 Lesson 2 focus: Fundamentals and basic usage
 Lesson 3 focus: Advanced techniques, best practices, edge cases
 
-QUIZ LESSON (Lesson 4):
-- Duration: 5-10m
+QUIZ LESSON (interspersed throughout):
+- Duration: 3-5m
 - Content: null
 - VideoSearchQuery: null
-- Description: "Test your understanding of ${args.keyTopics.join(", ")}"
-- Resources: Link to lessons 1-3 for review, if lesson 1 has no transcription, link to lesson 2-3 instead
+- Description: "Test your understanding of {topics covered in previous 1-2 lessons}"
+- Resources: Link to the lessons being tested
+- Place AFTER every 1-2 content lessons for immediate reinforcement
+- Example: After lessons 2-3, after lessons 5-6, after lessons 8-9
 
 RULES:
-- lessonOrder: 1, 2, 3, 4 (sequential)
+- lessonOrder: Sequential (1, 2, 3, 4, 5, ...)
 - Only article type has markdown content
 - Video/quiz types: content must be null
 - Each lesson needs 1 specific learning outcome using action verbs
-- Prerequisites: Lesson 1 (previous chapters), Lesson 2 (Lesson 1), Lesson 3 (Lessons 1-2), Lesson 4 (Lessons 1-3)
+- Prerequisites: Build on previous lessons logically
+- Intersperse quizzes throughout - don't put all at the end
+- Each quiz tests only the immediately preceding 1-2 lessons
 
 Level adjustments:
 - Beginner: More examples, step-by-step, simpler language

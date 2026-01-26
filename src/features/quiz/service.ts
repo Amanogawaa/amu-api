@@ -124,7 +124,67 @@ export class QuizService {
           throw new Error(`Question ${answer.questionId} not found`);
         }
 
-        const isCorrect = answer.selectedAnswer === question.correctAnswer;
+        let isCorrect = false;
+
+        // Grade based on question type
+        switch (question.questionType) {
+          case "multiple-choice":
+          case "true-false":
+            isCorrect = answer.selectedAnswer === question.correctAnswer;
+            break;
+
+          case "fill-in-the-blank": {
+            const userAnswers = Array.isArray(answer.selectedAnswer)
+              ? answer.selectedAnswer
+              : [answer.selectedAnswer];
+
+            if (
+              !question.blanks ||
+              question.blanks.length !== userAnswers.length
+            ) {
+              isCorrect = false;
+              break;
+            }
+
+            isCorrect = question.blanks.every((blank, index) => {
+              const userAnswer = userAnswers[index]?.toLowerCase().trim() || "";
+              return blank.acceptableAnswers.some(
+                (acceptable) => acceptable.toLowerCase().trim() === userAnswer,
+              );
+            });
+            break;
+          }
+
+          case "matching": {
+            const userPairs = Array.isArray(answer.selectedAnswer)
+              ? answer.selectedAnswer
+              : [];
+            const correctPairs = Array.isArray(question.correctAnswer)
+              ? question.correctAnswer
+              : [];
+
+            if (userPairs.length !== correctPairs.length) {
+              isCorrect = false;
+              break;
+            }
+
+            const sortedUser = [...userPairs].sort();
+            const sortedCorrect = [...correctPairs].sort();
+
+            isCorrect = sortedUser.every(
+              (pair, index) => pair === sortedCorrect[index],
+            );
+            break;
+          }
+
+          case "scenario-based":
+            isCorrect = answer.selectedAnswer === question.correctAnswer;
+            break;
+
+          default:
+            isCorrect = false;
+        }
+
         return {
           questionId: answer.questionId,
           selectedAnswer: answer.selectedAnswer,
