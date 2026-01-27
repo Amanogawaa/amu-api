@@ -169,6 +169,60 @@ export class CourseRoute {
 
     /**
      * @openapi
+     * /courses/stream:
+     *   post:
+     *     tags:
+     *       - My Courses
+     *     summary: Generate a course with streaming output (like ChatGPT)
+     *     description: |
+     *       Generates a course and streams the AI response in real-time.
+     *       Requires Socket.IO connection. Listen for 'course:stream' events.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - category
+     *               - topic
+     *               - level
+     *               - duration
+     *               - noOfChapters
+     *               - language
+     *             properties:
+     *               category:
+     *                 type: string
+     *               topic:
+     *                 type: string
+     *               level:
+     *                 type: string
+     *                 enum: [beginner, intermediate, advanced]
+     *               duration:
+     *                 type: string
+     *               noOfChapters:
+     *                 type: integer
+     *               language:
+     *                 type: string
+     *               userInstructions:
+     *                 type: string
+     *     responses:
+     *       201:
+     *         description: Course generated with streaming
+     *       400:
+     *         description: Invalid request or no socket connection
+     */
+    this.router.post(
+      "/courses/stream",
+      authMiddleware,
+      validateCourseTopic,
+      checkDuplicateCourse,
+      validateGenerateCourse,
+      this.controller.generateCourseStream.bind(this.controller),
+    );
+
+    /**
+     * @openapi
      * /courses/generate-full:
      *   post:
      *     tags:

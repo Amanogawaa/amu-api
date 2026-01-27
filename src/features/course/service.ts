@@ -102,7 +102,92 @@ export class CourseService {
     }
   }
 
-  public async generateCourseStream() {}
+  public async generateCourseStream(
+    request: GenerateCourseRequest,
+    socketId: string,
+    emitChunk: (socketId: string, chunk: string) => void,
+  ) {
+    try {
+      const promptMode: CoursePromptMode = request.promptMode ?? "system";
+      const { userPrompt, systemPrompt } = buildCoursePrompt(
+        {
+          category: request.category,
+          topic: request.topic,
+          level: request.level,
+          duration: request.duration,
+          noOfChapters: request.noOfChapters,
+          language: request.language,
+          userInstructions: request.userInstructions ?? "",
+        },
+        promptMode,
+      );
+
+      let fullResponse = "";
+
+      await geminiCall(userPrompt, {
+        temperature: 0.7,
+        maxRetries: 3,
+        systemPrompt,
+        stream: true,
+        onChunk: async (chunk: string) => {
+          fullResponse += chunk;
+          emitChunk(socketId, chunk);
+        },
+        benchmarkTag: `course:${promptMode}:stream`,
+        metadata: {
+          topic: request.topic,
+          level: request.level,
+        },
+      });
+
+      let parsedCourse;
+      try {
+        parsedCourse = JSON.parse(fullResponse);
+      } catch (parseError) {
+        logger.error("Failed to parse streamed course response", {
+          error: parseError,
+          response: fullResponse.substring(0, 500),
+        });
+        throw new AppError(
+          "Failed to parse course data from streamed response",
+          500,
+        );
+      }
+
+      const validatedCourse = courseSchema.parse(parsedCourse);
+
+      logger.info("Course generated successfully (streamed)", {
+        mode: promptMode,
+        topic: request.topic,
+        uid: request.uid,
+        name: validatedCourse?.name,
+      });
+
+      const courseData: Course = {
+        ...validatedCourse,
+        uid: request.uid,
+        publish: false,
+        draft: true,
+      };
+
+      const nameExist = await this.courseRepository.courseNameExists(
+        courseData.name,
+        courseData.uid,
+      );
+
+      if (nameExist) {
+        courseData.name = `${courseData.name} (${Date.now()})`;
+      }
+
+      const createdCourse =
+        await this.courseRepository.createCourse(courseData);
+
+      return createdCourse;
+    } catch (error) {
+      logger.error("Error in CoursesService.generateCourseStream:", error);
+      throw error;
+    }
+  }
 
   public async deleteCourse(courseId: string): Promise<void> {
     try {
