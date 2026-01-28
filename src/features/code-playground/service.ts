@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { AppError } from "../../utils/errors";
+import { config } from "../../config/environment";
 import { CodePlaygroundRepository } from "./repository";
 import type {
   CodeWorkspace,
@@ -11,28 +12,37 @@ import type {
   SaveWorkspaceRequest,
 } from "./types";
 import { LANGUAGE_MAP, SUPPORTED_LANGUAGES } from "./types";
+import { logger } from "@utils/loggers";
 
 export class CodePlaygroundService {
   private repository: CodePlaygroundRepository;
   private judge0ApiUrl: string;
   private judge0ApiKey: string;
+  private pistonApiUrl: string;
 
   constructor(repository: CodePlaygroundRepository) {
     this.repository = repository;
-    this.judge0ApiUrl =
-      process.env.JUDGE0_API_URL || "https://judge0-ce.p.rapidapi.com";
-    this.judge0ApiKey = process.env.JUDGE0_API_KEY || "";
 
-    if (!this.judge0ApiKey) {
-      console.warn("JUDGE0_API_KEY not set. Code execution will not work.");
+    this.judge0ApiUrl = config.codeExecution.judge0.apiUrl;
+    this.judge0ApiKey = config.codeExecution.judge0.apiKey;
+    this.pistonApiUrl = config.codeExecution.piston.apiUrl;
+
+    if (!this.judge0ApiKey && this.judge0ApiUrl.includes("rapidapi")) {
+      logger.warn(
+        "JUDGE0_API_KEY not set. Judge0 via RapidAPI will not work. Use self-hosted Judge0 or Piston instead.",
+      );
     }
+
+    logger.info(
+      `Code Execution: Piston=${this.pistonApiUrl}, Judge0=${this.judge0ApiUrl}`,
+    );
   }
 
   async pistonGetLanguages(): Promise<string[]> {
     try {
-      const response = await axios.get<any>(
-        "https://emkc.org/api/v2/piston/runtimes",
-      );
+      const response = await axios.get<any>(`${this.pistonApiUrl}/runtimes`, {
+        timeout: config.codeExecution.piston.timeout,
+      });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -46,35 +56,76 @@ export class CodePlaygroundService {
     language,
     sourceCode,
     version,
+    stdin,
   }: {
     language: string;
     sourceCode: string;
     version?: string;
-  }) {
+    stdin?: string;
+  }): Promise<any> {
     try {
+      const pistonLanguage = language.toLowerCase();
+
+      const requestBody: any = {
+        language: pistonLanguage,
+        version: version || "*",
+        files: [
+          {
+            name: `main.${this.getFileExtension(pistonLanguage)}`,
+            content: sourceCode,
+          },
+        ],
+      };
+
+      if (stdin) {
+        requestBody.stdin = stdin;
+      }
+
       const response = await axios.post<any>(
-        "https://emkc.org/api/v2/piston/execute",
+        `${this.pistonApiUrl}/execute`,
+        requestBody,
         {
-          language,
-          version,
-          files: [
-            {
-              content: sourceCode,
-            },
-          ],
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: config.codeExecution.piston.timeout,
         },
       );
+
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new AppError(`Code execution failed: ${error.message}`, 500);
+        const errorMessage = error.response?.data?.message || error.message;
+        throw new AppError(`Piston execution failed: ${errorMessage}`, 500);
       }
       throw error;
     }
   }
 
+  private getFileExtension(language: string): string {
+    const extensions: Record<string, string> = {
+      javascript: "js",
+      typescript: "ts",
+      python: "py",
+      java: "java",
+      "c++": "cpp",
+      cpp: "cpp",
+      c: "c",
+      csharp: "cs",
+      go: "go",
+      rust: "rs",
+      php: "php",
+      ruby: "rb",
+      swift: "swift",
+      kotlin: "kt",
+      r: "r",
+      bash: "sh",
+    };
+    return extensions[language] || "txt";
+  }
+
   async executeCode(request: ExecutionRequest): Promise<ExecutionResult> {
-    const { code, language, stdin } = request;
+    const { code, language, stdin, engine = "piston" } = request;
 
     if (!SUPPORTED_LANGUAGES.includes(language)) {
       throw new AppError(
@@ -85,10 +136,75 @@ export class CodePlaygroundService {
       );
     }
 
+    if (engine === "judge0") {
+      return this.executeCodeWithJudge0({ code, language, stdin });
+    }
+
+    return this.executeCodeWithPiston({ code, language, stdin });
+  }
+
+  private async executeCodeWithPiston({
+    code,
+    language,
+    stdin,
+  }: {
+    code: string;
+    language: string;
+    stdin?: string;
+  }): Promise<ExecutionResult> {
+    try {
+      const result = await this.pistonExecuteCode({
+        language,
+        sourceCode: code,
+        stdin,
+      });
+
+      const stdout = result.run?.stdout || "";
+      const stderr = result.run?.stderr || "";
+      const compileOutput =
+        result.compile?.stderr || result.compile?.stdout || "";
+
+      const hasError = result.run?.code !== 0 || stderr;
+
+      return {
+        stdout,
+        stderr,
+        status: {
+          id: hasError ? 6 : 3,
+          description: hasError ? "Runtime Error" : "Accepted",
+        },
+        time: "0",
+        memory: 0,
+        compile_output: compileOutput || undefined,
+      };
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError("Code execution failed", 500);
+    }
+  }
+
+  private async executeCodeWithJudge0({
+    code,
+    language,
+    stdin,
+  }: {
+    code: string;
+    language: string;
+    stdin?: string;
+  }): Promise<ExecutionResult> {
     const languageId = LANGUAGE_MAP[language];
 
     if (!languageId) {
       throw new AppError(`Language ID not found for: ${language}`, 400);
+    }
+
+    if (!this.judge0ApiKey) {
+      throw new AppError(
+        "Judge0 API key not configured. Please use Piston engine or configure Judge0.",
+        500,
+      );
     }
 
     try {
@@ -107,6 +223,7 @@ export class CodePlaygroundService {
             "X-RapidAPI-Key": this.judge0ApiKey,
             "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
           },
+          timeout: config.codeExecution.judge0.timeout,
         },
       );
 
@@ -132,7 +249,8 @@ export class CodePlaygroundService {
       };
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new AppError(`Code execution failed: ${error.message}`, 500);
+        const errorMessage = error.response?.data?.message || error.message;
+        throw new AppError(`Judge0 execution failed: ${errorMessage}`, 500);
       }
       throw error;
     }

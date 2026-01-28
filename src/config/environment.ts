@@ -56,6 +56,23 @@ export const config = {
     maxApiConnections: Number(process.env.MAX_API_CONNECTIONS) || 500,
   },
 
+  codeExecution: {
+    defaultEngine: (process.env.CODE_EXECUTION_ENGINE || "piston") as
+      | "piston"
+      | "judge0",
+
+    piston: {
+      apiUrl: process.env.PISTON_API_URL || "https://emkc.org/api/v2/piston",
+      timeout: Number(process.env.PISTON_TIMEOUT) || 10000,
+    },
+
+    judge0: {
+      apiUrl: process.env.JUDGE0_API_URL || "https://judge0-ce.p.rapidapi.com",
+      apiKey: process.env.JUDGE0_API_KEY || "",
+      timeout: Number(process.env.JUDGE0_TIMEOUT) || 15000,
+    },
+  },
+
   // Logging configuration
   logging: {
     level: process.env.LOG_LEVEL || "info",

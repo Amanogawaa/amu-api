@@ -1,5 +1,21 @@
 import type { PromptMode } from "../../utils/prompts/types";
 
+export type PlaygroundType = "vanilla" | "frontend" | "backend" | "none";
+
+export interface PlaygroundEnvironment {
+  type: PlaygroundType;
+  framework?: string;
+  dependencies?: string[];
+  supportsExecution: boolean;
+  executionEngine?: "piston" | "judge0" | "sandpack" | "none";
+  config?: {
+    template?: string;
+    files?: Record<string, string>;
+    buildCommand?: string;
+    runCommand?: string;
+  };
+}
+
 export interface Lesson {
   id: string;
   chapterId: string;
@@ -17,6 +33,9 @@ export interface Lesson {
   resources: LessonResource[];
   learningOutcome: string;
   prerequisites: string[];
+
+  // Phase 1: Adaptive Playground Environment
+  playgroundEnvironment?: PlaygroundEnvironment;
 }
 
 export interface LessonResource {

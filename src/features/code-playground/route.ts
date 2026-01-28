@@ -21,30 +21,6 @@ export class CodePlaygroundRoute {
       this.controller.executeCode,
     );
 
-    this.router.post(
-      "/code/execute-and-save",
-      validateExecuteCode,
-      this.controller.executeAndSave,
-    );
-
-    this.router.post(
-      "/code/workspace",
-      validateSaveWorkspace,
-      this.controller.saveWorkspace,
-    );
-
-    this.router.get("/code/workspace/:lessonId", this.controller.getWorkspace);
-
-    this.router.get(
-      "/code/workspaces/course/:courseId",
-      this.controller.getWorkspacesByCourse,
-    );
-
-    this.router.delete(
-      "/code/workspace/:workspaceId",
-      this.controller.deleteWorkspace,
-    );
-
     this.router.get(
       "/piston/languages",
       authMiddleware,
@@ -57,23 +33,51 @@ export class CodePlaygroundRoute {
       this.controller.pistonExecuteCode,
     );
 
-    /**
-     * @openapi
-     * /code/languages:
-     *   get:
-     *     tags: [Code Playground]
-     *     summary: Get supported programming languages
-     *     description: Retrieve a list of programming languages supported by the code execution service
-     *     responses:
-     *       200:
-     *        description: A list of supported programming languages
-     *       content:
-     *        application/json:
-     *         schema:
-     *          type: object
-     *          properties:
-     *
-     */
+    this.router.post(
+      "/judge0/execute",
+      authMiddleware,
+      validateExecuteCode,
+      this.controller.judge0ExecuteCode,
+    );
+
+    this.router.get(
+      "/judge0/languages",
+      authMiddleware,
+      this.controller.getJudge0SupportedLanguages,
+    );
+
+    this.router.post(
+      "/code/execute-and-save",
+      authMiddleware,
+      validateExecuteCode,
+      this.controller.executeAndSave,
+    );
+
+    this.router.post(
+      "/code/workspace",
+      authMiddleware,
+      validateSaveWorkspace,
+      this.controller.saveWorkspace,
+    );
+
+    this.router.get(
+      "/code/workspace/:lessonId",
+      authMiddleware,
+      this.controller.getWorkspace,
+    );
+
+    this.router.get(
+      "/code/workspaces/course/:courseId",
+      authMiddleware,
+      this.controller.getWorkspacesByCourse,
+    );
+
+    this.router.delete(
+      "/code/workspace/:workspaceId",
+      authMiddleware,
+      this.controller.deleteWorkspace,
+    );
+
     this.router.get("/code/languages", this.controller.getSupportedLanguages);
   }
 

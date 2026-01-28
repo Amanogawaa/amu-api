@@ -153,10 +153,64 @@ export class CodePlaygroundController {
     }
   };
 
-  /**
-   * Get workspace for lesson
-   * GET /api/code/workspace/:lessonId
-   */
+  judge0ExecuteCode = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { code, language, stdin, lessonId } = req.body;
+      const userId = req.user?.uid;
+
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+
+      const request: ExecutionRequest = {
+        code,
+        language,
+        stdin,
+        lessonId,
+        userId,
+        engine: "judge0", // Explicitly use Judge0
+      };
+
+      const result = await this.codePlaygroundService.executeCode(request);
+
+      res.status(200).json({
+        success: true,
+        data: result,
+        message: "Code executed successfully with Judge0",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getJudge0SupportedLanguages = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { JUDGE0_LANGUAGE_MAP } = await import("./types");
+
+      const languages = Object.keys(JUDGE0_LANGUAGE_MAP).map((key) => ({
+        name: key,
+        id: JUDGE0_LANGUAGE_MAP[key],
+      }));
+
+      res.status(200).json({
+        success: true,
+        data: languages,
+        message: "Judge0 supported languages retrieved successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   getWorkspace = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -194,10 +248,6 @@ export class CodePlaygroundController {
     }
   };
 
-  /**
-   * Get all workspaces for a course
-   * GET /api/code/workspaces/course/:courseId
-   */
   getWorkspacesByCourse = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -228,10 +278,6 @@ export class CodePlaygroundController {
     }
   };
 
-  /**
-   * Delete workspace
-   * DELETE /api/code/workspace/:workspaceId
-   */
   deleteWorkspace = async (
     req: AuthenticatedRequest,
     res: Response,

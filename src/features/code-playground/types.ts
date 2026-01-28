@@ -16,12 +16,70 @@ export interface CodeWorkspace {
   updatedAt: Date;
 }
 
+export type PlaygroundType = "vanilla" | "frontend" | "backend" | "none";
+
+export interface PlaygroundEnvironment {
+  type: PlaygroundType;
+  framework?: string;
+  dependencies?: string[];
+  supportsExecution: boolean;
+  executionEngine?: "piston" | "judge0" | "sandpack" | "none";
+  config?: {
+    template?: string;
+    files?: Record<string, string>;
+    buildCommand?: string;
+    runCommand?: string;
+  };
+}
+
 export interface ExecutionRequest {
   code: string;
   language: string;
   stdin?: string;
   lessonId: string;
   userId: string;
+  engine?: "piston" | "judge0";
+}
+
+export interface PistonExecutionRequest {
+  language: string;
+  version?: string;
+  files: {
+    name?: string;
+    content: string;
+  }[];
+  stdin?: string;
+  args?: string[];
+  compile_timeout?: number;
+  run_timeout?: number;
+  compile_memory_limit?: number;
+  run_memory_limit?: number;
+}
+
+export interface PistonExecutionResult {
+  language: string;
+  version: string;
+  run: {
+    stdout: string;
+    stderr: string;
+    code: number;
+    signal: string | null;
+    output: string;
+  };
+  compile?: {
+    stdout: string;
+    stderr: string;
+    code: number;
+    signal: string | null;
+    output: string;
+  };
+}
+
+export interface PistonRuntime {
+  language: string;
+  version: string;
+  aliases: string[];
+  runtime?: string;
 }
 
 export interface ExecutionResult {
@@ -49,7 +107,7 @@ export interface WorkspaceResponse {
   message: string;
 }
 
-export const LANGUAGE_MAP: Record<string, number> = {
+export const JUDGE0_LANGUAGE_MAP: Record<string, number> = {
   javascript: 63, // Node.js
   typescript: 74, // TypeScript
   python: 71, // Python 3
@@ -67,6 +125,27 @@ export const LANGUAGE_MAP: Record<string, number> = {
   sql: 82, // SQL (SQLite)
   bash: 46, // Bash
 };
+
+// Piston Language Mappings (use language name directly)
+export const PISTON_LANGUAGE_MAP: Record<string, string> = {
+  javascript: "javascript",
+  typescript: "typescript",
+  python: "python",
+  java: "java",
+  cpp: "c++",
+  c: "c",
+  csharp: "csharp",
+  go: "go",
+  rust: "rust",
+  php: "php",
+  ruby: "ruby",
+  swift: "swift",
+  kotlin: "kotlin",
+  r: "r",
+  bash: "bash",
+};
+
+export const LANGUAGE_MAP = JUDGE0_LANGUAGE_MAP;
 
 export const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_MAP);
 
