@@ -20,8 +20,15 @@ export class LeaderboardsRoute {
       this.controller.getLeaderboardStats.bind(this.controller),
     );
 
+    // Get specific user's stats
     this.router.get(
-      "/user/:userId?",
+      "/user/:userId",
+      this.controller.getUserStats.bind(this.controller),
+    );
+
+    // Get current user's stats (no userId param)
+    this.router.get(
+      "/user",
       this.controller.getUserStats.bind(this.controller),
     );
 
