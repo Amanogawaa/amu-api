@@ -34,7 +34,6 @@ export interface Lesson {
   learningOutcome: string;
   prerequisites: string[];
 
-  // Phase 1: Adaptive Playground Environment
   playgroundEnvironment?: PlaygroundEnvironment;
 }
 
@@ -131,6 +130,35 @@ export const lessonsSchema = {
           prerequisites: {
             type: "array",
             items: { type: "string" },
+          },
+          playgroundEnvironment: {
+            type: ["object", "null"],
+            properties: {
+              type: {
+                type: "string",
+                enum: ["vanilla", "frontend", "backend", "none"],
+              },
+              framework: { type: ["string", "null"] },
+              dependencies: {
+                type: "array",
+                items: { type: "string" },
+              },
+              supportsExecution: { type: "boolean" },
+              executionEngine: {
+                type: "string",
+                enum: ["piston", "judge0", "sandpack", "none"],
+              },
+              config: {
+                type: ["object", "null"],
+                properties: {
+                  template: { type: "string" },
+                  files: { type: "object" },
+                  buildCommand: { type: "string" },
+                  runCommand: { type: "string" },
+                },
+              },
+            },
+            required: ["type", "supportsExecution"],
           },
         },
         required: [

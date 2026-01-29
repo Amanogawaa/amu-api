@@ -1,0 +1,121 @@
+version: "3.8"
+
+services:
+  judge0-server:
+    image: judge0/judge0:1.13.0
+    container_name: judge0-server
+    restart: unless-stopped
+    ports:
+      - "2358:2358"
+    environment:
+      # Redis Configuration
+      - REDIS_HOST=judge0-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+
+      # PostgreSQL Configuration
+      - POSTGRES_HOST=judge0-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-judge0}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-YourSecurePassword123}
+      - POSTGRES_DB=${POSTGRES_DB:-judge0}
+
+      # Security & Limits
+      - ENABLE_WAIT_RESULT=true
+      - ENABLE_COMPILER_OPTIONS=true
+      - ALLOWED_LANGUAGES_FOR_COMPILE_OPTIONS=44,45,46,47,48,49,50,51,52,53,54
+      - MAX_QUEUE_SIZE=100
+      - MAX_CPU_TIME_LIMIT=5 # Max 5 seconds CPU time
+      - MAX_WALL_TIME_LIMIT=10 # Max 10 seconds total time
+      - MAX_MEMORY_LIMIT=256000 # Max 256MB memory
+      - MAX_STACK_LIMIT=64000 # Max 64MB stack
+      - MAX_PROCESSES_AND_OR_THREADS=60
+      - MAX_FILE_SIZE=1024 # Max 1MB file size
+      - NUMBER_OF_RUNS=1
+      - ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT=false
+      - ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT=false
+      - ENABLE_NETWORK=false # Disable network access for security
+
+      # Callback (optional)
+      - CALLBACKS_MAX_TRIES=3
+
+    depends_on:
+      - judge0-db
+      - judge0-redis
+    networks:
+      - judge0-network
+
+  # Judge0 Worker (executes code)
+  judge0-worker:
+    image: judge0/judge0:1.13.0
+    container_name: judge0-worker
+    restart: unless-stopped
+    command: ["./scripts/workers"]
+    environment:
+      # Redis Configuration
+      - REDIS_HOST=judge0-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+
+      # PostgreSQL Configuration
+      - POSTGRES_HOST=judge0-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-judge0}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-YourSecurePassword123}
+      - POSTGRES_DB=${POSTGRES_DB:-judge0}
+
+      # Security & Limits (same as server)
+      - ENABLE_WAIT_RESULT=true
+      - ENABLE_COMPILER_OPTIONS=true
+      - ALLOWED_LANGUAGES_FOR_COMPILE_OPTIONS=44,45,46,47,48,49,50,51,52,53,54
+      - MAX_QUEUE_SIZE=100
+      - MAX_CPU_TIME_LIMIT=5
+      - MAX_WALL_TIME_LIMIT=10
+      - MAX_MEMORY_LIMIT=256000
+      - MAX_STACK_LIMIT=64000
+      - MAX_PROCESSES_AND_OR_THREADS=60
+      - MAX_FILE_SIZE=1024
+      - NUMBER_OF_RUNS=1
+      - ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT=false
+      - ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT=false
+      - ENABLE_NETWORK=false
+
+    depends_on:
+      - judge0-db
+      - judge0-redis
+    networks:
+      - judge0-network
+    privileged: true # Required for code execution isolation
+
+  # PostgreSQL Database
+  judge0-db:
+    image: postgres:13-alpine
+    container_name: judge0-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-judge0}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-YourSecurePassword123}
+      - POSTGRES_DB=${POSTGRES_DB:-judge0}
+    volumes:
+      - judge0-postgres-data:/var/lib/postgresql/data
+    networks:
+      - judge0-network
+
+  # Redis (Job Queue)
+  judge0-redis:
+    image: redis:6-alpine
+    container_name: judge0-redis
+    restart: unless-stopped
+    command: redis-server ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}
+    volumes:
+      - judge0-redis-data:/data
+    networks:
+      - judge0-network
+
+networks:
+  judge0-network:
+    driver: bridge
+
+volumes:
+  judge0-postgres-data:
+  judge0-redis-data:

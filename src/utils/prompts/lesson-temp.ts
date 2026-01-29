@@ -41,7 +41,7 @@ Return valid JSON only:
     {
       "lessonOrder": 1,
       "lessonName": "string",
-      "type": "video | article | quiz",
+      "type": "video | article | quiz | exercise",
       "duration": "Xm",
       "lessonDescription": "2-3 sentences",
       "content": "markdown for article, null for video/quiz",
@@ -50,27 +50,32 @@ Return valid JSON only:
         {"title": "string", "url": "string", "type": "documentation | article | tool | video"}
       ],
       "learningOutcome": "string",
-      "prerequisites": ["string"]
+      "prerequisites": ["string"],
+      "playgroundEnvironment": {
+        "type": "vanilla | frontend | backend | none",
+        "framework": "string | null",
+        "dependencies": ["string"],
+        "supportsExecution": true | false,
+        "executionEngine": "piston | judge0 | sandpack | none",
+        "config": {"template": "string", "files": {}} | null
+      } | null
     }
   ]
 }
 
 LESSON STRUCTURE GUIDELINES (be flexible, adapt to chapter needs):
 - Determine optimal number of lessons based on chapter topics and duration
-- **IMPORTANT: Use DataCamp-style interspersed quizzes** throughout the chapter:
-  * Insert QUIZ lessons (3-5m) after every 1-2 content lessons
-  * Each quiz tests concepts from immediately preceding lessons
-  * Better engagement and retention than one quiz at the end
-- Common patterns:
-  * Short chapters (30m-1h): 4-6 lessons
-  * Medium chapters (1-2h): 6-10 lessons  
-  * Long chapters (2-3h): 8-15 lessons
-  * Aim for 30-40% quiz content in total lesson count
-
-Recommended lesson flow (adapt as needed):
-- Pattern 1: Video (12m) + Article (18m) + Quiz (5m) + Article (20m) + Quiz (5m) = 60m
-- Pattern 2: Video (10m) + Video (12m) + Quiz (5m) + Article (20m) + Article (18m) + Quiz (5m) + Article (15m) + Quiz (5m) = 90m
-- Pattern 3: Video (12m) + Article (20m) + Article (18m) + Quiz (5m) + Video (10m) + Article (20m) + Quiz (5m) + Article (15m) + Quiz (5m) = 110m
+- **IMPORTANT: Mix theory with practice** for programming courses:
+  * Use VIDEO (12m) for concepts and overviews
+  * Use ARTICLE (18-25m) for in-depth explanations with code examples
+  * Use QUIZ (3-5m) after every 1-2 lessons to test understanding
+  * **Use EXERCISE (10-20m) for hands-on coding challenges** - essential for programming topics!
+- Recommended patterns:
+  * Short chapters (30m-1h): 4-6 lessons (video + article + exercise + quiz)
+  * Medium chapters (1-2h): 6-10 lessons (video + 2 articles + exercise + quiz + article + exercise + quiz)
+  * Long chapters (2-3h): 8-15 lessons (2 videos + 2 articles + exercise + quiz + 2 articles + exercise + quiz + exercise)
+- Include at least 1 EXERCISE per chapter for programming courses
+- Aim for: 30-40% quiz content, 20-30% exercise content in total lesson count
 
 Total lesson durations must equal ${args.estimatedDuration} (±5m).
 
@@ -114,6 +119,36 @@ Real-world application with complete code
 Lesson 2 focus: Fundamentals and basic usage
 Lesson 3 focus: Advanced techniques, best practices, edge cases
 
+EXERCISE LESSON (hands-on coding challenge):
+- Duration: 10-20m
+- Content: Markdown with problem description, requirements, example I/O, hints:
+
+## Problem
+Brief description of coding challenge
+
+## Requirements
+- What the solution must accomplish
+- Edge cases to handle
+
+## Example
+\`\`\`
+Input: example input
+Output: expected output
+\`\`\`
+
+## Hints
+- Tips without giving away solution
+
+- VideoSearchQuery: null
+- playgroundEnvironment: REQUIRED! Must include:
+  * type: "vanilla" | "frontend" | "backend"
+  * executionEngine: "piston" (vanilla) | "sandpack" (frontend)
+  * config.starterCode: Function signature or component template
+  * Example: {"type":"vanilla","framework":null,"dependencies":[],"supportsExecution":true,"executionEngine":"piston","config":{"starterCode":"def solve(n):\n    # Your code here\n    pass"}}
+- Description: "Practice {concept} by building {task}"
+- Resources: Links to relevant docs for the challenge
+- Learning outcome: "Implement {concept} to solve {problem}"
+
 QUIZ LESSON (interspersed throughout):
 - Duration: 3-5m
 - Content: null
@@ -123,14 +158,30 @@ QUIZ LESSON (interspersed throughout):
 - Place AFTER every 1-2 content lessons for immediate reinforcement
 - Example: After lessons 2-3, after lessons 5-6, after lessons 8-9
 
+PLAYGROUND ENVIRONMENT (CRITICAL - analyze code in lesson):
+- Detect appropriate playground based on lesson code examples:
+  * **vanilla**: Single-file code (Python DSA, JS algorithms, Java basics) → {"type":"vanilla","framework":null,"dependencies":[],"supportsExecution":true,"executionEngine":"piston"}
+  * **frontend**: React/Vue/Angular components with JSX/templates → {"type":"frontend","framework":"react","dependencies":["react","react-dom"],"supportsExecution":true,"executionEngine":"sandpack","config":{"template":"react"}}
+  * **backend**: Django/FastAPI/Flask requiring framework setup → {"type":"backend","framework":"django","dependencies":["django"],"supportsExecution":false,"executionEngine":"none","config":{"files":{"views.py":"","models.py":""}}}
+  * **none**: No code examples (video/quiz) → playgroundEnvironment=null
+- For EXERCISE lessons, MUST include config.starterCode with function/class template
+- Examples:
+  * "Python Binary Search" → vanilla/piston with starterCode="def binary_search(arr, target):\n    pass"
+  * "React Hooks Tutorial" → frontend/sandpack/react
+  * "FastAPI REST API" → backend/none/fastapi (read-only)
+  * Quiz lesson → null
+
 RULES:
 - lessonOrder: Sequential (1, 2, 3, 4, 5, ...)
-- Only article type has markdown content
+- Only article and exercise types have markdown content
 - Video/quiz types: content must be null
+- Exercise type: content has problem + hints, playgroundEnvironment.config.starterCode has template
 - Each lesson needs 1 specific learning outcome using action verbs
 - Prerequisites: Build on previous lessons logically
 - Intersperse quizzes throughout - don't put all at the end
+- **For programming courses: Include exercise lessons for hands-on practice**
 - Each quiz tests only the immediately preceding 1-2 lessons
+- **MUST include playgroundEnvironment** for lessons with code (articles/exercises), null for video/quiz
 
 Level adjustments:
 - Beginner: More examples, step-by-step, simpler language
