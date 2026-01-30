@@ -20,7 +20,7 @@ export class LessonRepository {
     });
   }
 
-  async getLessons(chapterId: string) {
+  async getLessons(chapterId: string, fields?: string[]) {
     try {
       logger.info(`Fetching lessons for chapter: ${chapterId}`);
 
@@ -32,11 +32,30 @@ export class LessonRepository {
         return cached;
       }
 
-      const querySnapshot = await this.firebaseStore
+      let query: any = this.firebaseStore
         .collection(this.COLLECTION_NAME)
         .where("chapterId", "==", chapterId)
-        .limit(this.DEFAULT_LIMIT)
-        .get();
+        .limit(this.DEFAULT_LIMIT);
+
+      // Field selection for optimized queries
+      if (fields && fields.length > 0) {
+        query = query.select(...fields);
+      } else {
+        // Default fields for lesson list
+        query = query.select(
+          "title",
+          "description",
+          "lessonOrder",
+          "duration",
+          "chapterId",
+          "courseId",
+          "videoUrl",
+          "content",
+          "quizId",
+        );
+      }
+
+      const querySnapshot = await query.get();
 
       logger.info(
         `Found ${querySnapshot.size} lessons for chapter: ${chapterId}`,
@@ -47,7 +66,7 @@ export class LessonRepository {
         return [];
       }
 
-      const lessons = querySnapshot.docs.map((doc) => ({
+      const lessons = querySnapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
       })) as Lesson[];

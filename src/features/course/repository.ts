@@ -66,6 +66,24 @@ export class CourseRepository {
 
       query = query.orderBy("createdAt", "desc") as any;
 
+      if (params?.fields) {
+        query = query.select(...params.fields) as any;
+      } else {
+        query = query.select(
+          "name",
+          "description",
+          "thumbnail",
+          "level",
+          "category",
+          "language",
+          "publish",
+          "draft",
+          "uid",
+          "createdAt",
+          "updatedAt",
+        ) as any;
+      }
+
       const snapshot = await query.get();
 
       if (snapshot.empty) {

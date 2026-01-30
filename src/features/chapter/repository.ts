@@ -20,7 +20,7 @@ export class ChapterRepository {
     });
   }
 
-  async getChapters(courseId: string) {
+  async getChapters(courseId: string, fields?: string[]) {
     try {
       const cacheKey = `chapters:course:${courseId}`;
       const cached = this.cache.get<Chapter[]>(cacheKey);
@@ -30,18 +30,33 @@ export class ChapterRepository {
         return cached;
       }
 
-      const querySnapshot = await this.firebaseStore
+      let query: any = this.firebaseStore
         .collection(this.COLLECTION_NAME)
         .where("courseId", "==", courseId)
-        .limit(this.DEFAULT_LIMIT)
-        .get();
+        .limit(this.DEFAULT_LIMIT);
+
+      if (fields && fields.length > 0) {
+        query = query.select(...fields);
+      } else {
+        query = query.select(
+          "title",
+          "description",
+          "chapterOrder",
+          "courseId",
+          "courseName",
+          "estimatedDuration",
+          "createdAt",
+        );
+      }
+
+      const querySnapshot = await query.get();
 
       if (querySnapshot.empty) {
         logger.info("No matching chapters found.");
         return [];
       }
 
-      const chapters = querySnapshot.docs.map((doc) => ({
+      const chapters = querySnapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data(),
       })) as Chapter[];

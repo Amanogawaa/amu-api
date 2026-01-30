@@ -34,6 +34,7 @@ import { LessonAssistantContainer } from "./features/lesson-assistant/container"
 import { RecommendationContainer } from "./features/recommendation/container";
 import { LeaderboardsContainer } from "./features/leaderboards/container";
 import { config } from "./config/environment";
+import { cacheMiddleware } from "./middlewares/cache.middleware";
 
 class App {
   public app: Application;
@@ -220,6 +221,7 @@ class App {
 
     this.app.use(cors(corsOptions));
     this.app.use(cookieParser(config.security.cookieSecret));
+    this.app.use(cacheMiddleware);
 
     const apiLimiter = rateLimit({
       windowMs: config.security.rateLimitWindowMs,

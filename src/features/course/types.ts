@@ -60,6 +60,7 @@ export interface CourseQueryParams {
   language?: string;
   limit?: number;
   offset?: number;
+  fields?: string[];
 }
 
 export interface CourseResponse {
