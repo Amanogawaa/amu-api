@@ -22,7 +22,9 @@ export const authMiddleware = async (
     let token = req.headers.authorization?.replace("Bearer ", "").trim();
 
     if (!token) {
-      token = req.cookies?.[config.cookie || "FIREBASE_COOKIE_JWT"];
+      token =
+        req.signedCookies?.[config.cookie || "FIREBASE_COOKIE_JWT"] ||
+        req.cookies?.[config.cookie || "FIREBASE_COOKIE_JWT"];
     }
 
     if (!token) {

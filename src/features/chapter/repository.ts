@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Firestore } from "firebase-admin/firestore";
+import NodeCache from "node-cache";
 import { firebaseFirestore } from "../../config/firebase";
 import { logger } from "../../utils/loggers";
 import type { Chapter } from "./types";
@@ -7,16 +8,32 @@ import type { Chapter } from "./types";
 export class ChapterRepository {
   private firebaseStore: Firestore;
   private readonly COLLECTION_NAME = "chapters";
+  private readonly DEFAULT_LIMIT = 100;
+  private cache: NodeCache;
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
+    this.cache = new NodeCache({
+      stdTTL: 600,
+      checkperiod: 120,
+      useClones: false,
+    });
   }
 
   async getChapters(courseId: string) {
     try {
+      const cacheKey = `chapters:course:${courseId}`;
+      const cached = this.cache.get<Chapter[]>(cacheKey);
+
+      if (cached) {
+        logger.info(`Cache hit for chapters in course: ${courseId}`);
+        return cached;
+      }
+
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
         .where("courseId", "==", courseId)
+        .limit(this.DEFAULT_LIMIT)
         .get();
 
       if (querySnapshot.empty) {
@@ -24,10 +41,14 @@ export class ChapterRepository {
         return [];
       }
 
-      return querySnapshot.docs.map((doc) => ({
+      const chapters = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as Chapter[];
+
+      this.cache.set(cacheKey, chapters);
+
+      return chapters;
     } catch (error) {
       logger.error("Error in ChapterRepository.getChapter:", error);
       throw error;
@@ -36,6 +57,14 @@ export class ChapterRepository {
 
   async getChapter(chapterId: string): Promise<Chapter | null> {
     try {
+      const cacheKey = `chapter:${chapterId}`;
+      const cached = this.cache.get<Chapter>(cacheKey);
+
+      if (cached) {
+        logger.info(`Cache hit for chapter: ${chapterId}`);
+        return cached;
+      }
+
       const docRef = this.firebaseStore
         .collection(this.COLLECTION_NAME)
         .doc(chapterId);
@@ -46,10 +75,14 @@ export class ChapterRepository {
         return null;
       }
 
-      return {
+      const chapter = {
         id: doc.id,
         ...doc.data(),
       } as Chapter;
+
+      this.cache.set(cacheKey, chapter);
+
+      return chapter;
     } catch (error) {
       logger.error("Error in ChapterRepository.getChapter:", error);
       throw error;
@@ -139,6 +172,17 @@ export class ChapterRepository {
       }
 
       await batch.commit();
+
+      const updatedCourseIds = new Set(
+        chapters.map((c) => (c as any).courseId).filter(Boolean),
+      );
+      updatedCourseIds.forEach((courseId) => {
+        this.cache.del(`chapters:course:${courseId}`);
+      });
+      chapters.forEach((c) => {
+        if (c.id) this.cache.del(`chapter:${c.id}`);
+      });
+
       return { updated, errors };
     } catch (error) {
       logger.error("Error in ChapterRepository.updateChaptersBatch:", error);
@@ -165,6 +209,12 @@ export class ChapterRepository {
       });
 
       await batch.commit();
+
+      this.cache.del(`chapters:course:${courseId}`);
+      querySnapshot.docs.forEach((doc) => {
+        this.cache.del(`chapter:${doc.id}`);
+      });
+
       logger.info(
         `Deleted ${querySnapshot.size} chapters for courseId: ${courseId}`,
       );

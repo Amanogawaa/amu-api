@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Firestore } from "firebase-admin/firestore";
+import NodeCache from "node-cache";
 import { firebaseFirestore } from "../../config/firebase";
 import { AppError } from "../../utils/errors";
 import { logger } from "../../utils/loggers";
@@ -8,9 +9,18 @@ import type { Course, CourseQueryParams } from "./types";
 export class CourseRepository {
   private firebaseStore: Firestore;
   private readonly COLLECTION_NAME = "courses";
+  private readonly DEFAULT_LIMIT = 50;
+  private readonly MAX_LIMIT = 100;
+  private cache: NodeCache;
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
+
+    this.cache = new NodeCache({
+      stdTTL: 600,
+      checkperiod: 120,
+      useClones: false,
+    });
   }
 
   async getCourse(params?: CourseQueryParams): Promise<Course[]> {
@@ -44,14 +54,16 @@ export class CourseRepository {
       if (params?.language) {
         query = query.where("language", "==", params.language) as any;
       }
-      if (params?.limit) {
-        query = query.limit(params.limit) as any;
-      }
+
+      const limit = params?.limit
+        ? Math.min(params.limit, this.MAX_LIMIT)
+        : this.DEFAULT_LIMIT;
+      query = query.limit(limit) as any;
+
       if (params?.offset) {
         query = query.offset(params.offset) as any;
       }
 
-      // Sort by createdAt (newest first) by default
       query = query.orderBy("createdAt", "desc") as any;
 
       const snapshot = await query.get();
@@ -83,6 +95,14 @@ export class CourseRepository {
   }
 
   async getCourseById(slug: string): Promise<Course> {
+    const cacheKey = `course:${slug}`;
+    const cached = this.cache.get<Course>(cacheKey);
+
+    if (cached) {
+      logger.info(`Cache hit for course: ${slug}`);
+      return cached;
+    }
+
     const docRef = this.firebaseStore
       .collection(this.COLLECTION_NAME)
       .doc(slug);
@@ -95,7 +115,7 @@ export class CourseRepository {
 
     const data = doc.data();
 
-    return {
+    const course = {
       id: doc.id,
       ...data,
       learning_outcomes:
@@ -105,6 +125,10 @@ export class CourseRepository {
       createdAt: data?.createdAt?.toDate,
       updatedAt: data?.updatedAt?.toDate,
     } as Course;
+
+    this.cache.set(cacheKey, course);
+    logger.info(`Cached course: ${slug}`);
+    return course;
   }
 
   async createCourse(request: Omit<Course, "id">): Promise<Course> {
@@ -168,6 +192,9 @@ export class CourseRepository {
         .collection(this.COLLECTION_NAME)
         .doc(courseId)
         .delete();
+
+      this.cache.del(`course:${courseId}`);
+      logger.info(`Cache invalidated for deleted course: ${courseId}`);
 
       logger.info(
         `Course with ID: ${courseId} and its related data have been deleted.`,
@@ -235,6 +262,9 @@ export class CourseRepository {
         ...updates,
         updatedAt: new Date(),
       });
+
+      this.cache.del(`course:${courseId}`);
+      logger.info(`Cache invalidated for updated course: ${courseId}`);
 
       logger.info(`Course with ID: ${courseId} has been updated.`);
     } catch (error) {

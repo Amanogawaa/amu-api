@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Firestore } from "firebase-admin/firestore";
+import NodeCache from "node-cache";
 import { firebaseFirestore } from "../../config/firebase";
 import { logger } from "../../utils/loggers";
 import type { Lesson } from "./types";
@@ -7,18 +8,34 @@ import type { Lesson } from "./types";
 export class LessonRepository {
   private firebaseStore: Firestore;
   private readonly COLLECTION_NAME = "lessons";
+  private readonly DEFAULT_LIMIT = 100; // Lessons are typically limited per chapter
+  private cache: NodeCache;
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
+    this.cache = new NodeCache({
+      stdTTL: 600,
+      checkperiod: 120,
+      useClones: false,
+    });
   }
 
   async getLessons(chapterId: string) {
     try {
       logger.info(`Fetching lessons for chapter: ${chapterId}`);
 
+      const cacheKey = `lessons:chapter:${chapterId}`;
+      const cached = this.cache.get<Lesson[]>(cacheKey);
+
+      if (cached) {
+        logger.info(`Cache hit for lessons in chapter: ${chapterId}`);
+        return cached;
+      }
+
       const querySnapshot = await this.firebaseStore
         .collection(this.COLLECTION_NAME)
         .where("chapterId", "==", chapterId)
+        .limit(this.DEFAULT_LIMIT)
         .get();
 
       logger.info(
@@ -35,7 +52,13 @@ export class LessonRepository {
         ...doc.data(),
       })) as Lesson[];
 
-      return lessons.sort((a, b) => a.lessonOrder - b.lessonOrder);
+      const sortedLessons = lessons.sort(
+        (a, b) => a.lessonOrder - b.lessonOrder,
+      );
+
+      this.cache.set(cacheKey, sortedLessons);
+
+      return sortedLessons;
     } catch (error) {
       logger.error("Error in ChapterRepository.getChapter:", error);
       throw error;
@@ -75,6 +98,8 @@ export class LessonRepository {
         `Created ${createdLesson.length} lesson for chapter ${chapterId}`,
       );
 
+      this.cache.del(`lessons:chapter:${chapterId}`);
+
       return createdLesson;
     } catch (error) {
       logger.error("Error in LessonRepository.createLessons:", error);
@@ -100,7 +125,6 @@ export class LessonRepository {
           .collection(this.COLLECTION_NAME)
           .doc(lesson.id);
 
-        // Check if document exists
         const doc = await docRef.get();
         if (!doc.exists) {
           errors.push({ lesson, error: "Lesson not found" });
@@ -169,10 +193,17 @@ export class LessonRepository {
       await docRef.update(updateData);
 
       const updatedDoc = await docRef.get();
-      return {
+      const lesson = {
         id: updatedDoc.id,
         ...updatedDoc.data(),
       } as Lesson;
+
+      const chapterId = (updatedDoc.data() as any)?.chapterId;
+      if (chapterId) {
+        this.cache.del(`lessons:chapter:${chapterId}`);
+      }
+
+      return lesson;
     } catch (error) {
       logger.error("Error in LessonRepository.updateLesson:", error);
       throw error;
@@ -190,7 +221,14 @@ export class LessonRepository {
         throw new Error("Lesson not found");
       }
 
+      const chapterId = (doc.data() as any)?.chapterId;
+
       await docRef.delete();
+
+      if (chapterId) {
+        this.cache.del(`lessons:chapter:${chapterId}`);
+      }
+
       logger.info(`Deleted lesson ${lessonId}`);
     } catch (error) {
       logger.error("Error in LessonRepository.deleteLesson:", error);

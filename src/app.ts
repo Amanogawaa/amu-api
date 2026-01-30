@@ -1,5 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import compression from "compression";
 import type { Application, NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
@@ -130,9 +131,21 @@ class App {
     );
 
     this.app.use(
+      compression({
+        filter: (req: Request, res: Response) => {
+          if (req.headers["x-no-compression"]) {
+            return false;
+          }
+          return compression.filter(req, res);
+        },
+        level: 6,
+        threshold: 1024,
+      }),
+    );
+
+    this.app.use(
       express.json({
         limit: "10mb",
-        verify: (req, res, buf, encoding) => {},
       }),
     );
 
@@ -152,12 +165,10 @@ class App {
             styleSrc: ["'self'", "'unsafe-inline'"],
             scriptSrc: ["'self'"],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: [
-              "'self'",
-              config.security.corsOrigins[0] || "http://localhost:3000",
-            ],
+            connectSrc: ["'self'", ...config.security.corsOrigins],
             fontSrc: ["'self'", "data:"],
             objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
           },
         },
         hsts: {
@@ -173,6 +184,11 @@ class App {
 
     if (config.env === "production") {
       this.app.use((req, res, next) => {
+        // Skip HTTPS redirect for health check endpoints
+        if (req.path === "/health" || req.path === "/api/health") {
+          return next();
+        }
+
         if (req.secure || req.headers["x-forwarded-proto"] === "https") {
           return next();
         }
@@ -203,7 +219,7 @@ class App {
     };
 
     this.app.use(cors(corsOptions));
-    this.app.use(cookieParser());
+    this.app.use(cookieParser(config.security.cookieSecret));
 
     const apiLimiter = rateLimit({
       windowMs: config.security.rateLimitWindowMs,
