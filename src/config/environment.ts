@@ -49,11 +49,13 @@ export const config = {
   // Security configuration
   security: {
     rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
-    rateLimitMaxRequests: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000,
+    rateLimitMaxRequests: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+    rateLimitAuthMax: Number(process.env.RATE_LIMIT_AUTH_MAX) || 5,
     corsOrigins: process.env.CORS_ORIGINS?.split(",").map((origin) =>
       origin.trim(),
     ) || ["http://localhost:5173", "http://localhost:3000"],
     maxApiConnections: Number(process.env.MAX_API_CONNECTIONS) || 500,
+    cookieSecret: process.env.COOKIE_SECRET || crypto.randomUUID(),
   },
 
   codeExecution: {

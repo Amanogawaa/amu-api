@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { AppError, ValidationError } from "../utils/errors";
 import { logger } from "../utils/loggers";
+import { config } from "../config/environment";
 
 interface ErrorResponse {
   error: {
@@ -18,11 +19,9 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ): void => {
-  // Extract or generate request ID
   const requestId =
     (req.headers["x-request-id"] as string) || crypto.randomUUID();
 
-  // Log error with context
   logger.error("Error occurred", {
     requestId,
     error: err.message,
@@ -32,7 +31,6 @@ export const errorHandler = (
     statusCode: (err as AppError).statusCode || 500,
   });
 
-  // Handle operational errors (AppError and subclasses)
   if (err instanceof AppError) {
     const response: ErrorResponse = {
       error: {
@@ -43,7 +41,6 @@ export const errorHandler = (
       status: "error",
     };
 
-    // Add validation fields if present
     if (err instanceof ValidationError && err.fields) {
       response.error.fields = err.fields;
     }
@@ -52,18 +49,23 @@ export const errorHandler = (
     return;
   }
 
-  // Handle unknown/programming errors
   logger.error("Unexpected error", {
     requestId,
     error: err.message,
     stack: err.stack,
   });
 
+  const isDevelopment = config.env === "development";
+
   res.status(500).json({
     error: {
-      message: "An unexpected error occurred",
+      message: isDevelopment ? err.message : "An unexpected error occurred",
       code: "INTERNAL_SERVER_ERROR",
       requestId,
+      ...(isDevelopment && {
+        stack: err.stack,
+        details: err,
+      }),
     },
     status: "error",
   });

@@ -132,13 +132,13 @@ export const lessonsSchema = {
             items: { type: "string" },
           },
           playgroundEnvironment: {
-            type: ["object", "null"],
+            type: ["object"],
             properties: {
               type: {
                 type: "string",
                 enum: ["vanilla", "frontend", "backend", "none"],
               },
-              framework: { type: ["string", "null"] },
+              framework: { type: ["string"] },
               dependencies: {
                 type: "array",
                 items: { type: "string" },
@@ -149,10 +149,13 @@ export const lessonsSchema = {
                 enum: ["piston", "judge0", "sandpack", "none"],
               },
               config: {
-                type: ["object", "null"],
+                type: ["object"],
                 properties: {
                   template: { type: "string" },
-                  files: { type: "object" },
+                  files: {
+                    type: "object",
+                    additionalProperties: { type: "string" },
+                  },
                   buildCommand: { type: "string" },
                   runCommand: { type: "string" },
                 },
@@ -172,6 +175,7 @@ export const lessonsSchema = {
           "resources",
           "learningOutcome",
           "prerequisites",
+          "playgroundEnvironment",
         ],
       },
     },

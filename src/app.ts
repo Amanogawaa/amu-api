@@ -4,6 +4,7 @@ import type { Application, NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
 import http from "http";
+import rateLimit from "express-rate-limit";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
 import { logger } from "./utils/loggers";
@@ -128,9 +129,56 @@ class App {
       this.progressContainer.repository,
     );
 
-    this.app.use(express.json());
-    this.app.use(helmet());
-    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(
+      express.json({
+        limit: "10mb",
+        verify: (req, res, buf, encoding) => {},
+      }),
+    );
+
+    this.app.use(
+      express.urlencoded({
+        extended: true,
+        limit: "10mb",
+        parameterLimit: 1000,
+      }),
+    );
+
+    this.app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: [
+              "'self'",
+              config.security.corsOrigins[0] || "http://localhost:3000",
+            ],
+            fontSrc: ["'self'", "data:"],
+            objectSrc: ["'none'"],
+          },
+        },
+        hsts: {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        },
+        frameguard: { action: "deny" },
+        noSniff: true,
+        referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+      }),
+    );
+
+    if (config.env === "production") {
+      this.app.use((req, res, next) => {
+        if (req.secure || req.headers["x-forwarded-proto"] === "https") {
+          return next();
+        }
+        res.redirect(301, `https://${req.headers.host}${req.url}`);
+      });
+    }
 
     const corsOptions = {
       origin: (
@@ -157,9 +205,46 @@ class App {
     this.app.use(cors(corsOptions));
     this.app.use(cookieParser());
 
+    const apiLimiter = rateLimit({
+      windowMs: config.security.rateLimitWindowMs,
+      max: config.security.rateLimitMaxRequests,
+      message: {
+        error: {
+          message: "Too many requests from this IP, please try again later",
+          code: "RATE_LIMIT_EXCEEDED",
+        },
+        status: "error",
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+      skip: (req) => req.path === "/health",
+    });
+
+    const authLimiter = rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 5,
+      skipSuccessfulRequests: true,
+      message: {
+        error: {
+          message: "Too many authentication attempts, please try again later",
+          code: "AUTH_RATE_LIMIT_EXCEEDED",
+        },
+        status: "error",
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
+
+    this.app.use("/api/", apiLimiter);
+    this.app.use("/api/auth/", authLimiter);
+
     this.app.use(
       "/uploads",
-      express.static(path.join(process.cwd(), "uploads")),
+      express.static(path.join(process.cwd(), "uploads"), {
+        maxAge: "1d",
+        etag: true,
+        lastModified: true,
+      }),
     );
 
     this.app.get("/health", (req, res) => {
@@ -204,12 +289,34 @@ class App {
 
   private initializeMiddleware(): void {
     this.app.use((req: Request, res: Response, next: NextFunction) => {
+      const start = Date.now();
+
       logger.info("Incoming request", {
         method: req.method,
         url: req.url,
         ip: req.ip,
         userAgent: req.get("User-Agent"),
       });
+
+      res.on("finish", () => {
+        const duration = Date.now() - start;
+        const isSlowRequest = duration > 1000;
+
+        const logData = {
+          method: req.method,
+          url: req.url,
+          status: res.statusCode,
+          duration: `${duration}ms`,
+          ip: req.ip,
+        };
+
+        if (isSlowRequest) {
+          logger.warn("Slow request detected", logData);
+        } else {
+          logger.info("Request completed", logData);
+        }
+      });
+
       next();
     });
   }

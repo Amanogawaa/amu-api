@@ -10,6 +10,7 @@ revisions todo:
     ✔ match number of lessons to duration of courses - dont force 4 lessons per chapter, let the ai decide based on the duration of the course, remove ung constraints in the chapter template @done(26-01-23 17:00)
     ☐ course recommendation system - based on learning style, skill level, and previous courses
     ✔ sort courses by recently generated as default with date generated indicator @done(26-01-23 00:00)
+    ☐ the course should be not saved in database until all lessons are generated successfully         
 
 issue to fix:
     ✔ validation verification and analysis of request before generating - backend middleware to validate request data before processing (current implementation is not working as intended) @done(25-11-10 08:03)

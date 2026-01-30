@@ -20,12 +20,16 @@ export interface SocketConfig {
 
 export const socketConfig: SocketConfig = {
   cors: {
-    origin: [process.env.NEXTJS_FRONTEND_URL || "http://localhost:3000", "*"],
+    origin: [
+      process.env.NEXTJS_FRONTEND_URL || "http://localhost:3000",
+      ...(process.env.ADDITIONAL_SOCKET_ORIGINS?.split(",").filter(Boolean) ||
+        []),
+    ],
     methods: ["GET", "POST"],
     credentials: true,
   },
-  pingTimeout: 60000,
-  pingInterval: 25000,
+  pingTimeout: 30000,
+  pingInterval: 15000,
 };
 
 export function initializeSocketIO(
