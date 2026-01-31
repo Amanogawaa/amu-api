@@ -16,6 +16,9 @@ export interface SocketConfig {
   };
   pingTimeout: number;
   pingInterval: number;
+  maxHttpBufferSize: number;
+  transports: ("websocket" | "polling")[];
+  connectTimeout: number;
 }
 
 export const socketConfig: SocketConfig = {
@@ -30,6 +33,9 @@ export const socketConfig: SocketConfig = {
   },
   pingTimeout: 30000,
   pingInterval: 15000,
+  maxHttpBufferSize: 1e6,
+  transports: ["websocket", "polling"],
+  connectTimeout: 45000,
 };
 
 export function initializeSocketIO(

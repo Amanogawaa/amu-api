@@ -4,6 +4,7 @@ import NodeCache from "node-cache";
 import { firebaseFirestore } from "../../config/firebase";
 import { AppError } from "../../utils/errors";
 import { logger } from "../../utils/loggers";
+import { sanitizeSearchQuery, sanitizeInput } from "../../utils/sanitizer";
 import type { Course, CourseQueryParams } from "./types";
 
 export class CourseRepository {
@@ -32,9 +33,10 @@ export class CourseRepository {
       }
 
       if (params?.search) {
+        const sanitizedSearch = sanitizeSearchQuery(params.search);
         query = query
-          .where("name", ">=", params.search)
-          .where("name", "<=", params.search + "\uf8ff") as any;
+          .where("name", ">=", sanitizedSearch)
+          .where("name", "<=", sanitizedSearch + "\uf8ff") as any;
       }
 
       if (params?.publish !== undefined) {
@@ -46,13 +48,21 @@ export class CourseRepository {
       }
 
       if (params?.level) {
-        query = query.where("level", "==", params.level) as any;
+        query = query.where("level", "==", sanitizeInput(params.level)) as any;
       }
       if (params?.category) {
-        query = query.where("category", "==", params.category) as any;
+        query = query.where(
+          "category",
+          "==",
+          sanitizeInput(params.category),
+        ) as any;
       }
       if (params?.language) {
-        query = query.where("language", "==", params.language) as any;
+        query = query.where(
+          "language",
+          "==",
+          sanitizeInput(params.language),
+        ) as any;
       }
 
       const limit = params?.limit

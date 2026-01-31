@@ -14,6 +14,7 @@ import { initializeSocketIO } from "./config/socket";
 import { socketAuthMiddleware } from "./middlewares/socket.middleware";
 import { SocketHandlers } from "./utils/socket/socket.handlers";
 import path from "path";
+import { performanceMonitor } from "./middlewares/performance.middleware";
 
 import { AuthContainer } from "./features/auth/container";
 import { ChapterContainer } from "./features/chapter/container";
@@ -221,6 +222,7 @@ class App {
 
     this.app.use(cors(corsOptions));
     this.app.use(cookieParser(config.security.cookieSecret));
+    this.app.use(performanceMonitor);
     this.app.use(cacheMiddleware);
 
     const apiLimiter = rateLimit({

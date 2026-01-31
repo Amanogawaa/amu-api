@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from "express";
+import { Router } from "express";
 import { AuthContainer } from "./features/auth/container";
 import type { ChapterContainer } from "./features/chapter/container";
 import type { CodePlaygroundContainer } from "./features/code-playground/container";
@@ -16,6 +16,12 @@ import type { GitHubContainer } from "./features/github/container";
 import type { LessonAssistantContainer } from "./features/lesson-assistant/container";
 import type { RecommendationContainer } from "./features/recommendation/container";
 import type { LeaderboardsContainer } from "./features/leaderboards/container";
+import {
+  basicHealthCheck,
+  detailedHealthCheck,
+  readinessCheck,
+  livenessCheck,
+} from "./utils/health";
 
 export class AppRoutes {
   private router: Router;
@@ -75,14 +81,10 @@ export class AppRoutes {
   }
 
   private initializeRoutes() {
-    this.router.get("/health", (req: Request, res: Response) => {
-      res.status(200).json({
-        status: "ok",
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV || "development",
-      });
-    });
+    this.router.get("/health", basicHealthCheck);
+    this.router.get("/health/detailed", detailedHealthCheck);
+    this.router.get("/health/ready", readinessCheck);
+    this.router.get("/health/live", livenessCheck);
 
     this.router.use("/", this.authContainer.getRouter());
     this.router.use("/", this.courseContainer.getRouter());
