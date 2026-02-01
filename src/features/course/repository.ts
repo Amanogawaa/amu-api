@@ -6,6 +6,7 @@ import { AppError } from "../../utils/errors";
 import { logger } from "../../utils/loggers";
 import { sanitizeSearchQuery, sanitizeInput } from "../../utils/sanitizer";
 import type { Course, CourseQueryParams } from "./types";
+import type { StagedCourseData } from "../../utils/service/generation.service";
 
 export class CourseRepository {
   private firebaseStore: Firestore;
@@ -370,6 +371,115 @@ export class CourseRepository {
         error,
       );
       throw error;
+    }
+  }
+
+  /**
+   * Atomically create course with all related entities (chapters and lessons)
+   * Uses Firestore batch writes to ensure all-or-nothing semantics
+   */
+  async createCourseWithRelations(staged: StagedCourseData): Promise<Course> {
+    try {
+      const batches: any[] = [];
+      let currentBatch = this.firebaseStore.batch();
+      let operationCount = 0;
+      const MAX_BATCH_SIZE = 450;
+
+      const courseRef = this.firebaseStore
+        .collection(this.COLLECTION_NAME)
+        .doc();
+      const courseData = {
+        ...staged.course,
+        learning_outcomes: Array.isArray(staged.course.learning_outcomes)
+          ? JSON.stringify(staged.course.learning_outcomes)
+          : staged.course.learning_outcomes,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      currentBatch.set(courseRef, courseData);
+      operationCount++;
+
+      logger.info("Creating course with relations", {
+        courseId: courseRef.id,
+        courseName: staged.course.name,
+        chaptersCount: staged.chapters.length,
+        totalLessons: staged.chapters.reduce(
+          (sum, c) => sum + c.lessons.length,
+          0,
+        ),
+      });
+
+      for (let i = 0; i < staged.chapters.length; i++) {
+        const chapterData = staged.chapters[i];
+        if (!chapterData) continue;
+
+        const { chapter, lessons } = chapterData;
+
+        const chapterRef = this.firebaseStore.collection("chapters").doc();
+
+        currentBatch.set(chapterRef, {
+          ...chapter,
+          courseId: courseRef.id,
+          courseName: staged.course.name,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        operationCount++;
+
+        if (operationCount >= MAX_BATCH_SIZE) {
+          batches.push(currentBatch);
+          currentBatch = this.firebaseStore.batch();
+          operationCount = 0;
+        }
+
+        for (const lesson of lessons) {
+          const lessonRef = this.firebaseStore.collection("lessons").doc();
+
+          currentBatch.set(lessonRef, {
+            ...lesson,
+            chapterId: chapterRef.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          operationCount++;
+
+          if (operationCount >= MAX_BATCH_SIZE) {
+            batches.push(currentBatch);
+            currentBatch = this.firebaseStore.batch();
+            operationCount = 0;
+          }
+        }
+      }
+
+      if (operationCount > 0) {
+        batches.push(currentBatch);
+      }
+
+      logger.info(
+        `Committing ${batches.length} batch(es) for course creation`,
+        {
+          courseId: courseRef.id,
+          totalOperations:
+            1 +
+            staged.chapters.length +
+            staged.chapters.reduce((sum, c) => sum + c.lessons.length, 0),
+        },
+      );
+
+      await Promise.all(batches.map((batch) => batch.commit()));
+
+      logger.info(
+        `Successfully created course ${courseRef.id} with all relations`,
+      );
+
+      return {
+        id: courseRef.id,
+        ...staged.course,
+      };
+    } catch (error) {
+      logger.error("Failed to commit course with relations", error);
+      throw new AppError("Failed to save course. Please try again.", 500);
     }
   }
 }

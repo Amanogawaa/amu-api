@@ -138,7 +138,7 @@ export const lessonsSchema = {
                 type: "string",
                 enum: ["vanilla", "frontend", "backend", "none"],
               },
-              framework: { type: ["string"] },
+              framework: { type: "string" },
               dependencies: {
                 type: "array",
                 items: { type: "string" },
@@ -149,13 +149,14 @@ export const lessonsSchema = {
                 enum: ["piston", "judge0", "sandpack", "none"],
               },
               config: {
-                type: ["object"],
+                type: ["object", "null"],
                 properties: {
                   template: { type: "string" },
                   files: {
                     type: "object",
-                    additionalProperties: { type: "string" },
+                    items: { type: "string" },
                   },
+                  starterCode: { type: "string" },
                   buildCommand: { type: "string" },
                   runCommand: { type: "string" },
                 },

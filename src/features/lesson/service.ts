@@ -299,4 +299,54 @@ export class LessonService {
       throw error;
     }
   }
+
+  public async generateLessonsData(
+    request: GenerateLessonRequest,
+  ): Promise<Array<Omit<Lesson, "id" | "chapterId">>> {
+    try {
+      const promptMode: LessonPromptMode = request.promptMode ?? "legacy";
+      const { userPrompt, systemPrompt } = buildLessonsPrompt(
+        {
+          chapterId: request.chapterId,
+          chapterName: request.chapterName,
+          chapterDescription: request.chapterDescription,
+          chapterOrder: request.chapterOrder,
+          learningObjectives: request.learningObjectives,
+          keyTopics: request.keyTopics,
+          estimatedDuration: request.estimatedDuration,
+          courseName: request.courseName,
+          level: request.level,
+          language: request.language,
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode },
+      );
+
+      const result = await geminiCall(userPrompt, {
+        responseSchema: lessonsSchema,
+        temperature: 0.7,
+        maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `lessons:${promptMode}`,
+        metadata: {
+          chapterName: request.chapterName,
+          courseName: request.courseName,
+        },
+      });
+
+      logger.info("Lessons data generated (staged)", {
+        mode: promptMode,
+        lessonCount: result?.lessons?.length ?? 0,
+      });
+
+      if (!result.lessons || !Array.isArray(result.lessons)) {
+        throw new Error("Invalid response from Gemini: missing lessons array");
+      }
+
+      return result.lessons;
+    } catch (error) {
+      logger.error("Error in LessonService.generateLessonsData:", error);
+      throw error;
+    }
+  }
 }

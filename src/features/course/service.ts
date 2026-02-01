@@ -5,6 +5,7 @@ import {
   type CoursePromptMode,
 } from "../../utils/prompts/course-temp";
 import { CourseRepository } from "./repository";
+import type { StagedCourseData } from "../../utils/service/generation.service";
 
 import { geminiCall } from "../../utils/geminiCall";
 import {
@@ -154,17 +155,15 @@ export class CourseService {
         );
       }
 
-      const validatedCourse = courseSchema.parse(parsedCourse);
-
       logger.info("Course generated successfully (streamed)", {
         mode: promptMode,
         topic: request.topic,
         uid: request.uid,
-        name: validatedCourse?.name,
+        name: parsedCourse?.name,
       });
 
       const courseData: Course = {
-        ...validatedCourse,
+        ...parsedCourse,
         uid: request.uid,
         publish: false,
         draft: true,
@@ -334,6 +333,77 @@ export class CourseService {
       return await this.courseRepository.getCourseById(courseId);
     } catch (error) {
       logger.error("Error in CourseService.undraftCourse:", error);
+      throw error;
+    }
+  }
+
+  public async generateCourseData(
+    request: GenerateCourseRequest,
+  ): Promise<Omit<Course, "id">> {
+    try {
+      const promptMode: CoursePromptMode = request.promptMode ?? "system";
+      const { userPrompt, systemPrompt } = buildCoursePrompt(
+        {
+          category: request.category,
+          topic: request.topic,
+          level: request.level,
+          duration: request.duration,
+          noOfChapters: request.noOfChapters,
+          language: request.language,
+          userInstructions: request.userInstructions ?? "",
+        },
+        promptMode,
+      );
+
+      const result = await geminiCall(userPrompt, {
+        responseSchema: courseSchema,
+        temperature: 0.7,
+        maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `course:${promptMode}`,
+        metadata: {
+          topic: request.topic,
+          level: request.level,
+        },
+      });
+
+      logger.info("Course data generated (staged)", {
+        mode: promptMode,
+        topic: request.topic,
+        uid: request.uid,
+        name: result?.name,
+      });
+
+      const courseData: Omit<Course, "id"> = {
+        ...result,
+        uid: request.uid,
+        publish: false,
+        draft: true,
+      };
+
+      const nameExist = await this.courseRepository.courseNameExists(
+        courseData.name,
+        courseData.uid,
+      );
+
+      if (nameExist) {
+        courseData.name = `${courseData.name} (${Date.now()})`;
+      }
+
+      return courseData;
+    } catch (error) {
+      logger.error("Error in CourseService.generateCourseData:", error);
+      throw error;
+    }
+  }
+
+  public async createCourseWithRelations(
+    staged: StagedCourseData,
+  ): Promise<Course> {
+    try {
+      return await this.courseRepository.createCourseWithRelations(staged);
+    } catch (error) {
+      logger.error("Error in CourseService.createCourseWithRelations:", error);
       throw error;
     }
   }
