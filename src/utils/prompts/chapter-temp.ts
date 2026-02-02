@@ -138,3 +138,130 @@ export const buildChaptersPrompt = (
 
   return systemChaptersPrompt(args, intent);
 };
+
+// ============================================
+// NEW: Sequential Single Chapter Generation (Legacy buildChaptersPrompt unchanged)
+// ============================================
+
+/**
+ * Helper to calculate duration for a single module based on total course duration
+ */
+function calculateModuleDuration(
+  totalDuration: string,
+  moduleIndex: number,
+  totalModules: number,
+): string {
+  // Parse total duration (e.g., "10 hours" -> 600 minutes)
+  const match = totalDuration.match(/(\d+)\s*(hour|minute)/i);
+  if (!match) return "30-60 minutes";
+
+  const value = Number.parseInt(match[1]!);
+  const unit = match[2]!.toLowerCase();
+  const totalMinutes = unit === "hour" ? value * 60 : value;
+
+  const minutesPerModule = Math.floor(totalMinutes / totalModules);
+  const hours = Math.floor(minutesPerModule / 60);
+  const mins = minutesPerModule % 60;
+
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours} hours`;
+  }
+  return `${minutesPerModule} minutes`;
+}
+
+/**
+ * Builds prompt for generating a SINGLE chapter with context from previous modules
+ * Used in sequential course generation flow
+ */
+export function buildSingleChapterPrompt(
+  args: {
+    courseName: string;
+    courseDescription: string;
+    moduleIndex: number;
+    totalModules: number;
+    previousModules: Array<{
+      chapterName: string;
+      description: string;
+      learningObjectives: string[];
+    }>;
+    level: string;
+    language: string;
+    duration: string;
+    learningOutcomes?: string[];
+    skillsGained?: string[];
+    prerequisites?: string;
+    userInstructions?: string;
+  },
+  options: { mode: ChapterPromptMode; intent: string },
+): { userPrompt: string; systemPrompt: string } {
+  const moduleNumber = args.moduleIndex + 1;
+
+  const previousContext =
+    args.previousModules && args.previousModules.length > 0
+      ? `
+**Previous Modules (for context)**:
+${args.previousModules
+  .map(
+    (mod, i) => `
+Module ${i + 1}: ${mod.chapterName}
+- Description: ${mod.description}
+- Key Topics: ${mod.learningObjectives.join(", ")}
+`,
+  )
+  .join("\n")}
+
+**IMPORTANT**: Build upon these previous modules. Ensure logical progression and avoid repetition.
+`
+      : "This is the first module in the course.";
+
+  const systemPrompt =
+    options.mode === "system"
+      ? `You are ModuleArchitect v2. Generate a SINGLE module (Module ${moduleNumber} of ${args.totalModules}) for a programming course.
+
+Context:
+- Course: "${args.courseName}"
+- Total Modules: ${args.totalModules}
+- Current Module: ${moduleNumber}
+- Level: ${args.level}
+
+${previousContext}
+
+Requirements:
+1. Build logically on previous modules (if any)
+2. Appropriate difficulty progression
+3. 4-6 learning objectives (specific and measurable)
+4. 5-8 key topics to be covered
+5. Estimate 3-7 lessons needed for this module
+6. Clear practical application examples
+
+Return ONLY valid minified JSON matching the schema. No markdown, no explanations.`
+      : "";
+
+  const userPrompt = `
+Generate Module ${moduleNumber} of ${args.totalModules} for the course "${args.courseName}".
+
+**Course Context**:
+- Description: ${args.courseDescription}
+- Level: ${args.level}
+- Language: ${args.language}
+- Total Duration: ${args.duration}
+${args.learningOutcomes ? `- Learning Outcomes: ${args.learningOutcomes.join("; ")}` : ""}
+${args.skillsGained ? `- Skills to Gain: ${args.skillsGained.join(", ")}` : ""}
+${args.prerequisites ? `- Prerequisites: ${args.prerequisites}` : ""}
+
+${previousContext}
+
+**Module ${moduleNumber} Requirements**:
+- Should cover approximately ${Math.ceil(100 / args.totalModules)}% of course content
+- Estimated duration: ${calculateModuleDuration(args.duration, args.moduleIndex, args.totalModules)}
+- Must align with overall course learning outcomes
+- Progressive difficulty from previous modules (if applicable)
+- Include practical, real-world applications
+
+${args.userInstructions ? `\n**User Instructions**: ${args.userInstructions}\n` : ""}
+
+Generate comprehensive module metadata as JSON following the schema.
+`;
+
+  return { userPrompt, systemPrompt };
+}

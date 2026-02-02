@@ -312,6 +312,93 @@ export class CourseRoute {
 
     /**
      * @openapi
+     * /courses/generate-sequential:
+     *   post:
+     *     tags:
+     *       - My Courses
+     *     summary: Generate a complete course SEQUENTIALLY with real-time module-by-module updates
+     *     description: |
+     *       NEW: Generates a full course structure module by module with incremental progress.
+     *       Better UX compared to bulk generation - users can preview modules as they complete.
+     *       This is an asynchronous operation that returns immediately with a 202 status.
+     *       Connect to Socket.IO and listen for:
+     *       - 'generation:progress' - Overall progress updates
+     *       - 'module:completed' - Individual module completion (allows early preview!)
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - category
+     *               - topic
+     *               - level
+     *               - duration
+     *               - noOfChapters
+     *               - language
+     *             properties:
+     *               category:
+     *                 type: string
+     *                 example: Programming
+     *               topic:
+     *                 type: string
+     *                 example: Python for Data Science
+     *               level:
+     *                 type: string
+     *                 enum: [beginner, intermediate, advanced]
+     *                 example: beginner
+     *               duration:
+     *                 type: string
+     *                 example: 20 hours
+     *               noOfChapters:
+     *                 type: integer
+     *                 minimum: 1
+     *                 maximum: 10
+     *                 example: 5
+     *               language:
+     *                 type: string
+     *                 example: English
+     *               userInstructions:
+     *                 type: string
+     *                 example: Include lots of practical examples
+     *               promptMode:
+     *                 type: string
+     *                 enum: [system, legacy]
+     *                 example: system
+     *     responses:
+     *       202:
+     *         description: Sequential generation started
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *                   example: Sequential course generation started
+     *                 note:
+     *                   type: string
+     *                   example: Listen for generation:progress and module:completed events
+     *                 mode:
+     *                   type: string
+     *                   example: sequential
+     *       400:
+     *         description: Invalid request body
+     *       503:
+     *         description: Service not available
+     */
+    this.router.post(
+      "/courses/generate-sequential",
+      authMiddleware,
+      validateCourseTopic,
+      checkDuplicateCourse,
+      validateGenerateCourse,
+      this.controller.generateFullCourseSequential.bind(this.controller),
+    );
+
+    /**
+     * @openapi
      * /courses/{id}:
      *   patch:
      *     tags:

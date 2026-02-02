@@ -2,13 +2,16 @@ import { geminiCall } from "../../utils/geminiCall";
 import { logger } from "../../utils/loggers";
 import {
   buildChaptersPrompt,
+  buildSingleChapterPrompt,
   type ChapterPromptMode,
 } from "../../utils/prompts/chapter-temp";
 import { ChapterRepository } from "./repository";
 import {
   chaptersSchema,
+  singleChapterSchema,
   type Chapter,
   type GenerateChaptersRequest,
+  type GenerateSingleChapterRequest,
 } from "./types";
 
 export class ChapterService {
@@ -148,6 +151,97 @@ export class ChapterService {
       return result.chapters;
     } catch (error) {
       logger.error("Error in ChapterService.generateChaptersData:", error);
+      throw error;
+    }
+  }
+
+  // ============================================
+  // NEW: Sequential Single Chapter Generation (Legacy generateChapters unchanged)
+  // ============================================
+
+  /**
+   * Generates a SINGLE chapter with context from previous modules
+   * Used in sequential course generation flow
+   * @param request - Single chapter generation request with context
+   * @returns Created chapter
+   */
+  public async generateSingleChapter(
+    request: GenerateSingleChapterRequest,
+  ): Promise<Chapter> {
+    try {
+      const promptMode: ChapterPromptMode = request.promptMode ?? "system";
+
+      const { userPrompt, systemPrompt } = buildSingleChapterPrompt(
+        {
+          courseName: request.courseName,
+          courseDescription: request.courseDescription,
+          moduleIndex: request.moduleIndex,
+          totalModules: request.totalModules,
+          previousModules: request.previousModules || [],
+          level: request.level,
+          language: request.language,
+          duration: request.duration,
+          learningOutcomes: request.learningOutcomes,
+          skillsGained: request.skillsGained,
+          prerequisites: request.prerequisites,
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode, intent: "generate" },
+      );
+
+      const result = await geminiCall(userPrompt, {
+        responseSchema: singleChapterSchema,
+        temperature: 0.7,
+        maxRetries: 3,
+        systemPrompt,
+        benchmarkTag: `chapter-single:${promptMode}`,
+        metadata: {
+          courseId: request.courseId,
+          moduleIndex: request.moduleIndex,
+          totalModules: request.totalModules,
+        },
+      });
+
+      logger.info("Single chapter generated via Gemini", {
+        courseId: request.courseId,
+        moduleIndex: request.moduleIndex,
+        mode: promptMode,
+        chapterName: result?.chapterName,
+      });
+
+      if (!result) {
+        throw new Error("Invalid response from Gemini: missing chapter data");
+      }
+
+      // Create the single chapter in database
+      const createdChapter = await this.chapterRepository.createSingleChapter(
+        request.courseId,
+        request.courseName,
+        {
+          chapterOrder: request.moduleIndex,
+          chapterName: result.chapterName,
+          chapterDescription: result.chapterDescription,
+          estimatedDuration: result.estimatedDuration,
+          learningObjectives: result.learningObjectives,
+          keyTopics: result.keyTopics,
+          prerequisites: result.prerequisites || [],
+          practicalApplication: result.practicalApplication,
+          estimatedLessonCount: result.estimatedLessonCount,
+        },
+        request.moduleIndex,
+      );
+
+      logger.info(
+        `Successfully created single chapter (${request.moduleIndex + 1}/${request.totalModules})`,
+        {
+          chapterId: createdChapter.id,
+          chapterName: createdChapter.chapterName,
+        },
+      );
+
+      return createdChapter;
+    } catch (error) {
+      logger.error("Error in ChapterService.generateSingleChapter:", error);
       throw error;
     }
   }

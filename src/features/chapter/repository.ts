@@ -241,4 +241,59 @@ export class ChapterRepository {
       throw error;
     }
   }
+
+  // ============================================
+  // NEW: Sequential Generation Method (Legacy createChapters remains unchanged)
+  // ============================================
+
+  /**
+   * Creates a SINGLE chapter for sequential course generation
+   * @param courseId - The course ID
+   * @param courseName - The course name
+   * @param chapterData - Single chapter data from Gemini
+   * @param chapterOrder - Sequential order (0-based index)
+   * @returns Created chapter with ID
+   */
+  async createSingleChapter(
+    courseId: string,
+    courseName: string,
+    chapterData: Omit<
+      Chapter,
+      "id" | "courseId" | "courseName" | "createdAt" | "updatedAt"
+    >,
+    chapterOrder: number,
+  ): Promise<Chapter> {
+    try {
+      const docRef = this.firebaseStore.collection(this.COLLECTION_NAME).doc();
+
+      const data = {
+        courseId,
+        courseName,
+        ...chapterData,
+        chapterOrder, // Use explicit order passed
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await docRef.set(data);
+
+      const createdChapter: Chapter = {
+        id: docRef.id,
+        ...data,
+      } as Chapter;
+
+      // Invalidate course chapters cache
+      const cacheKey = `chapters:course:${courseId}`;
+      this.cache.del(cacheKey);
+
+      logger.info(
+        `Created single chapter (order: ${chapterOrder}) for course ${courseId}`,
+      );
+
+      return createdChapter;
+    } catch (error) {
+      logger.error("Error in ChapterRepository.createSingleChapter:", error);
+      throw error;
+    }
+  }
 }

@@ -132,7 +132,7 @@ export const lessonsSchema = {
             items: { type: "string" },
           },
           playgroundEnvironment: {
-            type: ["object"],
+            type: ["object", "null"],
             properties: {
               type: {
                 type: "string",
@@ -152,14 +152,11 @@ export const lessonsSchema = {
                 type: ["object", "null"],
                 properties: {
                   template: { type: "string" },
-                  files: {
-                    type: "object",
-                    items: { type: "string" },
-                  },
                   starterCode: { type: "string" },
                   buildCommand: { type: "string" },
                   runCommand: { type: "string" },
                 },
+                additionalProperties: true,
               },
             },
             required: ["type", "supportsExecution"],
@@ -176,7 +173,6 @@ export const lessonsSchema = {
           "resources",
           "learningOutcome",
           "prerequisites",
-          "playgroundEnvironment",
         ],
       },
     },

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Chapter } from "@features/chapter/types";
 import { enforceLimit, GENERATION_LIMITS } from "../../config/generationLimit";
 import { AppError } from "../../utils/errors";
 import type { ChapterService } from "../../features/chapter/service";
@@ -8,6 +7,10 @@ import type {
   Course,
   GenerateCourseRequest,
 } from "../../features/course/types";
+import type {
+  GenerateSingleChapterRequest,
+  Chapter,
+} from "../../features/chapter/types";
 import type { Lesson } from "../../features/lesson/types";
 import type { LessonService } from "../../features/lesson/service";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
@@ -19,6 +22,9 @@ import {
   emitGenerationFailed,
   emitGenerationStarted,
   emitLessonsGenerationProgress,
+  emitModuleGenerationProgress,
+  emitModuleLessonsProgress,
+  emitModuleCompleted,
   GenerationStep,
   type FullCourseGenerationResult,
 } from "../helper/generation.helpers";
@@ -297,6 +303,13 @@ export class FullCourseGenerationService {
               context.startTime,
             );
 
+            logger.info("Lessons generated (staged)", {
+              jobId: context.jobId,
+              chapterName: chapter.chapterName,
+              lessonsCount: lessons.length,
+              lessonContentPreview: lessons,
+            });
+
             return { chapter, lessons };
           }),
         );
@@ -375,5 +388,254 @@ export class FullCourseGenerationService {
     if (delayMs > 0 && completed < total) {
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
+  }
+
+  // ============================================
+  // NEW: Sequential Module-by-Module Generation (Legacy generateFullCourse unchanged)
+  // ============================================
+
+  /**
+   * Generates a full course SEQUENTIALLY: module by module with real-time progress
+   * Flow: Course → Module 1 → Module 1 Lessons → Module 2 → Module 2 Lessons → ...
+   *
+   * Benefits:
+   * - Users see completed modules earlier
+   * - Better streaming/real-time updates
+   * - Incremental preview capability
+   * - Better error recovery (partial success)
+   */
+  async generateFullCourseSequential(
+    req: AuthenticatedRequest,
+    request: GenerateCourseRequest,
+  ): Promise<FullCourseGenerationResult> {
+    const jobId = (req as any).generationJobId || createGenerationJobId();
+    const startTime =
+      (req as any).generationStartTime || new Date().toISOString();
+    const userId = req.user!.uid;
+
+    const completedModules: Chapter[] = [];
+    let totalLessonsGenerated = 0;
+
+    try {
+      logger.info("Starting SEQUENTIAL course generation", {
+        jobId,
+        userId,
+        request,
+        mode: "sequential",
+      });
+
+      emitGenerationStarted(req, jobId, userId, startTime);
+
+      // STEP 1: Generate Course Metadata (10%)
+      emitCourseGenerationProgress(
+        req,
+        jobId,
+        userId,
+        "Generating course metadata...",
+        undefined,
+        startTime,
+      );
+
+      const course = await this.courseService.generateCourse(request);
+
+      logger.info("Course generated successfully", {
+        jobId,
+        courseId: course.id,
+        courseName: course.name,
+        totalModules: course.noOfChapters,
+      });
+
+      emitCourseGenerationProgress(
+        req,
+        jobId,
+        userId,
+        `Course "${course.name}" created successfully!`,
+        { courseId: course.id, courseName: course.name },
+        startTime,
+      );
+
+      // STEP 2: Generate Modules Sequentially (module → lessons → repeat)
+      const totalModules = course.noOfChapters || 5;
+
+      for (let moduleIndex = 0; moduleIndex < totalModules; moduleIndex++) {
+        const moduleNumber = moduleIndex + 1;
+
+        // 2a. Generate Single Module
+        emitModuleGenerationProgress(
+          req,
+          jobId,
+          userId,
+          moduleNumber,
+          totalModules,
+          `Generating Module ${moduleNumber}/${totalModules}...`,
+          undefined,
+          startTime,
+        );
+
+        const module = await this.generateSingleModule(
+          course,
+          moduleIndex,
+          totalModules,
+          completedModules,
+          request,
+        );
+
+        logger.info(`Module ${moduleNumber} generated`, {
+          jobId,
+          moduleId: module.id,
+          moduleName: module.chapterName,
+        });
+
+        // 2b. Generate Lessons for This Module
+        emitModuleLessonsProgress(
+          req,
+          jobId,
+          userId,
+          moduleNumber,
+          totalModules,
+          `Generating lessons for Module ${moduleNumber}: "${module.chapterName}"...`,
+          {
+            moduleId: module.id,
+            moduleName: module.chapterName,
+          },
+          startTime,
+        );
+
+        const lessons = await this.generateModuleLessons(
+          req,
+          module,
+          course,
+          request,
+        );
+
+        totalLessonsGenerated += lessons.length;
+
+        logger.info(`Lessons generated for Module ${moduleNumber}`, {
+          jobId,
+          moduleId: module.id,
+          lessonsCount: lessons.length,
+        });
+
+        // 2c. Emit Module Completed (KEY EVENT for incremental preview!)
+        emitModuleCompleted(
+          req,
+          jobId,
+          userId,
+          module,
+          lessons,
+          moduleNumber,
+          totalModules,
+          startTime,
+        );
+
+        completedModules.push(module);
+      }
+
+      // STEP 3: Finalization
+      const result: FullCourseGenerationResult = {
+        courseId: course.id,
+        chaptersCount: completedModules.length,
+        lessonsCount: totalLessonsGenerated,
+        totalDuration: course.duration,
+      };
+
+      logger.info("Sequential course generation completed", {
+        jobId,
+        result,
+        mode: "sequential",
+      });
+
+      emitGenerationCompleted(req, jobId, userId, result);
+
+      return result;
+    } catch (error: any) {
+      logger.error("Sequential course generation failed", {
+        jobId,
+        userId,
+        completedModules: completedModules.length,
+        error: error.message,
+        mode: "sequential",
+      });
+
+      emitGenerationFailed(
+        req,
+        jobId,
+        userId,
+        error.message,
+        GenerationStep.MODULE,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Helper: Generate a single module with context from previous modules
+   */
+  private async generateSingleModule(
+    course: any,
+    moduleIndex: number,
+    totalModules: number,
+    previousModules: Chapter[],
+    courseRequest: GenerateCourseRequest,
+  ): Promise<Chapter> {
+    const previousContext = previousModules.map((mod) => ({
+      chapterName: mod.chapterName,
+      description: mod.chapterDescription,
+      learningObjectives: mod.learningObjectives || [],
+      keyTopics: mod.keyTopics || [],
+    }));
+
+    const moduleRequest: GenerateSingleChapterRequest = {
+      courseId: course.id,
+      courseName: course.name,
+      courseDescription: course.description,
+      moduleIndex,
+      totalModules,
+      level: course.level,
+      language: course.language,
+      duration: course.duration,
+      previousModules: previousContext,
+      learningOutcomes: course.learning_outcomes || [],
+      skillsGained: course.skills_gained || [],
+      prerequisites: course.prerequisites,
+      userInstructions: courseRequest.userInstructions,
+      promptMode: courseRequest.promptMode,
+    };
+
+    return await this.chapterService.generateSingleChapter(moduleRequest);
+  }
+
+  /**
+   * Helper: Generate lessons for a single module
+   */
+  private async generateModuleLessons(
+    req: AuthenticatedRequest,
+    module: Chapter,
+    course: any,
+    courseRequest: GenerateCourseRequest,
+  ): Promise<any[]> {
+    const requestedLessons = module.estimatedLessonCount || 5;
+    const limitedLessons = enforceLimit(
+      requestedLessons,
+      GENERATION_LIMITS.MAX_LESSONS_PER_CHAPTER,
+      "lessons",
+    );
+
+    const lessonsRequest = {
+      chapterId: module.id,
+      chapterName: module.chapterName,
+      chapterDescription: module.chapterDescription,
+      chapterOrder: module.chapterOrder,
+      learningObjectives: module.learningObjectives || [],
+      keyTopics: module.keyTopics || [],
+      estimatedDuration: module.estimatedDuration || "1 hour",
+      courseName: course.name,
+      level: course.level,
+      language: course.language,
+      userInstructions: courseRequest.userInstructions,
+      promptMode: courseRequest.promptMode,
+    };
+
+    return await this.lessonService.generateLessons(lessonsRequest);
   }
 }

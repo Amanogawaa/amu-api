@@ -136,7 +136,7 @@ export class CourseController {
         });
         return;
       }
-
+      // need to fix later since this is not yet used
       const { getIO } = await import("../../utils/socket/socket.helpers");
       const io = getIO();
 
@@ -413,6 +413,69 @@ export class CourseController {
       });
     } catch (error) {
       logger.error("Error in CourseController.generateFullCourse:", error);
+      next(error);
+    }
+  }
+
+  // ============================================
+  // NEW: Sequential Course Generation (Legacy generateFullCourse unchanged)
+  // ============================================
+
+  /**
+   * Generates a course SEQUENTIALLY: module by module with real-time progress
+   * Provides better UX with incremental updates and early module preview
+   */
+  async generateFullCourseSequential(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      if (!this.fullGenerationService) {
+        response.status(501).json({
+          error: "Full course generation service not available",
+        });
+        return;
+      }
+
+      const courseRequest = {
+        ...request.body,
+        uid: request.user!.uid,
+      };
+
+      logger.info("Starting SEQUENTIAL full course generation", {
+        userId: request.user?.uid,
+        request: courseRequest,
+        mode: "sequential",
+      });
+
+      // Return immediately with job ID, generation continues in background
+      response.status(202).json({
+        message:
+          "Sequential course generation started. Listen to Socket.IO events for progress updates.",
+        note: "Connect to Socket.IO and listen for 'generation:progress' and 'module:completed' events",
+        mode: "sequential",
+      });
+
+      // Run sequential generation in background
+      setImmediate(async () => {
+        try {
+          await this.fullGenerationService!.generateFullCourseSequential(
+            request,
+            courseRequest,
+          );
+        } catch (error: any) {
+          logger.error(
+            "Background sequential course generation failed:",
+            error,
+          );
+        }
+      });
+    } catch (error) {
+      logger.error(
+        "Error in CourseController.generateFullCourseSequential:",
+        error,
+      );
       next(error);
     }
   }

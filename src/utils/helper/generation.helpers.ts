@@ -16,6 +16,10 @@ export enum GenerationStep {
   COURSE = "course",
   CHAPTERS = "chapters",
   LESSONS = "lessons",
+  // NEW: For sequential generation
+  MODULE = "module",
+  MODULE_LESSONS = "module_lessons",
+  FINALIZING = "finalizing",
 }
 
 export interface GenerationProgress {
@@ -254,4 +258,120 @@ export function emitGenerationFailed(
 
 export function createGenerationJobId(): string {
   return `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// ============================================
+// NEW: Sequential Module Generation Progress Helpers (Legacy functions unchanged)
+// ============================================
+
+/**
+ * Emits progress for a single module generation
+ */
+export function emitModuleGenerationProgress(
+  req: AuthenticatedRequest,
+  jobId: string,
+  userId: string,
+  moduleNumber: number,
+  totalModules: number,
+  message: string,
+  data?: any,
+  startTime?: string,
+): void {
+  const progress = 10 + ((moduleNumber - 1) / totalModules) * 90;
+
+  const progressData: GenerationProgress = {
+    jobId,
+    userId,
+    status: GenerationStatus.IN_PROGRESS,
+    currentStep: GenerationStep.MODULE,
+    progress: Math.floor(progress),
+    message,
+    data: {
+      ...data,
+      moduleNumber,
+      totalModules,
+    },
+    timestamp: new Date().toISOString(),
+    startTime,
+    estimatedTimeRemaining: startTime
+      ? calculateEstimatedTime(progress, startTime)
+      : "Calculating...",
+  };
+
+  emitGenerationProgress(req, progressData);
+}
+
+/**
+ * Emits progress for module lessons generation
+ */
+export function emitModuleLessonsProgress(
+  req: AuthenticatedRequest,
+  jobId: string,
+  userId: string,
+  moduleNumber: number,
+  totalModules: number,
+  message: string,
+  data?: any,
+  startTime?: string,
+): void {
+  const baseProgress = 10 + ((moduleNumber - 1) / totalModules) * 90;
+  const progress = baseProgress + (90 / totalModules) * 0.5; // Halfway through module
+
+  const progressData: GenerationProgress = {
+    jobId,
+    userId,
+    status: GenerationStatus.IN_PROGRESS,
+    currentStep: GenerationStep.MODULE_LESSONS,
+    progress: Math.floor(progress),
+    message,
+    data: {
+      ...data,
+      moduleNumber,
+      totalModules,
+    },
+    timestamp: new Date().toISOString(),
+    startTime,
+    estimatedTimeRemaining: startTime
+      ? calculateEstimatedTime(progress, startTime)
+      : "Calculating...",
+  };
+
+  emitGenerationProgress(req, progressData);
+}
+
+/**
+ * Emits a module:completed event when a single module and its lessons are done
+ * This allows frontend to show incremental progress
+ */
+export function emitModuleCompleted(
+  req: AuthenticatedRequest,
+  jobId: string,
+  userId: string,
+  module: any,
+  lessons: any[],
+  moduleNumber: number,
+  totalModules: number,
+  startTime?: string,
+): void {
+  const socketHandlers = getSocketHandlers(req);
+  if (socketHandlers) {
+    socketHandlers.emitToUser(userId, "module:completed", {
+      jobId,
+      moduleId: module.id,
+      moduleName: module.chapterName,
+      moduleNumber,
+      totalModules,
+      lessonsCount: lessons.length,
+      lessonIds: lessons.map((l) => l.id),
+      timestamp: new Date().toISOString(),
+    });
+
+    logger.info("Module completed event emitted", {
+      jobId,
+      moduleNumber,
+      moduleId: module.id,
+      moduleName: module.chapterName,
+      lessonsCount: lessons.length,
+    });
+  }
 }
