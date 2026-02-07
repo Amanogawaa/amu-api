@@ -8,7 +8,7 @@ import type { Lesson } from "./types";
 export class LessonRepository {
   private firebaseStore: Firestore;
   private readonly COLLECTION_NAME = "lessons";
-  private readonly DEFAULT_LIMIT = 100; // Lessons are typically limited per chapter
+  private readonly DEFAULT_LIMIT = 100;
   private cache: NodeCache;
 
   constructor(firestore: Firestore = firebaseFirestore) {
@@ -37,14 +37,12 @@ export class LessonRepository {
         .where("chapterId", "==", chapterId)
         .limit(this.DEFAULT_LIMIT);
 
-      // Field selection for optimized queries
       if (fields && fields.length > 0) {
         query = query.select(...fields);
       } else {
-        // Default fields for lesson list
         query = query.select(
-          "title",
-          "description",
+          "lessonName",
+          "lessonDescription",
           "lessonOrder",
           "duration",
           "chapterId",
@@ -79,7 +77,7 @@ export class LessonRepository {
 
       return sortedLessons;
     } catch (error) {
-      logger.error("Error in ChapterRepository.getChapter:", error);
+      logger.error("Error in LessonRepository.getLessons:", error);
       throw error;
     }
   }
@@ -114,7 +112,7 @@ export class LessonRepository {
 
       await batch.commit();
       logger.info(
-        `Created ${createdLesson.length} lesson for chapter ${chapterId}`,
+        `Created ${createdLesson.length} lessons for chapter ${chapterId}`,
       );
 
       this.cache.del(`lessons:chapter:${chapterId}`);

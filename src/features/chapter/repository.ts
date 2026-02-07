@@ -39,8 +39,8 @@ export class ChapterRepository {
         query = query.select(...fields);
       } else {
         query = query.select(
-          "title",
-          "description",
+          "chapterName",
+          "chapterDescription",
           "chapterOrder",
           "courseId",
           "courseName",
