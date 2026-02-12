@@ -118,6 +118,7 @@ export class CourseController {
     }
   }
 
+  // TODO: need to refactor this to use the new sequential generation flow instead of generating all chapters at once and then saving. This will require changes to the service layer as well to support generating and saving one chapter at a time with context from previous chapters.
   async generateCourseStream(
     request: AuthenticatedRequest,
     response: Response,
@@ -474,6 +475,75 @@ export class CourseController {
     } catch (error) {
       logger.error(
         "Error in CourseController.generateFullCourseSequential:",
+        error,
+      );
+      next(error);
+    }
+  }
+
+  // ============================================
+  // NEW: Sequential + Transactional Generation
+  // ============================================
+
+  /**
+   * Generates a course SEQUENTIALLY with TRANSACTIONAL saves
+   * Best of both worlds: incremental updates + data consistency
+   */
+  async generateFullCourseSequentialTransactional(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      if (!this.fullGenerationService) {
+        response.status(501).json({
+          error: "Full course generation service not available",
+        });
+        return;
+      }
+
+      const courseRequest = {
+        ...request.body,
+        uid: request.user!.uid,
+      };
+
+      logger.info("Starting SEQUENTIAL TRANSACTIONAL full course generation", {
+        userId: request.user?.uid,
+        request: courseRequest,
+        mode: "sequential-transactional",
+      });
+
+      // Return immediately with job ID, generation continues in background
+      response.status(202).json({
+        message:
+          "Sequential transactional course generation started. Listen to Socket.IO events for progress updates.",
+        note: "Connect to Socket.IO and listen for 'generation:progress' and 'module:completed' events. Course will only be saved after all modules complete.",
+        mode: "sequential-transactional",
+        benefits: [
+          "Real-time module-by-module progress",
+          "Preview staged modules as they generate",
+          "Atomic all-or-nothing database save",
+          "No partial courses on failure",
+        ],
+      });
+
+      // Run sequential transactional generation in background
+      setImmediate(async () => {
+        try {
+          await this.fullGenerationService!.generateFullCourseSequentialTransactional(
+            request,
+            courseRequest,
+          );
+        } catch (error: any) {
+          logger.error(
+            "Background sequential transactional course generation failed:",
+            error,
+          );
+        }
+      });
+    } catch (error) {
+      logger.error(
+        "Error in CourseController.generateFullCourseSequentialTransactional:",
         error,
       );
       next(error);

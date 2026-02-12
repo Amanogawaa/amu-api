@@ -19,6 +19,7 @@ export interface PlaygroundEnvironment {
 export interface Lesson {
   id: string;
   chapterId: string;
+  courseId?: string; // Added for efficient queries and cascade deletion
   lessonOrder: number;
   lessonName: string;
   type: "video" | "article" | "quiz";

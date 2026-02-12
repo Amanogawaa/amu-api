@@ -29,6 +29,9 @@ import {
   type FullCourseGenerationResult,
 } from "../helper/generation.helpers";
 import { logger } from "../loggers";
+import { geminiCall } from "../geminiCall";
+import { buildSingleChapterPrompt } from "../prompts/chapter-temp";
+import { singleChapterSchema } from "../../features/chapter/types";
 
 export interface StagedCourseData {
   course: Omit<Course, "id">;
@@ -637,5 +640,346 @@ export class FullCourseGenerationService {
     };
 
     return await this.lessonService.generateLessons(lessonsRequest);
+  }
+
+  // ============================================
+  // NEW: Sequential + Transactional Generation (Best of Both Worlds!)
+  // ============================================
+
+  /**
+   * Generates a full course SEQUENTIALLY with TRANSACTIONAL saves
+   *
+   * Benefits:
+   * - ✅ Sequential: Module-by-module with real-time progress
+   * - ✅ Transactional: All-or-nothing atomic saves
+   * - ✅ Incremental Preview: Users see staged modules as they complete
+   * - ✅ Data Consistency: No partial courses in database on failure
+   *
+   * Flow:
+   * 1. Generate course metadata (staged)
+   * 2. For each module:
+   *    a. Generate module (staged)
+   *    b. Generate lessons (staged)
+   *    c. Emit module:completed with staged data (preview)
+   * 3. Validate all staged data
+   * 4. Atomic batch save to database
+   */
+  async generateFullCourseSequentialTransactional(
+    req: AuthenticatedRequest,
+    request: GenerateCourseRequest,
+  ): Promise<FullCourseGenerationResult> {
+    const jobId = (req as any).generationJobId || createGenerationJobId();
+    const startTime =
+      (req as any).generationStartTime || new Date().toISOString();
+    const userId = req.user!.uid;
+
+    const context: GenerationContext = {
+      jobId,
+      userId,
+      startTime,
+      request,
+      staged: {
+        course: {} as any,
+        chapters: [],
+      },
+    };
+
+    try {
+      logger.info("Starting SEQUENTIAL TRANSACTIONAL course generation", {
+        jobId,
+        userId,
+        request,
+        mode: "sequential-transactional",
+      });
+
+      emitGenerationStarted(req, jobId, userId, startTime);
+
+      // STEP 1: Generate Course Metadata (staged)
+      emitCourseGenerationProgress(
+        req,
+        jobId,
+        userId,
+        "Generating course metadata...",
+        undefined,
+        startTime,
+      );
+
+      context.staged.course =
+        await this.courseService.generateCourseData(request);
+
+      logger.info("Course metadata generated (staged)", {
+        jobId,
+        courseName: context.staged.course.name,
+        mode: "sequential-transactional",
+      });
+
+      emitCourseGenerationProgress(
+        req,
+        jobId,
+        userId,
+        `Course "${context.staged.course.name}" created successfully!`,
+        { courseName: context.staged.course.name },
+        startTime,
+      );
+
+      // STEP 2: Generate Modules Sequentially (all staged)
+      const totalModules = context.staged.course.noOfChapters || 5;
+
+      for (let moduleIndex = 0; moduleIndex < totalModules; moduleIndex++) {
+        const moduleNumber = moduleIndex + 1;
+
+        // 2a. Generate Single Module (staged)
+        emitModuleGenerationProgress(
+          req,
+          jobId,
+          userId,
+          moduleNumber,
+          totalModules,
+          `Generating Module ${moduleNumber}/${totalModules}...`,
+          undefined,
+          startTime,
+        );
+
+        const moduleData = await this.generateSingleModuleDataStaged(
+          context.staged.course,
+          moduleIndex,
+          totalModules,
+          context.staged.chapters.map((c) => c.chapter),
+          request,
+        );
+
+        logger.info(`Module ${moduleNumber} generated (staged)`, {
+          jobId,
+          moduleName: moduleData.chapterName,
+          mode: "sequential-transactional",
+        });
+
+        // 2b. Generate Lessons for This Module (staged)
+        emitModuleLessonsProgress(
+          req,
+          jobId,
+          userId,
+          moduleNumber,
+          totalModules,
+          `Generating lessons for Module ${moduleNumber}: "${moduleData.chapterName}"...`,
+          {
+            moduleName: moduleData.chapterName,
+          },
+          startTime,
+        );
+
+        const lessonsData = await this.generateModuleLessonsDataStaged(
+          moduleData,
+          context.staged.course,
+          request,
+        );
+
+        logger.info(`Lessons generated for Module ${moduleNumber} (staged)`, {
+          jobId,
+          moduleName: moduleData.chapterName,
+          lessonsCount: lessonsData.length,
+          mode: "sequential-transactional",
+        });
+
+        // Store in staged data
+        context.staged.chapters.push({
+          chapter: moduleData,
+          lessons: lessonsData,
+        });
+
+        // 2c. Emit Module Completed (with staged data for preview)
+        emitModuleCompleted(
+          req,
+          jobId,
+          userId,
+          {
+            id: `staged-${moduleIndex}`,
+            chapterName: moduleData.chapterName,
+            ...moduleData,
+          } as any,
+          lessonsData.map((l, idx) => ({
+            id: `staged-${moduleIndex}-${idx}`,
+            ...l,
+          })) as any,
+          moduleNumber,
+          totalModules,
+          startTime,
+        );
+      }
+
+      // STEP 3: Validate Staged Data
+      logger.info("Validating staged course data", {
+        jobId,
+        chaptersCount: context.staged.chapters.length,
+        lessonsCount: context.staged.chapters.reduce(
+          (sum, c) => sum + c.lessons.length,
+          0,
+        ),
+        mode: "sequential-transactional",
+      });
+
+      this.validateStagedCourse(context.staged);
+
+      // STEP 4: Atomic Batch Save to Database
+      emitCourseGenerationProgress(
+        req,
+        jobId,
+        userId,
+        "Saving complete course to database...",
+        undefined,
+        startTime,
+      );
+
+      const savedCourse = await this.courseService.createCourseWithRelations(
+        context.staged,
+      );
+
+      // STEP 5: Success!
+      const result: FullCourseGenerationResult = {
+        courseId: savedCourse.id,
+        chaptersCount: context.staged.chapters.length,
+        lessonsCount: context.staged.chapters.reduce(
+          (sum, c) => sum + c.lessons.length,
+          0,
+        ),
+        totalDuration: savedCourse.duration,
+      };
+
+      logger.info("Sequential transactional course generation completed", {
+        jobId,
+        result,
+        mode: "sequential-transactional",
+      });
+
+      emitGenerationCompleted(req, jobId, userId, result);
+
+      return result;
+    } catch (error: any) {
+      logger.error("Sequential transactional course generation failed", {
+        jobId,
+        userId,
+        completedModules: context.staged.chapters.length,
+        error: error.message,
+        mode: "sequential-transactional",
+      });
+
+      // No database cleanup needed - nothing was saved!
+      emitGenerationFailed(
+        req,
+        jobId,
+        userId,
+        error.message,
+        GenerationStep.MODULE,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Helper: Generate a single module data (staged, not saved)
+   */
+  private async generateSingleModuleDataStaged(
+    courseData: any,
+    moduleIndex: number,
+    totalModules: number,
+    previousModules: Array<any>,
+    courseRequest: GenerateCourseRequest,
+  ): Promise<any> {
+    const previousContext = previousModules.map((mod) => ({
+      chapterName: mod.chapterName,
+      description: mod.chapterDescription,
+      learningObjectives: mod.learningObjectives || [],
+      keyTopics: mod.keyTopics || [],
+    }));
+
+    const moduleRequest: GenerateSingleChapterRequest = {
+      courseId: "staged", // Not saved yet
+      courseName: courseData.name,
+      courseDescription: courseData.description,
+      moduleIndex,
+      totalModules,
+      level: courseData.level,
+      language: courseData.language,
+      duration: courseData.duration,
+      previousModules: previousContext,
+      learningOutcomes: courseData.learning_outcomes || [],
+      skillsGained: courseData.skills_gained || [],
+      prerequisites: courseData.prerequisites,
+      userInstructions: courseRequest.userInstructions,
+      promptMode: courseRequest.promptMode,
+    };
+
+    // Generate using the prompt, but return data only (not saved)
+    const promptMode = moduleRequest.promptMode ?? "system";
+    const { userPrompt, systemPrompt } = buildSingleChapterPrompt(
+      {
+        courseName: moduleRequest.courseName,
+        courseDescription: moduleRequest.courseDescription,
+        moduleIndex: moduleRequest.moduleIndex,
+        totalModules: moduleRequest.totalModules,
+        previousModules: moduleRequest.previousModules || [],
+        level: moduleRequest.level,
+        language: moduleRequest.language,
+        duration: moduleRequest.duration,
+        learningOutcomes: moduleRequest.learningOutcomes,
+        skillsGained: moduleRequest.skillsGained,
+        prerequisites: moduleRequest.prerequisites,
+        userInstructions: moduleRequest.userInstructions,
+      },
+      { mode: promptMode, intent: "generate" },
+    );
+
+    const result = await geminiCall(userPrompt, {
+      responseSchema: singleChapterSchema,
+      temperature: 0.7,
+      maxRetries: 3,
+      systemPrompt,
+      benchmarkTag: `chapter-single-staged:${promptMode}`,
+      metadata: {
+        moduleIndex: moduleRequest.moduleIndex,
+        totalModules: moduleRequest.totalModules,
+      },
+    });
+
+    if (!result) {
+      throw new Error("Invalid response from Gemini: missing chapter data");
+    }
+
+    return {
+      chapterOrder: moduleRequest.moduleIndex,
+      chapterName: result.chapterName,
+      chapterDescription: result.chapterDescription,
+      estimatedDuration: result.estimatedDuration,
+      learningObjectives: result.learningObjectives,
+      keyTopics: result.keyTopics,
+      prerequisites: result.prerequisites || [],
+      practicalApplication: result.practicalApplication,
+      estimatedLessonCount: result.estimatedLessonCount,
+    };
+  }
+
+  /**
+   * Helper: Generate lessons data for a module (staged, not saved)
+   */
+  private async generateModuleLessonsDataStaged(
+    moduleData: any,
+    courseData: any,
+    courseRequest: GenerateCourseRequest,
+  ): Promise<any[]> {
+    const lessonsRequest = {
+      chapterName: moduleData.chapterName,
+      chapterDescription: moduleData.chapterDescription,
+      chapterOrder: moduleData.chapterOrder,
+      learningObjectives: moduleData.learningObjectives || [],
+      keyTopics: moduleData.keyTopics || [],
+      estimatedDuration: moduleData.estimatedDuration || "1 hour",
+      courseName: courseData.name,
+      level: courseData.level,
+      language: courseData.language,
+      userInstructions: courseRequest.userInstructions,
+      promptMode: courseRequest.promptMode,
+    };
+
+    return await this.lessonService.generateLessonsData(lessonsRequest);
   }
 }

@@ -87,6 +87,7 @@ export class LessonRepository {
     lessons: Array<
       Omit<Lesson, "id" | "chapterId" | "createdAt" | "updatedAt">
     >,
+    courseId?: string,
   ): Promise<Lesson[]> {
     try {
       const batch = this.firebaseStore.batch();
@@ -99,6 +100,7 @@ export class LessonRepository {
         const data = {
           ...lesson,
           chapterId,
+          ...(courseId && { courseId }), // Add courseId if provided
           createdAt: new Date(),
           updatedAt: new Date(),
         };

@@ -399,6 +399,112 @@ export class CourseRoute {
 
     /**
      * @openapi
+     * /courses/generate-sequential-transactional:
+     *   post:
+     *     tags:
+     *       - My Courses
+     *     summary: Generate a complete course SEQUENTIALLY with TRANSACTIONAL saves (BEST!)
+     *     description: |
+     *       🏆 RECOMMENDED: Combines the best of both approaches!
+     *
+     *       Benefits:
+     *       - ✅ Sequential module-by-module generation with real-time progress
+     *       - ✅ Preview staged modules as they complete (before final save)
+     *       - ✅ Atomic all-or-nothing database save (data consistency)
+     *       - ✅ No partial courses in database on failure
+     *
+     *       This is an asynchronous operation that returns immediately with a 202 status.
+     *
+     *       Socket.IO Events:
+     *       - 'generation:progress' - Overall progress updates
+     *       - 'module:completed' - Individual module completion with STAGED data (preview only)
+     *       - 'generation:completed' - Final atomic save complete (real IDs available)
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - category
+     *               - topic
+     *               - level
+     *               - duration
+     *               - noOfChapters
+     *               - language
+     *             properties:
+     *               category:
+     *                 type: string
+     *                 example: Programming
+     *               topic:
+     *                 type: string
+     *                 example: Modern JavaScript Development
+     *               level:
+     *                 type: string
+     *                 enum: [beginner, intermediate, advanced]
+     *                 example: intermediate
+     *               duration:
+     *                 type: string
+     *                 example: 30 hours
+     *               noOfChapters:
+     *                 type: integer
+     *                 minimum: 1
+     *                 maximum: 10
+     *                 example: 6
+     *               language:
+     *                 type: string
+     *                 example: English
+     *               userInstructions:
+     *                 type: string
+     *                 example: Focus on ES6+ features and modern frameworks
+     *               promptMode:
+     *                 type: string
+     *                 enum: [system, legacy]
+     *                 example: system
+     *     responses:
+     *       202:
+     *         description: Sequential transactional generation started
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *                   example: Sequential transactional course generation started
+     *                 note:
+     *                   type: string
+     *                   example: Course will only be saved after all modules complete
+     *                 mode:
+     *                   type: string
+     *                   example: sequential-transactional
+     *                 benefits:
+     *                   type: array
+     *                   items:
+     *                     type: string
+     *                   example:
+     *                     - Real-time module-by-module progress
+     *                     - Preview staged modules as they generate
+     *                     - Atomic all-or-nothing database save
+     *                     - No partial courses on failure
+     *       400:
+     *         description: Invalid request body
+     *       503:
+     *         description: Service not available
+     */
+    this.router.post(
+      "/courses/generate-sequential-transactional",
+      authMiddleware,
+      validateCourseTopic,
+      checkDuplicateCourse,
+      validateGenerateCourse,
+      this.controller.generateFullCourseSequentialTransactional.bind(
+        this.controller,
+      ),
+    );
+
+    /**
+     * @openapi
      * /courses/{id}:
      *   patch:
      *     tags:

@@ -439,6 +439,7 @@ export class CourseRepository {
           currentBatch.set(lessonRef, {
             ...lesson,
             chapterId: chapterRef.id,
+            courseId: courseRef.id, // Add courseId for efficient queries and deletion
             createdAt: new Date(),
             updatedAt: new Date(),
           });
@@ -467,7 +468,12 @@ export class CourseRepository {
         },
       );
 
-      await Promise.all(batches.map((batch) => batch.commit()));
+      // Commit batches sequentially to maintain parent-child referential integrity
+      // (course -> chapters -> lessons)
+      for (let i = 0; i < batches.length; i++) {
+        await batches[i].commit();
+        logger.debug(`Committed batch ${i + 1}/${batches.length}`);
+      }
 
       logger.info(
         `Successfully created course ${courseRef.id} with all relations`,

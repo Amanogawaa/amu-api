@@ -76,9 +76,17 @@ export class LessonService {
         throw new Error("Invalid response from Gemini: missing lessons array");
       }
 
+      // Get courseId from chapter for proper lesson linking
+      const chapter = await this.lessonRepository["firebaseStore"]
+        .collection("chapters")
+        .doc(request.chapterId)
+        .get();
+      const courseId = chapter.exists ? chapter.data()?.courseId : undefined;
+
       const createdLessons = await this.lessonRepository.createLessons(
         request.chapterId,
         result.lessons,
+        courseId,
       );
 
       logger.info(`Successfully created ${createdLessons.length} lessons`);
