@@ -4,7 +4,10 @@ import { logger } from "../../utils/loggers";
 import type { CourseService } from "./service";
 import type { CourseQueryParams } from "./types";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
-import { notifyCourseCreated } from "../../utils/socket/socket.helpers";
+import {
+  notifyCourseCreated,
+  getSocketHandlers,
+} from "../../utils/socket/socket.helpers";
 import type { FullCourseGenerationService } from "../../utils/service/generation.service";
 
 export class CourseController {
@@ -130,32 +133,38 @@ export class CourseController {
         uid: request.user?.uid,
       };
 
-      const socketId = (request as any).socketId;
-      if (!socketId) {
-        response.status(400).json({
-          message: "Socket connection required for streaming",
+      const userId = request.user?.uid;
+      if (!userId) {
+        response.status(401).json({
+          message: "Authentication required",
         });
         return;
       }
-      // need to fix later since this is not yet used
-      const { getIO } = await import("../../utils/socket/socket.helpers");
-      const io = getIO();
 
-      const emitChunk = (sid: string, chunk: string) => {
-        io.to(sid).emit("course:stream", { chunk });
+      const socketHandlers = getSocketHandlers(request);
+
+      if (!socketHandlers) {
+        response.status(503).json({
+          message: "Socket service unavailable",
+        });
+        return;
+      }
+
+      const emitChunk = (chunk: string) => {
+        socketHandlers.emitToUser(userId, "course:stream", { chunk });
       };
 
-      io.to(socketId).emit("course:stream:start", {
+      socketHandlers.emitToUser(userId, "course:stream:start", {
         message: "Starting course generation...",
       });
 
       const course = await this.service.generateCourseStream(
         courseRequest,
-        socketId,
+        userId,
         emitChunk,
       );
 
-      io.to(socketId).emit("course:stream:complete", {
+      socketHandlers.emitToUser(userId, "course:stream:complete", {
         courseId: course.id,
         courseName: course.name,
       });
@@ -169,13 +178,16 @@ export class CourseController {
     } catch (error) {
       logger.error("Error in CoursesController.generateCourseStream:", error);
 
-      const socketId = (request as any).socketId;
-      if (socketId) {
-        const { getIO } = await import("../../utils/socket/socket.helpers");
-        const io = getIO();
-        io.to(socketId).emit("course:stream:error", {
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
+      const userId = request.user?.uid;
+      if (userId) {
+        const { getSocketHandlers } =
+          await import("../../utils/socket/socket.helpers");
+        const socketHandlers = getSocketHandlers(request);
+        if (socketHandlers) {
+          socketHandlers.emitToUser(userId, "course:stream:error", {
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
       }
 
       next(error);

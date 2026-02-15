@@ -41,6 +41,17 @@ export class ChapterService {
     }
   }
 
+  public async deleteChaptersByCourseId(courseId: string) {
+    try {
+      await this.chapterRepository.deleteChaptersByCourseId(courseId);
+    } catch (error) {
+      logger.error("Error in ChapterService.deleteChaptersByCourseId:", error);
+      throw error;
+    }
+  }
+
+  // default chapter creation method for bulk generation flow (generateChapters)
+  // course -> chapters (all chapters generated at once, then created in DB) -> lessons (all generated at once for each chapter)
   public async generateChapters(request: GenerateChaptersRequest) {
     try {
       const promptMode: ChapterPromptMode = request.promptMode ?? "system";
@@ -97,15 +108,9 @@ export class ChapterService {
     }
   }
 
-  public async deleteChaptersByCourseId(courseId: string) {
-    try {
-      await this.chapterRepository.deleteChaptersByCourseId(courseId);
-    } catch (error) {
-      logger.error("Error in ChapterService.deleteChaptersByCourseId:", error);
-      throw error;
-    }
-  }
-
+  // new method chapter generation flow (generateSingleChapter)
+  // course -> module 1 (generate chapter 1, saved in memory before saving in db) -> module 2 (generate chapter 2 with context from module 1, saved in memory before saving in db) -> ... -> module N
+  // transactionally create each chapter immediately after generation to ensure data is saved and available as context for subsequent modules, instead of generating all chapters at once and then saving in batch at the end
   public async generateChaptersData(
     request: GenerateChaptersRequest,
   ): Promise<Array<Omit<Chapter, "id" | "courseId" | "courseName">>> {

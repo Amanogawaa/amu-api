@@ -103,10 +103,11 @@ export class CourseService {
     }
   }
 
+  // Streaming course generation - streams AI output to user in real-time via Socket.IO
   public async generateCourseStream(
     request: GenerateCourseRequest,
-    socketId: string,
-    emitChunk: (socketId: string, chunk: string) => void,
+    userId: string,
+    emitChunk: (chunk: string) => void,
   ) {
     try {
       const promptMode: CoursePromptMode = request.promptMode ?? "system";
@@ -132,7 +133,7 @@ export class CourseService {
         stream: true,
         onChunk: async (chunk: string) => {
           fullResponse += chunk;
-          emitChunk(socketId, chunk);
+          emitChunk(chunk);
         },
         benchmarkTag: `course:${promptMode}:stream`,
         metadata: {
