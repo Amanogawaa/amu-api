@@ -505,6 +505,73 @@ export class CourseRoute {
 
     /**
      * @openapi
+     * /courses/generate-sequential-transactional-streaming:
+     *   post:
+     *     tags:
+     *       - My Courses
+     *     summary: Generate a complete course SEQUENTIALLY with TRANSACTIONAL saves AND real-time AI streaming
+     *     description: |
+     *       🏆 BEST: Combines sequential generation, atomic saves, and live AI token streaming!
+     *       Socket.IO Events:
+     *       - 'generation:stream'   — { step: "course" | "module-N" | "lessons-N", chunk: "..." } raw AI tokens
+     *       - 'generation:progress' — Overall step progress updates
+     *       - 'module:completed'    — Individual module completion with staged data (preview)
+     *       - 'generation:completed' — Final atomic save complete (real IDs available)
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - category
+     *               - topic
+     *               - level
+     *               - duration
+     *               - noOfChapters
+     *               - language
+     *             properties:
+     *               category:
+     *                 type: string
+     *               topic:
+     *                 type: string
+     *               level:
+     *                 type: string
+     *                 enum: [beginner, intermediate, advanced]
+     *               duration:
+     *                 type: string
+     *               noOfChapters:
+     *                 type: integer
+     *                 minimum: 1
+     *                 maximum: 10
+     *               language:
+     *                 type: string
+     *               userInstructions:
+     *                 type: string
+     *               promptMode:
+     *                 type: string
+     *                 enum: [system, legacy]
+     *     responses:
+     *       202:
+     *         description: Streaming generation started
+     *       400:
+     *         description: Invalid request body
+     *       503:
+     *         description: Socket service unavailable
+     */
+    this.router.post(
+      "/courses/generate-sequential-transactional-streaming",
+      authMiddleware,
+      validateCourseTopic,
+      checkDuplicateCourse,
+      validateGenerateCourse,
+      this.controller.generateFullCourseSequentialTransactionalStreaming.bind(
+        this.controller,
+      ),
+    );
+
+    /**
+     * @openapi
      * /courses/{id}:
      *   patch:
      *     tags:

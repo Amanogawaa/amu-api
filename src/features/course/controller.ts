@@ -561,4 +561,88 @@ export class CourseController {
       next(error);
     }
   }
+
+  /**
+   * Generates a course SEQUENTIALLY with TRANSACTIONAL saves AND real-time AI streaming.
+   * Each Gemini call streams raw tokens to the client via the `generation:stream` Socket.IO event.
+   */
+  async generateFullCourseSequentialTransactionalStreaming(
+    request: AuthenticatedRequest,
+    response: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      if (!this.fullGenerationService) {
+        response.status(501).json({
+          error: "Full course generation service not available",
+        });
+        return;
+      }
+
+      const courseRequest = {
+        ...request.body,
+        uid: request.user!.uid,
+      };
+
+      const userId = request.user!.uid;
+      const socketHandlers = getSocketHandlers(request);
+
+      if (!socketHandlers) {
+        response.status(503).json({
+          message: "Socket service unavailable",
+        });
+        return;
+      }
+
+      logger.info(
+        "Starting SEQUENTIAL TRANSACTIONAL STREAMING full course generation",
+        {
+          userId,
+          request: courseRequest,
+          mode: "sequential-transactional-streaming",
+        },
+      );
+
+      /**
+       * emitChunk forwards raw AI tokens to the client via Socket.IO.
+       * `step` indicates which part is being generated:
+       *   "course"    — course metadata
+       *   "module-N"  — module N (chapter)
+       *   "lessons-N" — lessons for module N
+       */
+      const emitChunk = (step: string, chunk: string) => {
+        socketHandlers.emitToUser(userId, "generation:stream", { step, chunk });
+      };
+
+      response.status(202).json({
+        message:
+          "Sequential transactional streaming course generation started.",
+        note: "Listen to 'generation:stream' for live AI tokens, 'generation:progress' for step updates, 'module:completed' for staged previews, and 'generation:completed' for the final saved result.",
+        mode: "sequential-transactional-streaming",
+        streamEvent: "generation:stream",
+        streamPayload: { step: "course | module-N | lessons-N", chunk: "..." },
+      });
+
+      setImmediate(async () => {
+        try {
+          await this.fullGenerationService!.generateFullCourseSequentialTransactionalStreaming(
+            request,
+            courseRequest,
+            emitChunk,
+          );
+        } catch (error: any) {
+          logger.error(
+            "Background sequential transactional streaming generation failed:",
+            error,
+          );
+        }
+      });
+    } catch (error) {
+      logger.error(
+        "Error in CourseController.generateFullCourseSequentialTransactionalStreaming:",
+        error,
+      );
+      next(error);
+    }
+  }
 }

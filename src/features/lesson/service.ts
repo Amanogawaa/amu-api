@@ -357,4 +357,87 @@ export class LessonService {
       throw error;
     }
   }
+
+  /**
+   * Streaming variant of generateLessonsData.
+   * Pipes raw Gemini tokens to `onChunk` for real-time display,
+   * then parses the accumulated response and returns the lessons array (staged, not saved).
+   * @param request - Lesson generation request.
+   * @param onChunk - Callback invoked with each streamed token.
+   * @returns Array of lesson data ready for staging.
+   */
+  public async generateLessonsDataStreaming(
+    request: GenerateLessonRequest,
+    onChunk: (chunk: string) => void,
+  ): Promise<Array<Omit<Lesson, "id" | "chapterId">>> {
+    try {
+      const promptMode: LessonPromptMode = request.promptMode ?? "legacy";
+      const { userPrompt, systemPrompt } = buildLessonsPrompt(
+        {
+          chapterId: request.chapterId,
+          chapterName: request.chapterName,
+          chapterDescription: request.chapterDescription,
+          chapterOrder: request.chapterOrder,
+          learningObjectives: request.learningObjectives,
+          keyTopics: request.keyTopics,
+          estimatedDuration: request.estimatedDuration,
+          courseName: request.courseName,
+          level: request.level,
+          language: request.language,
+          userInstructions: request.userInstructions,
+        },
+        { mode: promptMode },
+      );
+
+      let fullResponse = "";
+      await geminiCall(userPrompt, {
+        responseSchema: lessonsSchema,
+        temperature: 0.7,
+        maxRetries: 3,
+        systemPrompt,
+        stream: true,
+        onChunk: (chunk: string) => {
+          fullResponse += chunk;
+          onChunk(chunk);
+        },
+        benchmarkTag: `lessons:${promptMode}:stream`,
+        metadata: {
+          chapterName: request.chapterName,
+          courseName: request.courseName,
+        },
+      });
+
+      let result: any;
+      try {
+        let cleaned = fullResponse.trim();
+        if (cleaned.startsWith("```")) {
+          cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "");
+          cleaned = cleaned.replace(/\n?```\s*$/, "");
+        }
+        result = JSON.parse(cleaned);
+      } catch (parseError) {
+        logger.error("Failed to parse streamed lessons response", {
+          parseError,
+        });
+        throw new Error("Failed to parse lessons data from streamed response");
+      }
+
+      logger.info("Lessons data generated via streaming (staged)", {
+        mode: promptMode,
+        lessonCount: result?.lessons?.length ?? 0,
+      });
+
+      if (!result.lessons || !Array.isArray(result.lessons)) {
+        throw new Error("Invalid response from Gemini: missing lessons array");
+      }
+
+      return result.lessons;
+    } catch (error) {
+      logger.error(
+        "Error in LessonService.generateLessonsDataStreaming:",
+        error,
+      );
+      throw error;
+    }
+  }
 }

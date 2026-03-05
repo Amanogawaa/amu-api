@@ -104,14 +104,10 @@ const makeGeminiCall = async (
     config: {
       temperature:
         config.temperature || RATE_LIMIT_CONFIG.GEMINI.DEFAULT_TEMPERATURE,
-      responseMimeType:
-        config.stream || !config.responseSchema
-          ? "text/plain"
-          : "application/json",
-      responseSchema:
-        config.stream || !config.responseSchema
-          ? undefined
-          : config.responseSchema,
+      responseMimeType: config.responseSchema
+        ? "application/json"
+        : "text/plain",
+      responseSchema: config.responseSchema ?? undefined,
     },
     contents,
   };
