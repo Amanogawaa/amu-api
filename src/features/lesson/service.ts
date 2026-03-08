@@ -409,15 +409,43 @@ export class LessonService {
 
       let result: any;
       try {
+        logger.info("Raw streamed lessons response received", {
+          fullResponseLength: fullResponse.length,
+          first500: fullResponse.substring(0, 500),
+          last500: fullResponse.substring(
+            Math.max(0, fullResponse.length - 500),
+          ),
+        });
+
         let cleaned = fullResponse.trim();
         if (cleaned.startsWith("```")) {
+          logger.info("Stripping markdown code fences from response");
           cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "");
           cleaned = cleaned.replace(/\n?```\s*$/, "");
         }
+
+        logger.info("Cleaned response before JSON.parse", {
+          cleanedLength: cleaned.length,
+          first500: cleaned.substring(0, 500),
+          last500: cleaned.substring(Math.max(0, cleaned.length - 500)),
+        });
+
         result = JSON.parse(cleaned);
-      } catch (parseError) {
+        logger.info("Successfully parsed streamed lessons JSON", {
+          hasLessons: !!result?.lessons,
+          lessonsIsArray: Array.isArray(result?.lessons),
+          lessonCount: result?.lessons?.length ?? 0,
+          topLevelKeys: Object.keys(result ?? {}),
+        });
+      } catch (parseError: any) {
         logger.error("Failed to parse streamed lessons response", {
-          parseError,
+          errorMessage: parseError?.message ?? String(parseError),
+          errorStack: parseError?.stack,
+          fullResponseLength: fullResponse.length,
+          first500: fullResponse.substring(0, 500),
+          last500: fullResponse.substring(
+            Math.max(0, fullResponse.length - 500),
+          ),
         });
         throw new Error("Failed to parse lessons data from streamed response");
       }
