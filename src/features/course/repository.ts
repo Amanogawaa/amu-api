@@ -84,6 +84,7 @@ export class CourseRepository {
           "name",
           "description",
           "thumbnail",
+          "duration",
           "level",
           "category",
           "language",
