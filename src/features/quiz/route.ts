@@ -51,9 +51,14 @@ export class QuizRoute {
      *         description: Quiz generated successfully
      *       400:
      *         description: Invalid request
+     *       401:
+     *         description: Unauthorized
+     *     security:
+     *       - bearerAuth: []
      */
     this.router.post(
-      "/generate",
+      "/quiz/generate",
+      authMiddleware,
       validateGenerateQuiz,
       this.controller.generateQuiz.bind(this.controller),
     );

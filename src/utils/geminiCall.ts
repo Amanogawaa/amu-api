@@ -13,6 +13,7 @@ interface GeminiConfig {
   metadata?: Record<string, unknown>;
   stream?: boolean;
   onChunk?: (chunk: string) => void | Promise<void>;
+  timeoutMs?: number;
 }
 
 let jobCounter = 0;
@@ -120,9 +121,42 @@ const makeGeminiCall = async (
   }
 
   const start = Date.now();
+  const timeoutMs =
+    config.timeoutMs ??
+    (process.env.GEMINI_TIMEOUT_MS
+      ? Number(process.env.GEMINI_TIMEOUT_MS)
+      : 120_000);
+
+  const withTimeout = async <T>(p: Promise<T>, label: string): Promise<T> => {
+    if (!timeoutMs || Number.isNaN(timeoutMs) || timeoutMs <= 0) {
+      return await p;
+    }
+
+    let timeoutHandle: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => {
+        reject(new Error(`Gemini request timed out after ${timeoutMs}ms (${label})`));
+      }, timeoutMs);
+    });
+
+    try {
+      return await Promise.race([p, timeoutPromise]);
+    } finally {
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+    }
+  };
 
   if (config.stream && config.onChunk) {
-    const stream = await ai.models.generateContentStream(requestPayload);
+    logger.info("Gemini API request started (streaming)", {
+      timeoutMs,
+      benchmarkTag: config.benchmarkTag ?? "default",
+      metadata: config.metadata,
+    });
+
+    const stream = await withTimeout(
+      ai.models.generateContentStream(requestPayload),
+      "generateContentStream",
+    );
     let fullResponse = "";
 
     for await (const chunk of stream) {
@@ -144,7 +178,16 @@ const makeGeminiCall = async (
     return fullResponse;
   }
 
-  const response = await ai.models.generateContent(requestPayload);
+  logger.info("Gemini API request started", {
+    timeoutMs,
+    benchmarkTag: config.benchmarkTag ?? "default",
+    metadata: config.metadata,
+  });
+
+  const response = await withTimeout(
+    ai.models.generateContent(requestPayload),
+    "generateContent",
+  );
   const durationMs = Date.now() - start;
 
   const text = response.text;
