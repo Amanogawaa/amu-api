@@ -4,7 +4,7 @@ import {
   buildCoursePrompt,
   type CoursePromptMode,
 } from "../../utils/prompts/course-temp";
-import { CourseRepository } from "./repository";
+import { CourseRepository, type CourseCreationResult } from "./repository";
 import type { StagedCourseData } from "../../utils/service/generation.service";
 
 import { geminiCall } from "../../utils/geminiCall";
@@ -583,7 +583,7 @@ export class CourseService {
    */
   public async createCourseWithRelations(
     staged: StagedCourseData,
-  ): Promise<Course> {
+  ): Promise<CourseCreationResult> {
     try {
       return await this.courseRepository.createCourseWithRelations(staged);
     } catch (error) {

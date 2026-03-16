@@ -107,6 +107,16 @@ export class LessonService {
     }
   }
 
+  /**
+   * Publicly schedules quiz generation for a chapter's lessons as a background job.
+   * Called after batch course creation where autoGenerateQuizzes is not triggered automatically.
+   */
+  public scheduleQuizGeneration(lessons: Lesson[], chapterId: string): void {
+    backgroundJobService.enqueue(`lesson:${chapterId}:quizzes`, () =>
+      this.autoGenerateQuizzes(lessons, chapterId),
+    );
+  }
+
   private async autoFetchTranscriptsForVideoLessons(
     lessons: Lesson[],
   ): Promise<void> {

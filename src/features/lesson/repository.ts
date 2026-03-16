@@ -44,11 +44,14 @@ export class LessonRepository {
           "lessonName",
           "lessonDescription",
           "lessonOrder",
+          "type",
           "duration",
           "chapterId",
           "courseId",
           "videoUrl",
           "content",
+          "videoTranscript",
+          "learningOutcome",
           "quizId",
         );
       }

@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import type { QuizService } from "./service";
 import { logger } from "../../utils/loggers";
+import { AppError } from "../../utils/errors";
 
 export class QuizController {
   private service: QuizService;
@@ -16,7 +17,16 @@ export class QuizController {
     next: NextFunction,
   ): Promise<void> {
     try {
+      logger.info("QuizController.generateQuiz - request received", {
+        body: request.body,
+      });
+
       const generateRequest = request.body;
+
+      if (!generateRequest) {
+        throw new AppError("Request body is required", 400, "MISSING_BODY");
+      }
+
       const quiz = await this.service.generateQuiz(generateRequest);
 
       response.status(201).json({
@@ -24,7 +34,10 @@ export class QuizController {
         message: "Quiz generated successfully",
       });
     } catch (error) {
-      logger.error("Error in QuizController.generateQuiz:", error);
+      logger.error("Error in QuizController.generateQuiz:", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       next(error);
     }
   }

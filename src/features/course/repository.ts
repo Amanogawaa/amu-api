@@ -6,7 +6,13 @@ import { AppError } from "../../utils/errors";
 import { logger } from "../../utils/loggers";
 import { sanitizeSearchQuery, sanitizeInput } from "../../utils/sanitizer";
 import type { Course, CourseQueryParams } from "./types";
+import type { Lesson } from "../lesson/types";
 import type { StagedCourseData } from "../../utils/service/generation.service";
+
+export interface CourseCreationResult {
+  course: Course;
+  chaptersWithLessons: Array<{ chapterId: string; lessons: Lesson[] }>;
+}
 
 export class CourseRepository {
   private firebaseStore: Firestore;
@@ -377,9 +383,13 @@ export class CourseRepository {
 
   /**
    * Atomically create course with all related entities (chapters and lessons)
-   * Uses Firestore batch writes to ensure all-or-nothing semantics
+   * Uses Firestore batch writes to ensure all-or-nothing semantics.
+   * Returns the created course along with chapter IDs and their lessons (with real Firestore IDs)
+   * so callers can trigger post-save background jobs (e.g. quiz generation).
    */
-  async createCourseWithRelations(staged: StagedCourseData): Promise<Course> {
+  async createCourseWithRelations(
+    staged: StagedCourseData,
+  ): Promise<CourseCreationResult> {
     try {
       const batches: any[] = [];
       let currentBatch = this.firebaseStore.batch();
@@ -411,6 +421,11 @@ export class CourseRepository {
         ),
       });
 
+      const chaptersWithLessons: Array<{
+        chapterId: string;
+        lessons: Lesson[];
+      }> = [];
+
       for (let i = 0; i < staged.chapters.length; i++) {
         const chapterData = staged.chapters[i];
         if (!chapterData) continue;
@@ -434,17 +449,26 @@ export class CourseRepository {
           operationCount = 0;
         }
 
+        const chapterLessons: Lesson[] = [];
+
         for (const lesson of lessons) {
           const lessonRef = this.firebaseStore.collection("lessons").doc();
 
           currentBatch.set(lessonRef, {
             ...lesson,
             chapterId: chapterRef.id,
-            courseId: courseRef.id, // Add courseId for efficient queries and deletion
+            courseId: courseRef.id,
             createdAt: new Date(),
             updatedAt: new Date(),
           });
           operationCount++;
+
+          chapterLessons.push({
+            ...(lesson as Lesson),
+            id: lessonRef.id,
+            chapterId: chapterRef.id,
+            courseId: courseRef.id,
+          });
 
           if (operationCount >= MAX_BATCH_SIZE) {
             batches.push(currentBatch);
@@ -452,6 +476,11 @@ export class CourseRepository {
             operationCount = 0;
           }
         }
+
+        chaptersWithLessons.push({
+          chapterId: chapterRef.id,
+          lessons: chapterLessons,
+        });
       }
 
       if (operationCount > 0) {
@@ -481,8 +510,11 @@ export class CourseRepository {
       );
 
       return {
-        id: courseRef.id,
-        ...staged.course,
+        course: {
+          id: courseRef.id,
+          ...staged.course,
+        },
+        chaptersWithLessons,
       };
     } catch (error) {
       logger.error("Failed to commit course with relations", error);

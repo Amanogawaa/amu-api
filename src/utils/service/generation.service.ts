@@ -126,9 +126,15 @@ export class FullCourseGenerationService {
         startTime,
       );
 
-      const savedCourse = await this.courseService.createCourseWithRelations(
+      const creationResult = await this.courseService.createCourseWithRelations(
         context.staged,
       );
+      const savedCourse = creationResult.course;
+
+      // Schedule quiz generation as background jobs for each chapter
+      for (const { chapterId, lessons } of creationResult.chaptersWithLessons) {
+        this.lessonService.scheduleQuizGeneration(lessons, chapterId);
+      }
 
       const result: FullCourseGenerationResult = {
         courseId: savedCourse.id,
@@ -830,9 +836,15 @@ export class FullCourseGenerationService {
         startTime,
       );
 
-      const savedCourse = await this.courseService.createCourseWithRelations(
+      const creationResult = await this.courseService.createCourseWithRelations(
         context.staged,
       );
+      const savedCourse = creationResult.course;
+
+      // Schedule quiz generation as background jobs for each chapter
+      for (const { chapterId, lessons } of creationResult.chaptersWithLessons) {
+        this.lessonService.scheduleQuizGeneration(lessons, chapterId);
+      }
 
       // STEP 5: Success!
       const result: FullCourseGenerationResult = {
@@ -1166,9 +1178,15 @@ export class FullCourseGenerationService {
         startTime,
       );
 
-      const savedCourse = await this.courseService.createCourseWithRelations(
+      const creationResult = await this.courseService.createCourseWithRelations(
         context.staged,
       );
+      const savedCourse = creationResult.course;
+
+      // Schedule quiz generation as background jobs for each chapter
+      for (const { chapterId, lessons } of creationResult.chaptersWithLessons) {
+        this.lessonService.scheduleQuizGeneration(lessons, chapterId);
+      }
 
       // STEP 5: Success!
       const result: FullCourseGenerationResult = {

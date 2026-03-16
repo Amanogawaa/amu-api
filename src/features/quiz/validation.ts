@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Request, Response, NextFunction } from "express";
+import { ValidationError } from "../../utils/errors";
 
 export const generateQuizSchema = z.object({
   lessonId: z.string().min(1, "Lesson ID is required"),
@@ -26,3 +28,39 @@ export const submitQuizSchema = z.object({
 
 export type GenerateQuizInput = z.infer<typeof generateQuizSchema>;
 export type SubmitQuizInput = z.infer<typeof submitQuizSchema>;
+
+export const validateGenerateQuiz = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    generateQuizSchema.parse(req.body);
+    next();
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      throw new ValidationError(
+        error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", "),
+      );
+    }
+    next(error);
+  }
+};
+
+export const validateSubmitQuiz = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    submitQuizSchema.parse(req.body);
+    next();
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      throw new ValidationError(
+        error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", "),
+      );
+    }
+    next(error);
+  }
+};
