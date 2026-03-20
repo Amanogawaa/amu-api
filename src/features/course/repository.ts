@@ -222,6 +222,10 @@ export class CourseRepository {
         deleteCollection("capstoneGuidelines"),
         deleteCollection("capstoneSubmissions"),
         deleteCollection("enrollments"),
+        deleteCollection("quizzes"),
+        deleteCollection("recommendations"),
+        deleteCollection("likes"),
+        deleteCollection("comments"),
       ]);
 
       await this.firebaseStore
