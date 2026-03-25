@@ -28,7 +28,8 @@ export class LeaderboardsRoute {
 
     // Get current user's stats (no userId param)
     this.router.get(
-      "/user",
+      "/my-stats/:userId",
+      authMiddleware,
       this.controller.getUserStats.bind(this.controller),
     );
 
