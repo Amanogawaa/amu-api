@@ -159,7 +159,7 @@ export class RecommendationService {
         likeCount: likes.length,
       });
 
-      if (likes.length < 3) {
+      if (likes.length < 2) {
         logger.info("Insufficient likes for personalized recommendations", {
           userId,
           likeCount: likes.length,
@@ -610,6 +610,10 @@ export class RecommendationService {
     completedCategory: string,
     candidateCategory: string,
   ): number {
+    if (!completedTopic || !candidateTopic) {
+      return completedCategory === candidateCategory ? 0.5 : 0;
+    }
+
     const categoryMatch = completedCategory === candidateCategory ? 0.5 : 0;
 
     const completedWords = new Set(completedTopic.toLowerCase().split(/\s+/));
