@@ -270,6 +270,18 @@ export class CapstoneService {
         throw new AppError("You have already submitted this repository", 400);
       }
 
+      const existingSubmission = await this.repository.getSubmissions({
+        userId,
+        courseId: request.courseId,
+      });
+
+      if (existingSubmission.length > 0) {
+        throw new AppError(
+          "You can only submit one project per course. Please update your existing submission instead.",
+          400,
+        );
+      }
+
       const { owner, repo } = this.parseGitHubUrl(request.githubRepoUrl);
 
       const repoMetadata = await this.githubService.getRepoMetadata(

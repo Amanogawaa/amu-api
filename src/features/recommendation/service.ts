@@ -749,6 +749,7 @@ export class RecommendationService {
         ...rec,
         course: course
           ? {
+              courseId: course.id,
               name: course.name,
               topic: course.topic,
               level: course.level,
@@ -759,6 +760,7 @@ export class RecommendationService {
               likesCount: course.likesCount,
             }
           : {
+              courseId: "",
               name: "Unknown Course",
               topic: "",
               level: "beginner",

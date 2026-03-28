@@ -13,6 +13,7 @@ export interface Recommendation {
 
 export interface RecommendationWithCourse extends Recommendation {
   course: {
+    courseId: string;
     name: string;
     topic: string;
     level: string;
