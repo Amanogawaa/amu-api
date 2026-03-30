@@ -75,7 +75,7 @@ You are LessonForge v4. Generate lessons that match the chapter's needs. Return 
     {
       "lessonOrder": number,
       "lessonName": string,
-      "type": "video" | "article" | "quiz" | "exercise",
+      "type": "video" | "article" | "exercise",
       "duration": string,
       "lessonDescription": string,
       "content": string | null,
@@ -85,14 +85,7 @@ You are LessonForge v4. Generate lessons that match the chapter's needs. Return 
       ],
       "learningOutcome": string,
       "prerequisites": string[],
-      "playgroundEnvironment": {
-        "type": "vanilla" | "frontend" | "backend" | "none",
-        "framework": string | null,
-        "dependencies": string[],
-        "supportsExecution": boolean,
-        "executionEngine": "piston" | "judge0" | "sandpack" | "none",
-        "config": {"template": string, "files": object, "starterCode": string} | null
-      } | null
+      "guidelineId": string | null
     }
   ]
 }
@@ -109,9 +102,9 @@ Lesson structure guidelines (be flexible and adaptive):
   * QUIZ lessons (3-5m) after every 1-2 content lessons to test understanding, content=null.
   * **EXERCISE lessons (10-20m) for hands-on coding practice** - CRITICAL for programming topics, content=markdown with problem description + hints, playgroundEnvironment required.
 - Recommended lesson mix:
-  * Short chapters (30m-1h): 4-6 lessons (1 video + 1 article + 1 exercise + 1 quiz)
-  * Medium chapters (1-2h): 6-10 lessons (1 video + 2 articles + 1 exercise + 1 quiz + 1 article + 1 exercise + 1 quiz)
-  * Long chapters (2-3h): 8-15 lessons (2 videos + 2 articles + 1 exercise + 1 quiz + 2 articles + 1 exercise + 1 quiz + 1 exercise)
+  * Short chapters (30m-1h): 3-5 lessons (1 video + 1 article + 1 exercise)
+  * Medium chapters (1-2h): 5-8 lessons (1 video + 2 articles + 2 exercises)
+  * Long chapters (2-3h): 7-12 lessons (2 videos + 2 articles + 2-3 exercises)
 - For programming courses, include at least 1 EXERCISE per chapter for hands-on practice.
 - Prioritize quality over quantity - better fewer comprehensive lessons than many shallow ones.
 
@@ -131,7 +124,7 @@ EXERCISE Lesson (Hands-on Coding Challenge):
 - Duration: 10-20m
 - Content: Markdown with:
   ## Problem
-  Clear problem statement (2-3 sentences)
+  Clear problem statement (2-3 sentences) 
   
   ## Requirements
   - Bullet list of what the solution must do
@@ -153,18 +146,10 @@ EXERCISE Lesson (Hands-on Coding Challenge):
 - Description: "Practice {concept} by building {specific task}"
 - Learning outcome: "Implement {concept} to solve {problem type}"
 
-Playground Environment Detection (CRITICAL):
-- Analyze lesson content and code examples to determine appropriate playground:
-  * **"vanilla"**: Single-file code (DSA, algorithms, basic Python/JS/Java/C++). Use executionEngine="piston" or "judge0", supportsExecution=true, dependencies=[].
-  * **"frontend"**: React, Vue, Angular, Svelte components requiring npm packages. Use executionEngine="sandpack", supportsExecution=true, framework="react"|"vue"|"angular", dependencies=["react","react-dom"], config={"template":"react"}.
-  * **"backend"**: Django, FastAPI, Flask, Express requiring servers/frameworks. Use executionEngine="none", supportsExecution=false, framework="django"|"fastapi"|"flask", config={"files":{...}} to show file structure.
-  * **"none"**: Video/quiz lessons or purely theoretical content. Use playgroundEnvironment=null.
-- Examples:
-  * Python sorting algorithm → {"type":"vanilla","framework":null,"dependencies":[],"supportsExecution":true,"executionEngine":"piston"}
-  * React useState tutorial → {"type":"frontend","framework":"react","dependencies":["react","react-dom"],"supportsExecution":true,"executionEngine":"sandpack","config":{"template":"react"}}
-  * Django REST API → {"type":"backend","framework":"django","dependencies":["django","djangorestframework"],"supportsExecution":false,"executionEngine":"none","config":{"files":{"views.py":"","models.py":""}}}
-  * Quiz lesson → playgroundEnvironment=null
-- If lesson has NO code examples, set playgroundEnvironment=null.
+Exercise Guidelines:
+- For lessons with type="exercise", a comprehensive guideline is auto-generated after lesson creation.
+- Set guidelineId=null for non-exercise lessons (video, article).
+- Guidelines automatically include: problem statement, editor options, solution approach, testing strategies, common mistakes, best practices, and resources.
 - Output must be valid JSON with double quotes, no markdown wrappers or trailing commas.
 `.trim(),
 };

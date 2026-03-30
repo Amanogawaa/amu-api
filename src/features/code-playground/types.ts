@@ -1,3 +1,100 @@
+// ==================== EXERCISE GUIDELINES ====================
+// Replace code playground with comprehensive exercise guidelines
+// Users will use their own editors instead of the built-in playground
+
+export interface ExerciseGuideline {
+  id: string;
+  lessonId: string;
+  courseId: string;
+  title: string;
+  description: string;
+  objectives: string[];
+  gettingStarted: {
+    editorOptions: Array<{
+      name: string;
+      description: string;
+      url: string;
+      difficulty: "beginner" | "intermediate" | "advanced";
+      pros: string[];
+      cons: string[];
+    }>;
+    environmentSetup: string[];
+    recommendedApproach: string;
+  };
+  problemStatement: {
+    description: string;
+    constraints: string[];
+    acceptanceCriteria: string[];
+  };
+  technicalRequirements: {
+    languages: string[];
+    frameworks?: string[];
+    tools: string[];
+    runtime?: string;
+  };
+  solutionApproach: {
+    steps: string[];
+    pseudocode?: string;
+    keyAlgorithms?: string[];
+  };
+  projectStructure: {
+    description: string;
+    fileStructure: Record<string, string>;
+  };
+  testingGuidelines: {
+    whatToTest: string[];
+    sampleTestCases?: Array<{
+      input: string;
+      expectedOutput: string;
+    }>;
+    testingTools: string[];
+    bestPractices: string[];
+  };
+  commonMistakes: Array<{
+    mistake: string;
+    correction: string;
+    prevention: string;
+  }>;
+  bestPractices: string[];
+  resources: string[];
+  examples: {
+    description: string;
+    links: string[];
+  };
+  estimatedTime: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  submissionGuidelines: {
+    format: string;
+    requiredFiles: string[];
+    instructions: string[];
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SaveExerciseRequest {
+  lessonId: string;
+  courseId: string;
+  code: string;
+  language: string;
+}
+
+export interface ExerciseSubmission {
+  id: string;
+  userId: string;
+  lessonId: string;
+  courseId: string;
+  code: string;
+  language: string;
+  submittedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ==================== DEPRECATED: CODE WORKSPACE ====================
+// The following interfaces are deprecated and will be removed.
+// Use ExerciseGuideline instead for new implementations.
+
 export interface CodeWorkspace {
   id: string;
   userId: string;

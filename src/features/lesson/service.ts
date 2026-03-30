@@ -60,9 +60,10 @@ export class LessonService {
     return `${head}\n\n[...truncated ${label}: ${text.length - head.length - tail.length} chars...]\n\n${tail}`;
   }
 
-  private buildPreviousLessonsContextForQuiz(
-    previousLessons: Lesson[],
-  ): { context: string; stats: Record<string, unknown> } {
+  private buildPreviousLessonsContextForQuiz(previousLessons: Lesson[]): {
+    context: string;
+    stats: Record<string, unknown>;
+  } {
     const limits = this.getQuizContextLimits();
 
     // Prefer most recent lessons closest to the quiz.
@@ -121,10 +122,7 @@ export class LessonService {
 
     // Return in chronological order for readability (oldest -> newest)
     const context = combined
-      ? combined
-          .split("\n\n---\n\n")
-          .reverse()
-          .join("\n\n---\n\n")
+      ? combined.split("\n\n---\n\n").reverse().join("\n\n---\n\n")
       : "";
 
     return {
@@ -225,42 +223,6 @@ export class LessonService {
     }
   }
 
-  /**
-   * Publicly schedules quiz generation for a chapter's lessons as a background job.
-   * Called after batch course creation where autoGenerateQuizzes is not triggered automatically.
-   */
-  public scheduleQuizGeneration(lessons: Lesson[], chapterId: string): void {
-    logger.info("Scheduling quiz generation background job", {
-      chapterId,
-      lessonCount: lessons.length,
-      quizLessonCount: lessons.filter((l) => l.type === "quiz").length,
-      jobName: `lesson:${chapterId}:quizzes`,
-    });
-
-    backgroundJobService.enqueue(`lesson:${chapterId}:quizzes`, async () => {
-      logger.info("Quiz generation background job started", {
-        chapterId,
-        jobName: `lesson:${chapterId}:quizzes`,
-      });
-
-      try {
-        await this.autoGenerateQuizzes(lessons, chapterId);
-        logger.info("Quiz generation background job completed", {
-          chapterId,
-          jobName: `lesson:${chapterId}:quizzes`,
-        });
-      } catch (error) {
-        logger.error("Quiz generation background job failed", {
-          chapterId,
-          jobName: `lesson:${chapterId}:quizzes`,
-          error:
-            error instanceof Error ? error.message : JSON.stringify(error),
-        });
-        throw error;
-      }
-    });
-  }
-
   private async autoFetchTranscriptsForVideoLessons(
     lessons: Lesson[],
   ): Promise<void> {
@@ -339,13 +301,22 @@ export class LessonService {
     lessons: Lesson[],
     chapterId: string,
   ): Promise<void> {
+    logger.info("🚀 [QUIZ DEBUG] autoGenerateQuizzes called", {
+      chapterId,
+      lessonsCount: lessons.length,
+      lessonTypes: lessons.map((l) => l.type),
+    });
+
     if (!this.quizService) {
-      logger.warn("Quiz service not available, skipping quiz generation", {
+      logger.error("❌ [QUIZ DEBUG] Quiz service not available!", {
         chapterId,
-        lessonCount: lessons.length,
       });
       return;
     }
+
+    logger.info("✅ [QUIZ DEBUG] Quiz service is available", {
+      chapterId,
+    });
 
     logger.info("Starting auto-generation of quizzes for quiz lessons...", {
       chapterId,
@@ -353,20 +324,36 @@ export class LessonService {
     });
 
     const quizLessons = lessons.filter((lesson) => lesson.type === "quiz");
+    logger.info("🔍 [QUIZ DEBUG] Filtered quiz lessons", {
+      chapterId,
+      totalLessonsIn: lessons.length,
+      quizLessonsOut: quizLessons.length,
+      quizLessonIds: quizLessons.map((l) => l.id),
+    });
 
     if (quizLessons.length === 0) {
-      logger.info("No quiz lessons to generate", {
+      logger.warn("⚠️ [QUIZ DEBUG] No quiz lessons found!", {
         chapterId,
         lessonCount: lessons.length,
+        lessonTypes: lessons.map((l) => l.type),
       });
       return;
     }
 
+    logger.info("📚 [QUIZ DEBUG] Fetching ALL lessons from repository...", {
+      chapterId,
+    });
+
     const allLessons = await this.lessonRepository.getLessons(chapterId);
-    logger.info("Fetched lessons from repository for quiz generation", {
+    logger.info("📦 [QUIZ DEBUG] Fetched lessons from repository", {
       chapterId,
       passedInLessonCount: lessons.length,
       fetchedLessonCount: allLessons.length,
+      fetchedLessonTypes: allLessons.map((l) => ({
+        id: l.id,
+        type: l.type,
+        order: l.lessonOrder,
+      })),
     });
     const sortedLessons = allLessons.sort(
       (a, b) => a.lessonOrder - b.lessonOrder,
@@ -388,6 +375,13 @@ export class LessonService {
             lesson.lessonOrder < quizLesson.lessonOrder &&
             lesson.type !== "quiz",
         );
+
+        logger.info("🔎 [QUIZ DEBUG] Filtered previous lessons", {
+          chapterId,
+          quizLessonId: quizLesson.id,
+          quizLessonOrder: quizLesson.lessonOrder,
+          previousLessonCount: previousLessons.length,
+        });
 
         if (previousLessons.length === 0) {
           logger.warn(
@@ -420,6 +414,14 @@ export class LessonService {
         }
 
         try {
+          logger.info("🤖 [QUIZ DEBUG] Calling quizService.generateQuiz", {
+            chapterId,
+            quizLessonId: quizLesson.id,
+            lessonName: quizLesson.lessonName,
+            difficulty,
+            previousLessonCount: previousLessons.length,
+          });
+
           const quiz = await this.quizService.generateQuiz({
             lessonId: quizLesson.id,
             lessonName: quizLesson.lessonName,
@@ -428,25 +430,22 @@ export class LessonService {
             difficulty,
           });
 
-          logger.info(
-            `✅ Quiz generated for lesson ${quizLesson.id}: ${quiz.questions.length} questions, ${difficulty} difficulty`,
-            {
-              chapterId,
-              quizLessonId: quizLesson.id,
-              questionCount: quiz.questions.length,
-              difficulty,
-            },
-          );
+          logger.info("✅ [QUIZ DEBUG] Quiz generated successfully", {
+            chapterId,
+            quizLessonId: quizLesson.id,
+            quizId: quiz.id,
+            questionCount: quiz.questions.length,
+            difficulty,
+          });
         } catch (error) {
-          logger.error(
-            `QuizService.generateQuiz failed for lesson ${quizLesson.id}`,
-            {
-              chapterId,
-              quizLessonId: quizLesson.id,
-              error:
-                error instanceof Error ? error.message : JSON.stringify(error),
-            },
-          );
+          logger.error("❌ [QUIZ DEBUG] QuizService.generateQuiz FAILED", {
+            chapterId,
+            quizLessonId: quizLesson.id,
+            lessonName: quizLesson.lessonName,
+            error:
+              error instanceof Error ? error.message : JSON.stringify(error),
+            errorStack: error instanceof Error ? error.stack : undefined,
+          });
           throw error;
         }
       } catch (error) {

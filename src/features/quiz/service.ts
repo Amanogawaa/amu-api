@@ -80,7 +80,18 @@ export class QuizService {
         );
       }
 
-      logger.info(`Generated ${result.questions.length} questions for quiz`, {
+      logger.info(
+        `🏆 [QUIZ DEBUG] Generated ${result.questions.length} questions from Gemini`,
+        {
+          lessonId: request.lessonId,
+          questionCount: result.questions.length,
+          questionTypes: result.questions
+            .slice(0, 2)
+            .map((q) => q.questionType),
+        },
+      );
+
+      logger.info("💾 [QUIZ DEBUG] Saving quiz to repository", {
         lessonId: request.lessonId,
         questionCount: result.questions.length,
       });
@@ -91,7 +102,13 @@ export class QuizService {
         passingScore: 70,
       });
 
-      logger.info(`Quiz created successfully with id: ${quiz.id}`, {
+      logger.info("✨ [QUIZ DEBUG] Quiz created successfully in repository", {
+        quizId: quiz.id,
+        lessonId: request.lessonId,
+        questionCount: quiz.questions.length,
+      });
+
+      logger.info("✅ [QUIZ DEBUG] Quiz creation COMPLETE", {
         quizId: quiz.id,
         lessonId: request.lessonId,
       });

@@ -15,70 +15,28 @@ export class CodePlaygroundRoute {
 
   private initializeRoutes(): void {
     this.router.post(
-      "/code/execute",
+      "/guidelines/generate/:lessonId",
       authMiddleware,
-      validateExecuteCode,
-      this.controller.executeCode,
+      this.controller.generateGuideline,
     );
 
     this.router.get(
-      "/piston/languages",
+      "/guidelines/lesson/:lessonId",
       authMiddleware,
-      this.controller.getPistonSupportedLanguages,
-    );
-
-    this.router.post(
-      "/piston/execute",
-      authMiddleware,
-      this.controller.pistonExecuteCode,
-    );
-
-    this.router.post(
-      "/judge0/execute",
-      authMiddleware,
-      validateExecuteCode,
-      this.controller.judge0ExecuteCode,
+      this.controller.getGuidelineByLesson,
     );
 
     this.router.get(
-      "/judge0/languages",
+      "/guidelines/:id",
       authMiddleware,
-      this.controller.getJudge0SupportedLanguages,
-    );
-
-    this.router.post(
-      "/code/execute-and-save",
-      authMiddleware,
-      validateExecuteCode,
-      this.controller.executeAndSave,
-    );
-
-    this.router.post(
-      "/code/workspace",
-      authMiddleware,
-      validateSaveWorkspace,
-      this.controller.saveWorkspace,
+      this.controller.getGuidelineById,
     );
 
     this.router.get(
-      "/code/workspace/:lessonId",
+      "/guidelines/course/:courseId",
       authMiddleware,
-      this.controller.getWorkspace,
+      this.controller.getGuidelinesByCourse,
     );
-
-    this.router.get(
-      "/code/workspaces/course/:courseId",
-      authMiddleware,
-      this.controller.getWorkspacesByCourse,
-    );
-
-    this.router.delete(
-      "/code/workspace/:workspaceId",
-      authMiddleware,
-      this.controller.deleteWorkspace,
-    );
-
-    this.router.get("/code/languages", this.controller.getSupportedLanguages);
   }
 
   public getRouter(): Router {

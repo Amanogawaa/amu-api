@@ -22,7 +22,7 @@ export interface Lesson {
   courseId?: string; // Added for efficient queries and cascade deletion
   lessonOrder: number;
   lessonName: string;
-  type: "video" | "article" | "quiz";
+  type: "video" | "article" | "quiz" | "exercise";
   duration: string;
   lessonDescription: string;
   content: string | null;

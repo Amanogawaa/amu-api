@@ -1,41 +1,41 @@
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import compression from "compression";
 import type { Application, NextFunction, Request, Response } from "express";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import http from "http";
-import rateLimit from "express-rate-limit";
-import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./config/swagger";
-import { logger } from "./utils/loggers";
-import type { Server as SocketIOServer } from "socket.io";
-import { initializeSocketIO } from "./config/socket";
-import { socketAuthMiddleware } from "./middlewares/socket.middleware";
-import { SocketHandlers } from "./utils/socket/socket.handlers";
 import path from "path";
+import type { Server as SocketIOServer } from "socket.io";
+import swaggerUi from "swagger-ui-express";
+import { initializeSocketIO } from "./config/socket";
+import { swaggerSpec } from "./config/swagger";
 import { performanceMonitor } from "./middlewares/performance.middleware";
+import { socketAuthMiddleware } from "./middlewares/socket.middleware";
+import { logger } from "./utils/loggers";
+import { SocketHandlers } from "./utils/socket/socket.handlers";
+import { FullCourseGenerationService } from "./utils/service/generation.service";
 
+import { config } from "./config/environment";
 import { AuthContainer } from "./features/auth/container";
+import { CapstoneContainer } from "./features/capstone/container";
 import { ChapterContainer } from "./features/chapter/container";
+import { CodePlaygroundContainer } from "./features/code-playground/container";
+import { CommentsContainer } from "./features/comments/container";
 import { CourseContainer } from "./features/course/container";
+import { EnrollmentContainer } from "./features/enrollment/container";
+import { GitHubContainer } from "./features/github/container";
+import { LeaderboardsContainer } from "./features/leaderboards/container";
+import { LessonAssistantContainer } from "./features/lesson-assistant/container";
+import { LessonContainer } from "./features/lesson/container";
+import { LikesContainer } from "./features/likes/container";
+import { ProgressContainer } from "./features/progress/container";
+import { RecommendationContainer } from "./features/recommendation/container";
+import { UserContainer } from "./features/user/container";
+import { cacheMiddleware } from "./middlewares/cache.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
 import { AppRoutes } from "./routes";
-import { LessonContainer } from "./features/lesson/container";
-import { ProgressContainer } from "./features/progress/container";
-import { LikesContainer } from "./features/likes/container";
-import { CommentsContainer } from "./features/comments/container";
-import { UserContainer } from "./features/user/container";
-import { QuizContainer } from "./features/quiz/container";
-import { EnrollmentContainer } from "./features/enrollment/container";
-import { CodePlaygroundContainer } from "./features/code-playground/container";
-import { CapstoneContainer } from "./features/capstone/container";
-import { GitHubContainer } from "./features/github/container";
-import { LessonAssistantContainer } from "./features/lesson-assistant/container";
-import { RecommendationContainer } from "./features/recommendation/container";
-import { LeaderboardsContainer } from "./features/leaderboards/container";
-import { config } from "./config/environment";
-import { cacheMiddleware } from "./middlewares/cache.middleware";
 
 class App {
   public app: Application;
@@ -52,7 +52,6 @@ class App {
   private likesContainer: LikesContainer;
   private commentsContainer: CommentsContainer;
   private userContainer: UserContainer;
-  private quizContainer: QuizContainer;
   private enrollmentContainer: EnrollmentContainer;
   private codePlaygroundContainer: CodePlaygroundContainer;
   private capstoneContainer: CapstoneContainer;
@@ -70,8 +69,7 @@ class App {
     likesContainer: LikesContainer = new LikesContainer(),
     commentsContainer: CommentsContainer = new CommentsContainer(),
     userContainer: UserContainer = new UserContainer(),
-    quizContainer: QuizContainer = new QuizContainer(),
-    codePlaygroundContainer: CodePlaygroundContainer = new CodePlaygroundContainer(),
+    codePlaygroundContainer?: CodePlaygroundContainer,
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -83,12 +81,8 @@ class App {
 
     this.authContainer = authContainer;
     this.chapterContainer = chapterContainer;
-    this.quizContainer = quizContainer;
 
-    this.lessonContainer =
-      lessonContainer || new LessonContainer(undefined, quizContainer.service);
-
-    this.codePlaygroundContainer = codePlaygroundContainer;
+    this.lessonContainer = lessonContainer || new LessonContainer(undefined);
 
     this.courseContainer =
       courseContainer ||
@@ -97,6 +91,27 @@ class App {
         chapterContainer.service,
         this.lessonContainer.service,
       );
+
+    this.codePlaygroundContainer =
+      codePlaygroundContainer ||
+      new CodePlaygroundContainer(
+        this.courseContainer.repository,
+        chapterContainer.repository,
+        this.lessonContainer.repository,
+      );
+
+    if (
+      this.courseContainer.fullGenerationService &&
+      this.codePlaygroundContainer.service
+    ) {
+      this.courseContainer.fullGenerationService =
+        new FullCourseGenerationService(
+          this.courseContainer.service,
+          chapterContainer.service,
+          this.lessonContainer.service,
+          this.codePlaygroundContainer.service,
+        );
+    }
 
     this.capstoneContainer = new CapstoneContainer(
       undefined,
@@ -119,7 +134,6 @@ class App {
       progressContainer ||
       new ProgressContainer(
         undefined,
-        quizContainer.service,
         this.lessonContainer.service,
         this.leaderboardsContainer.leaderboardsService,
       );
@@ -289,7 +303,6 @@ class App {
       this.likesContainer,
       this.commentsContainer,
       this.userContainer,
-      this.quizContainer,
       this.enrollmentContainer,
       this.codePlaygroundContainer,
       this.capstoneContainer,

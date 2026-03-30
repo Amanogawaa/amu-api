@@ -33,7 +33,6 @@ export class AppRoutes {
   private likesContainer: LikesContainer;
   private commentsContainer: CommentsContainer;
   private userContainer: UserContainer;
-  private quizContainer: QuizContainer;
   private enrollmentContainer: EnrollmentContainer;
   private codePlaygroundContainer: CodePlaygroundContainer;
   private capstoneContainer: CapstoneContainer;
@@ -51,7 +50,6 @@ export class AppRoutes {
     likesContainer: LikesContainer,
     commentsContainer: CommentsContainer,
     userContainer: UserContainer,
-    quizContainer: QuizContainer,
     enrollmentContainer: EnrollmentContainer,
     codePlaygroundContainer: CodePlaygroundContainer,
     capstoneContainer: CapstoneContainer,
@@ -69,7 +67,6 @@ export class AppRoutes {
     this.likesContainer = likesContainer;
     this.commentsContainer = commentsContainer;
     this.userContainer = userContainer;
-    this.quizContainer = quizContainer;
     this.enrollmentContainer = enrollmentContainer;
     this.codePlaygroundContainer = codePlaygroundContainer;
     this.capstoneContainer = capstoneContainer;
@@ -95,7 +92,6 @@ export class AppRoutes {
     this.router.use("/", this.commentsContainer.getRouter());
     this.router.use("/socket", socketTestRoutes);
     this.router.use("/", this.userContainer.getRouter());
-    this.router.use("/", this.quizContainer.getRouter());
     this.router.use("/", this.enrollmentContainer.route.getRouter());
     this.router.use("/", this.codePlaygroundContainer.getRouter());
     this.router.use("/", this.capstoneContainer.getRouter());
