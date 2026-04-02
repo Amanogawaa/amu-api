@@ -38,6 +38,7 @@
     "axios": "^1.13.2",
     "bottleneck": "^2.19.5",
     "compression": "^1.8.1",
+    "convex": "^1.34.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
