@@ -21,29 +21,6 @@ export function validateEnvironment(): ValidationError[] {
   const requiredVars = [
     { name: "NODE_ENV", value: process.env.NODE_ENV },
     { name: "JWT_SECRET", value: process.env.JWT_SECRET },
-    { name: "FIREBASE_TYPE", value: process.env.FIREBASE_TYPE },
-    { name: "FIREBASE_PROJECT_ID", value: process.env.FIREBASE_PROJECT_ID },
-    {
-      name: "FIREBASE_PRIVATE_KEY_ID",
-      value: process.env.FIREBASE_PRIVATE_KEY_ID,
-    },
-    { name: "FIREBASE_PRIVATE_KEY", value: process.env.FIREBASE_PRIVATE_KEY },
-    { name: "FIREBASE_CLIENT_EMAIL", value: process.env.FIREBASE_CLIENT_EMAIL },
-    { name: "FIREBASE_CLIENT_ID", value: process.env.FIREBASE_CLIENT_ID },
-    { name: "FIREBASE_AUTH_URI", value: process.env.FIREBASE_AUTH_URI },
-    { name: "FIREBASE_TOKEN_URI", value: process.env.FIREBASE_TOKEN_URI },
-    {
-      name: "FIREBASE_AUTH_PROVIDER_X509_CERT_URL",
-      value: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
-    },
-    {
-      name: "FIREBASE_CLIENT_PROVIDER_X509_CERT_URL",
-      value: process.env.FIREBASE_CLIENT_PROVIDER_X509_CERT_URL,
-    },
-    {
-      name: "FIREBASE_UNIVERSE_DOMAIN",
-      value: process.env.FIREBASE_UNIVERSE_DOMAIN,
-    },
   ];
 
   // Check for missing or empty variables
@@ -68,78 +45,6 @@ export function validateEnvironment(): ValidationError[] {
     errors.push({
       variable: "GEMINI_API_KEY",
       message: "GEMINI_API_KEY is required but not set or empty",
-    });
-  }
-
-  // Validate Firebase-specific fields
-  if (
-    process.env.FIREBASE_TYPE &&
-    process.env.FIREBASE_TYPE !== "service_account"
-  ) {
-    errors.push({
-      variable: "FIREBASE_TYPE",
-      message: "FIREBASE_TYPE must be 'service_account'",
-    });
-  }
-
-  if (
-    process.env.FIREBASE_PRIVATE_KEY &&
-    !process.env.FIREBASE_PRIVATE_KEY.includes("-----BEGIN PRIVATE KEY-----")
-  ) {
-    errors.push({
-      variable: "FIREBASE_PRIVATE_KEY",
-      message:
-        "FIREBASE_PRIVATE_KEY is invalid (must include -----BEGIN PRIVATE KEY-----)",
-    });
-  }
-
-  if (
-    process.env.FIREBASE_AUTH_URI &&
-    !process.env.FIREBASE_AUTH_URI.startsWith("https://")
-  ) {
-    errors.push({
-      variable: "FIREBASE_AUTH_URI",
-      message: "FIREBASE_AUTH_URI must be a valid HTTPS URL",
-    });
-  }
-
-  if (
-    process.env.FIREBASE_TOKEN_URI &&
-    !process.env.FIREBASE_TOKEN_URI.startsWith("https://")
-  ) {
-    errors.push({
-      variable: "FIREBASE_TOKEN_URI",
-      message: "FIREBASE_TOKEN_URI must be a valid HTTPS URL",
-    });
-  }
-
-  if (
-    process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL &&
-    !process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL.startsWith("https://")
-  ) {
-    errors.push({
-      variable: "FIREBASE_AUTH_PROVIDER_X509_CERT_URL",
-      message: "FIREBASE_AUTH_PROVIDER_X509_CERT_URL must be a valid HTTPS URL",
-    });
-  }
-
-  if (
-    process.env.FIREBASE_CLIENT_X509_CERT_URL &&
-    !process.env.FIREBASE_CLIENT_X509_CERT_URL.startsWith("https://")
-  ) {
-    errors.push({
-      variable: "FIREBASE_CLIENT_X509_CERT_URL",
-      message: "FIREBASE_CLIENT_X509_CERT_URL must be a valid HTTPS URL",
-    });
-  }
-
-  if (
-    process.env.FIREBASE_UNIVERSE_DOMAIN &&
-    process.env.FIREBASE_UNIVERSE_DOMAIN !== "googleapis.com"
-  ) {
-    errors.push({
-      variable: "FIREBASE_UNIVERSE_DOMAIN",
-      message: "FIREBASE_UNIVERSE_DOMAIN must be 'googleapis.com'",
     });
   }
 

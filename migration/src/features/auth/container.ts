@@ -16,8 +16,4 @@ export class AuthContainer {
     this.controller = new AuthController(this.service);
     this.routes = new AuthRoute(this.controller);
   }
-
-  getRouter() {
-    return this.routes.router;
-  }
 }

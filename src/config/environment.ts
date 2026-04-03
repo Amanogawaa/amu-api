@@ -22,28 +22,16 @@ export const config = {
 
   googleApiKey: process.env.GEMINI_API_KEY || "",
 
-  // Firebase configuration
-  firebase: {
-    serviceAccount: {
-      type: process.env.FIREBASE_TYPE!,
-      project_id: process.env.FIREBASE_PROJECT_ID!,
-      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID!,
-      private_key: process.env.FIREBASE_PRIVATE_KEY!,
-      client_email: process.env.FIREBASE_CLIENT_EMAIL!,
-      client_id: process.env.FIREBASE_CLIENT_ID!,
-      auth_uri: process.env.FIREBASE_AUTH_URI!,
-      token_uri: process.env.FIREBASE_TOKEN_URI!,
-      auth_provider_x509_cert_url:
-        process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL!,
-      client_x509_cert_url: process.env.FIREBASE_CLIENT_PROVIDER_X509_CERT_URL!,
-      universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN!,
-    },
-  },
-
   // Authentication configuration
-  cookie: process.env.COOKIE_NAME || "FIREBASE_COOKIE_JWT",
+  cookie: process.env.COOKIE_NAME,
   jwt: {
     secret: process.env.JWT_SECRET!,
+  },
+
+  convex: {
+    deployment: process.env.CONVEX_DEPLOYMENT,
+    url: process.env.CONVEX_URL,
+    site_url: process.env.CONVEX_SITE_URL,
   },
 
   // Security configuration
@@ -56,23 +44,6 @@ export const config = {
     ) || ["http://localhost:5173", "http://localhost:3000"],
     maxApiConnections: Number(process.env.MAX_API_CONNECTIONS) || 500,
     cookieSecret: process.env.COOKIE_SECRET || crypto.randomUUID(),
-  },
-
-  codeExecution: {
-    defaultEngine: (process.env.CODE_EXECUTION_ENGINE || "piston") as
-      | "piston"
-      | "judge0",
-
-    piston: {
-      apiUrl: process.env.PISTON_API_URL || "https://emkc.org/api/v2/piston",
-      timeout: Number(process.env.PISTON_TIMEOUT) || 10000,
-    },
-
-    judge0: {
-      apiUrl: process.env.JUDGE0_API_URL || "https://judge0-ce.p.rapidapi.com",
-      apiKey: process.env.JUDGE0_API_KEY || "",
-      timeout: Number(process.env.JUDGE0_TIMEOUT) || 15000,
-    },
   },
 
   // Logging configuration

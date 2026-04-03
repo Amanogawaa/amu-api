@@ -3,11 +3,13 @@ import { v } from "convex/values";
 
 export default defineSchema({
   users: defineTable({
-    uid: v.string(),
     email: v.string(),
     password: v.string(),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
+    program: v.string(),
+    year: v.number(),
+    school: v.string(),
     photoURL: v.optional(v.string()),
     isPrivate: v.optional(v.boolean()),
     githubUsername: v.optional(v.string()),
@@ -15,15 +17,12 @@ export default defineSchema({
     githubConnectedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
-  })
-    .index("by_uid", ["uid"])
-    .index("by_email", ["email"])
-    .index("by_password", ["password"]),
+  }).index("by_email", ["email"]),
 
   courses: defineTable({
-    uid: v.string(), // creator/owner
+    userId: v.id("users"),
     topic: v.string(),
-    level: v.string(), // "beginner" | "intermediate" | "advanced"
+    level: v.string(),
     duration: v.string(),
     category: v.string(),
     language: v.string(),
@@ -39,11 +38,10 @@ export default defineSchema({
     draft: v.boolean(),
     supportsCodePlayground: v.optional(v.boolean()),
     tags: v.optional(v.array(v.string())),
-    nextCourses: v.optional(v.array(v.string())), // array of course IDs
+    nextCourses: v.optional(v.array(v.string())),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_uid", ["uid"])
     .index("by_name", ["name"])
     .index("by_category", ["category"]),
 

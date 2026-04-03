@@ -9,13 +9,6 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as chapters from "../chapters.js";
-import type * as comments from "../comments.js";
-import type * as courses from "../courses.js";
-import type * as enrollments from "../enrollments.js";
-import type * as lessons from "../lessons.js";
-import type * as likes from "../likes.js";
-import type * as progress from "../progress.js";
 
 import type {
   ApiFromModules,
@@ -25,13 +18,6 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  chapters: typeof chapters;
-  comments: typeof comments;
-  courses: typeof courses;
-  enrollments: typeof enrollments;
-  lessons: typeof lessons;
-  likes: typeof likes;
-  progress: typeof progress;
 }>;
 
 /**

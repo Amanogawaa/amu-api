@@ -1,30 +1,27 @@
+import type { Doc } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
- * Get user by UID
+ * Get user by ID
  */
-export const getUserByUid = query({
-  args: { uid: v.string() },
+export const getUserById = query({
+  args: { id: v.id("users") },
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("uid"), args.uid))
-      .unique();
+    return await ctx.db.get(args.id);
   },
 });
 
 /**
- * Get user by ID
+ * Get user by email
  */
-export const getUser = query({
-  args: { id: v.id("users") },
+export const getUserByEmail = query({
+  args: { email: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.id);
-    if (!user) {
-      throw new Error("User not found");
-    }
-    return user;
+    return await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .unique();
   },
 });
 
@@ -33,28 +30,32 @@ export const getUser = query({
  */
 export const createUser = mutation({
   args: {
-    uid: v.string(),
     email: v.string(),
-    firstName: v.optional(v.string()),
-    lastName: v.optional(v.string()),
+    password: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+    program: v.string(),
+    year: v.number(),
+    school: v.string(),
   },
   handler: async (ctx, args) => {
     // Check if user already exists
     const existingUser = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("uid"), args.uid))
+      .filter((q) => q.eq(q.field("email"), args.email))
       .unique();
 
     if (existingUser) {
       return existingUser;
     }
 
-    const userId = await ctx.db.insert("users", {
+    const user = await ctx.db.insert("users", {
       ...args,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
-    return await ctx.db.get(userId);
+
+    return await ctx.db.get(user);
   },
 });
 
@@ -63,7 +64,7 @@ export const createUser = mutation({
  */
 export const updateUserProfile = mutation({
   args: {
-    uid: v.string(),
+    id: v.id("users"),
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     photoURL: v.optional(v.string()),
@@ -73,23 +74,20 @@ export const updateUserProfile = mutation({
     githubConnectedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("uid"), args.uid))
-      .unique();
+    const user = await ctx.db.get(args.id);
 
     if (!user) {
       throw new Error("User not found");
     }
 
-    const updates = {
-      ...args,
-      uid: undefined, // don't update uid
+    const { id, ...updates } = args;
+    const patchData = {
+      ...updates,
       updatedAt: Date.now(),
     };
 
-    await ctx.db.patch(user._id, updates);
-    return await ctx.db.get(user._id);
+    await ctx.db.patch(args.id, patchData);
+    return await ctx.db.get(args.id);
   },
 });
 
@@ -97,12 +95,9 @@ export const updateUserProfile = mutation({
  * Get user profile (public)
  */
 export const getUserProfile = query({
-  args: { uid: v.string() },
+  args: { id: v.id("users") },
   handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("uid"), args.uid))
-      .unique();
+    const user = await ctx.db.get(args.id);
 
     if (!user) {
       throw new Error("User not found");
@@ -111,7 +106,6 @@ export const getUserProfile = query({
     // Return limited public profile if user is private
     if (user.isPrivate) {
       return {
-        uid: user.uid,
         firstName: user.firstName,
         lastName: user.lastName,
         photoURL: user.photoURL,
