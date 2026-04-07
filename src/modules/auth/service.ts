@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import { convexClient, api } from "../../core/convex";
 import type { CreateUserDTO, LoginUserDTO } from "./type";
 
@@ -21,10 +22,13 @@ export class AuthService {
         throw new Error("User with this email already exists");
       }
 
-      // Create user in Convex
+      // Hash password using bcrypt
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+
+      // Create user in Convex with hashed password
       const user = await convexClient.mutation((api as any).auth.createUser, {
         email: data.email,
-        password: data.password,
+        password: hashedPassword,
         firstName: data.firstName,
         lastName: data.lastName,
         program: data.program,
@@ -63,8 +67,13 @@ export class AuthService {
         throw new Error("Invalid email or password");
       }
 
-      // Simple password validation (in production, use bcrypt)
-      if (user.password !== credentials.password) {
+      // Verify password using bcrypt
+      const isPasswordValid = await bcrypt.compare(
+        credentials.password,
+        user.password,
+      );
+
+      if (!isPasswordValid) {
         throw new Error("Invalid email or password");
       }
 
@@ -122,12 +131,9 @@ export class AuthService {
    */
   async getProfile(userId: string) {
     try {
-      const user = await convexClient.query(
-        (api as any).auth.getUserById,
-        {
-          id: userId,
-        },
-      );
+      const user = await convexClient.query((api as any).auth.getUserById, {
+        id: userId,
+      });
 
       if (!user) {
         throw new Error("User not found");

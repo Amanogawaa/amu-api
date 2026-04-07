@@ -30,7 +30,6 @@ export const authMiddleware = async (
       throw new UnauthorizedError("No authentication token provided");
     }
 
-    // Decode JWT token to get user ID
     let userId: string;
     try {
       const decoded = jwt.decode(token) as {

@@ -21,6 +21,8 @@ export function validateEnvironment(): ValidationError[] {
   const requiredVars = [
     { name: "NODE_ENV", value: process.env.NODE_ENV },
     { name: "JWT_SECRET", value: process.env.JWT_SECRET },
+    { name: "CONVEX_URL", value: process.env.CONVEX_URL },
+    { name: "CONVEX_SITE_URL", value: process.env.CONVEX_SITE_URL },
   ];
 
   // Check for missing or empty variables

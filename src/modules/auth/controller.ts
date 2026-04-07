@@ -2,6 +2,8 @@ import type { Request, Response, NextFunction } from "express";
 import { AuthService } from "./service";
 import type { CreateUserDTO, LoginUserDTO } from "./type";
 import { sendResponse } from "../../core/utils/response";
+import { generateToken } from "../../core/utils/auth";
+import type { AuthenticatedRequest } from "../../core/middlewares/auth.middleware";
 
 export class AuthController {
   private authService: AuthService;
@@ -38,7 +40,15 @@ export class AuthController {
       const credentials = req.body as LoginUserDTO;
       const result = await this.authService.login(credentials);
 
-      return sendResponse(res, result, 200, "User logged in successfully");
+      // Generate JWT token
+      const token = generateToken(result.user.id, res);
+
+      return sendResponse(
+        res,
+        { ...result, token },
+        200,
+        "User logged in successfully",
+      );
     } catch (error) {
       next(error);
     }
@@ -48,20 +58,15 @@ export class AuthController {
    * Get user profile
    */
   async getProfile(
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const userId = req.params.id;
+      const userId = req.user?.id;
 
       if (!userId) {
-        return sendResponse(
-          res,
-          null,
-          400,
-          "User ID is required",
-        );
+        return sendResponse(res, null, 401, "Unauthorized");
       }
 
       const result = await this.authService.getProfile(userId);
@@ -76,21 +81,16 @@ export class AuthController {
    * Update user profile
    */
   async updateProfile(
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
-      const userId = req.params.id;
+      const userId = req.user?.id;
       const updates = req.body;
 
       if (!userId) {
-        return sendResponse(
-          res,
-          null,
-          400,
-          "User ID is required",
-        );
+        return sendResponse(res, null, 401, "Unauthorized");
       }
 
       const result = await this.authService.updateProfile(userId, updates);

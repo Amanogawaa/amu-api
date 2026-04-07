@@ -13,6 +13,9 @@ import { config } from "./config/environment";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { errorHandler } from "./core/middlewares/error.middleware";
+import { CourseContainer } from "./modules/course";
+import { ChapterContainer } from "./modules/chapter";
+import { LessonContainer } from "./modules/lesson";
 
 class App {
   public app: Application;
@@ -20,12 +23,23 @@ class App {
 
   private appRoutes!: AppRoute;
   private authContainer: AuthContainer;
+  private courseContainer: CourseContainer;
+  private chapterContainer: ChapterContainer;
+  private lessonContainer: LessonContainer;
 
-  constructor(authContainer: AuthContainer = new AuthContainer()) {
+  constructor(
+    authContainer: AuthContainer = new AuthContainer(),
+    courseContainer: CourseContainer = new CourseContainer(),
+    chapterContainer: ChapterContainer = new ChapterContainer(),
+    lessonContainer: LessonContainer = new LessonContainer(),
+  ) {
     this.app = express();
     this.server = null;
 
     this.authContainer = authContainer;
+    this.courseContainer = courseContainer;
+    this.chapterContainer = chapterContainer;
+    this.lessonContainer = lessonContainer;
 
     this.app.use(express.json());
 
@@ -115,7 +129,12 @@ class App {
   }
 
   private initializeRouter(): void {
-    this.appRoutes = new AppRoute(this.authContainer);
+    this.appRoutes = new AppRoute(
+      this.authContainer,
+      this.courseContainer,
+      this.chapterContainer,
+      this.lessonContainer,
+    );
     this.app.use("/api", this.appRoutes.getRouter());
   }
 

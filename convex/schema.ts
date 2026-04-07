@@ -1,7 +1,10 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  ...authTables,
+
   users: defineTable({
     email: v.string(),
     password: v.string(),
@@ -15,8 +18,6 @@ export default defineSchema({
     githubUsername: v.optional(v.string()),
     githubId: v.optional(v.string()),
     githubConnectedAt: v.optional(v.number()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
   }).index("by_email", ["email"]),
 
   courses: defineTable({
@@ -39,14 +40,12 @@ export default defineSchema({
     supportsCodePlayground: v.optional(v.boolean()),
     tags: v.optional(v.array(v.string())),
     nextCourses: v.optional(v.array(v.string())),
-    createdAt: v.number(),
-    updatedAt: v.number(),
   })
     .index("by_name", ["name"])
     .index("by_category", ["category"]),
 
   chapters: defineTable({
-    courseId: v.string(),
+    courseId: v.id("courses"),
     courseName: v.string(),
     chapterOrder: v.number(),
     chapterName: v.string(),
@@ -57,16 +56,16 @@ export default defineSchema({
     prerequisites: v.array(v.string()),
     practicalApplication: v.string(),
     estimatedLessonCount: v.number(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_courseId", ["courseId"]),
+  })
+    .index("by_courseId", ["courseId"])
+    .index("by_courseId_chapterOrder", ["courseId", "chapterOrder"]),
 
   lessons: defineTable({
-    chapterId: v.string(),
-    courseId: v.optional(v.string()),
+    chapterId: v.id("chapters"),
+    courseId: v.id("courses"),
     lessonOrder: v.number(),
     lessonName: v.string(),
-    type: v.string(), // "video" | "article" | "quiz" | "exercise"
+    type: v.string(),
     duration: v.string(),
     lessonDescription: v.string(),
     content: v.optional(v.string()),
@@ -79,12 +78,13 @@ export default defineSchema({
       v.object({
         title: v.string(),
         url: v.string(),
-        type: v.string(), // "documentation" | "article" | "tool" | "github" | "reference"
+        type: v.string(),
         description: v.string(),
       }),
     ),
     learningOutcome: v.string(),
     prerequisites: v.array(v.string()),
+    // might delete this later
     playgroundEnvironment: v.optional(
       v.object({
         type: v.string(), // "vanilla" | "frontend" | "backend" | "none"
@@ -102,11 +102,10 @@ export default defineSchema({
         ),
       }),
     ),
-    createdAt: v.number(),
-    updatedAt: v.number(),
   })
     .index("by_chapterId", ["chapterId"])
-    .index("by_courseId", ["courseId"]),
+    .index("by_courseId", ["courseId"])
+    .index("by_chapterId_lessonOrder", ["chapterId", "lessonOrder"]),
 
   enrollments: defineTable({
     courseId: v.string(),

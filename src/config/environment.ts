@@ -23,15 +23,14 @@ export const config = {
   googleApiKey: process.env.GEMINI_API_KEY || "",
 
   // Authentication configuration
-  cookie: process.env.COOKIE_NAME,
+  cookie: process.env.COOKIE_NAME || "COURSECRAFT_COOKIE",
   jwt: {
     secret: process.env.JWT_SECRET!,
   },
 
   convex: {
-    deployment: process.env.CONVEX_DEPLOYMENT,
-    url: process.env.CONVEX_URL,
-    site_url: process.env.CONVEX_SITE_URL,
+    url: process.env.CONVEX_URL || "",
+    site_url: process.env.CONVEX_SITE_URL || "",
   },
 
   // Security configuration

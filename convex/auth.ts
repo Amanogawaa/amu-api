@@ -1,6 +1,8 @@
-import type { Doc } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
+import GitHub from "@auth/core/providers/github";
+import { Password } from "@convex-dev/auth/providers/Password";
+import { convexAuth } from "@convex-dev/auth/server";
 import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 /**
  * Get user by ID
@@ -51,8 +53,6 @@ export const createUser = mutation({
 
     const user = await ctx.db.insert("users", {
       ...args,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
     });
 
     return await ctx.db.get(user);
@@ -74,7 +74,7 @@ export const updateUserProfile = mutation({
     githubConnectedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.id);
+    const user = await ctx.db.get("users", args.id);
 
     if (!user) {
       throw new Error("User not found");
@@ -87,7 +87,7 @@ export const updateUserProfile = mutation({
     };
 
     await ctx.db.patch(args.id, patchData);
-    return await ctx.db.get(args.id);
+    return await ctx.db.get("users", args.id);
   },
 });
 
@@ -97,7 +97,7 @@ export const updateUserProfile = mutation({
 export const getUserProfile = query({
   args: { id: v.id("users") },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.id);
+    const user = await ctx.db.get("users", args.id);
 
     if (!user) {
       throw new Error("User not found");
@@ -114,4 +114,8 @@ export const getUserProfile = query({
 
     return user;
   },
+});
+
+export const { auth, signIn, signOut, store } = convexAuth({
+  providers: [GitHub, Password],
 });

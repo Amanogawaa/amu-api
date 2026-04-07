@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "./controller";
+import { authMiddleware } from "../../core/middlewares/auth.middleware";
 
 export class AuthRoutes {
   public router: Router;
@@ -31,20 +32,22 @@ export class AuthRoutes {
     );
 
     /**
-     * GET /api/auth/profile/:id
+     * GET /api/auth/profile
      * Get user profile
      */
     this.router.get(
-      "/auth/profile/:id",
+      "/auth/profile",
+      authMiddleware,
       this.authController.getProfile.bind(this.authController),
     );
 
     /**
-     * PATCH /api/auth/profile/:id
+     * PATCH /api/auth/profile
      * Update user profile
      */
     this.router.patch(
-      "/auth/profile/:id",
+      "/auth/profile",
+      authMiddleware,
       this.authController.updateProfile.bind(this.authController),
     );
   }

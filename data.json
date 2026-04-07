@@ -1,0 +1,86 @@
+[
+  {
+    "category": "programming",
+    "description": "This course introduces the fundamentals of building backend services using the Go programming language. You will learn how to set up a Go project, understand core concepts like routing and handling HTTP requests, and ultimately answer the question: how can I make a server using Go programming language efficiently and effectively.",
+    "draft": true,
+    "duration": "2 hours",
+    "language": "English",
+    "learning_outcomes": [
+      "Understand the basics of Go for backend development.",
+      "Learn how to set up a Go development environment.",
+      "Create and configure a simple HTTP server in Go.",
+      "Implement routing and handle different HTTP methods (GET, POST).",
+      "Manage request and response data in Go applications.",
+      "Build a foundational understanding of Go's standard library for web development.",
+      "Deploy a basic Go backend application."
+    ],
+    "level": "beginner",
+    "name": "Go Backend Development Fundamentals",
+    "noOfChapters": 2,
+    "prerequisites": "Basic understanding of programming concepts and command-line interface. No prior Go experience required.",
+    "publish": false,
+    "skillsGained": [
+      "Go Programming",
+      "Backend Development",
+      "HTTP Servers",
+      "API Development",
+      "Go Standard Library"
+    ],
+    "subtitle": "Build Your First Server-Side Applications with Go",
+    "tags": [
+      "Go",
+      "Golang",
+      "Backend Development",
+      "Web Development",
+      "HTTP",
+      "Server",
+      "API"
+    ],
+    "targetAudience": "Beginner developers interested in learning Go for backend development, students, or anyone looking to build server-side applications with a modern language.",
+    "topic": "go backend development",
+    "userId": "kx7at9z0adtssxa54zsen3fq4n846zjw"
+  },
+  {
+    "category": "programming",
+    "description": "Learn the fundamentals of HTML and CSS to create a professional and responsive online portfolio. This course will guide you through structuring web pages with HTML and styling them beautifully with CSS, culminating in a simple, yet effective, personal portfolio website.",
+    "draft": false,
+    "duration": "2 hours",
+    "language": "English",
+    "learning_outcomes": [
+      "Understand the basic structure of an HTML document",
+      "Utilize common HTML tags to organize content",
+      "Apply CSS rules to style HTML elements",
+      "Differentiate between inline, internal, and external CSS",
+      "Create a simple, multi-page personal portfolio website",
+      "Implement basic responsive design principles for different screen sizes",
+      "Publish a static website using common hosting methods"
+    ],
+    "level": "beginner",
+    "name": "HTML and CSS for building a Simple Portfolio",
+    "noOfChapters": 2,
+    "prerequisites": "Basic computer literacy and internet navigation skills.",
+    "publish": true,
+    "skillsGained": [
+      "HTML5",
+      "CSS3",
+      "Portfolio Buidling",
+      "Front-end Development",
+      "Responsive Design",
+      "Web Development"
+    ],
+    "subtitle": "Craft Your First Online Portfolio with HTML and CSS Basics",
+    "tags": [
+      "HTML",
+      "CSS",
+      "Web Development",
+      "Portfolio",
+      "Beginner",
+      "Front-end",
+      "Website",
+      "Coding"
+    ],
+    "targetAudience": "Absolute beginners interested in web development, aspiring designers, or anyone looking to build a simple online portfolio.",
+    "topic": "html and css",
+    "userId": "kx7e29vefxyyr1gpr91qhe24cn847p4x"
+  }
+]
