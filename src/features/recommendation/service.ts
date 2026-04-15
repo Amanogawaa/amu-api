@@ -152,13 +152,14 @@ export class RecommendationService {
       }
 
       const likes = await this.likedRepo.getLikesByUser(userId);
+      console.log("User likes fetched:", likes);
 
       logger.info("User likes fetched", {
         userId,
         likeCount: likes.length,
       });
 
-      if (likes.length < 3) {
+      if (likes.length < 2) {
         logger.info("Insufficient likes for personalized recommendations", {
           userId,
           likeCount: likes.length,
@@ -182,11 +183,26 @@ export class RecommendationService {
         likes.map((like) => like.courseId),
       );
 
+      console.log("User like profile built:", userProfile);
+
       const allCourses = await this.courseRepo.getCourse({ publish: true });
+      console.log("Total published courses in database:", allCourses.length);
 
       const likedCourseIds = new Set(likes.map((like) => like.courseId));
+      console.log("Liked course IDs:", Array.from(likedCourseIds));
+
       const candidates = allCourses.filter(
         (course) => !likedCourseIds.has(course.id),
+      );
+
+      console.log("Candidate courses after filtering liked courses:", {
+        total: candidates.length,
+        courseIds: candidates.map((c) => c.id),
+      });
+
+      console.log(
+        "Candidate courses for liked-based recommendations:",
+        candidates,
       );
 
       const scoredRecommendations = candidates
@@ -210,15 +226,18 @@ export class RecommendationService {
             },
           } as Recommendation;
         })
-        .filter((rec) => rec.score > 0.1)
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
+
+      console.log("Scored liked-based recommendations:", scoredRecommendations);
 
       const diversifiedResults = this.applyDiversityFilter(
         scoredRecommendations,
         allCourses,
         limit,
       );
+
+      console.log("Diversified recommendations:", diversifiedResults);
 
       await this.setCachedRecommendations(
         userId,
@@ -229,6 +248,8 @@ export class RecommendationService {
 
       const enrichedRecommendations =
         await this.enrichRecommendations(diversifiedResults);
+
+      console.log("Enriched recommendations:", enrichedRecommendations);
 
       logger.info("Generated liked-based recommendations", {
         userId,
@@ -491,7 +512,10 @@ export class RecommendationService {
     return diversified;
   }
 
-  private tokenize(text: string): string[] {
+  private tokenize(text: string | undefined | null): string[] {
+    if (!text || typeof text !== "string") {
+      return [];
+    }
     return text
       .toLowerCase()
       .split(/\s+/)
@@ -586,6 +610,10 @@ export class RecommendationService {
     completedCategory: string,
     candidateCategory: string,
   ): number {
+    if (!completedTopic || !candidateTopic) {
+      return completedCategory === candidateCategory ? 0.5 : 0;
+    }
+
     const categoryMatch = completedCategory === candidateCategory ? 0.5 : 0;
 
     const completedWords = new Set(completedTopic.toLowerCase().split(/\s+/));
@@ -721,6 +749,7 @@ export class RecommendationService {
         ...rec,
         course: course
           ? {
+              courseId: course.id,
               name: course.name,
               topic: course.topic,
               level: course.level,
@@ -731,6 +760,7 @@ export class RecommendationService {
               likesCount: course.likesCount,
             }
           : {
+              courseId: "",
               name: "Unknown Course",
               topic: "",
               level: "beginner",

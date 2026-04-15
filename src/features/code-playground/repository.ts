@@ -1,181 +1,261 @@
 import type { Firestore } from "firebase-admin/firestore";
 import { firebaseFirestore } from "../../config/firebase";
-import type { CodeWorkspace, SaveWorkspaceRequest } from "./types";
+import { AppError } from "../../utils/errors";
+import { logger } from "../../utils/loggers";
+import type { ExerciseGuideline, ExerciseSubmission } from "./types";
 
 export class CodePlaygroundRepository {
   private firebaseStore: Firestore;
-  private readonly COLLECTION_NAME = "code_workspaces";
+  private readonly GUIDELINES_COLLECTION = "exerciseGuidelines";
+  private readonly SUBMISSIONS_COLLECTION = "exerciseSubmissions";
 
   constructor(firestore: Firestore = firebaseFirestore) {
     this.firebaseStore = firestore;
   }
 
-  async saveWorkspace(
-    workspaceData: SaveWorkspaceRequest,
-    workspaceId?: string,
-  ): Promise<CodeWorkspace> {
-    const now = new Date();
+  async createGuideline(
+    guideline: Omit<ExerciseGuideline, "id" | "createdAt" | "updatedAt">,
+  ): Promise<ExerciseGuideline> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.GUIDELINES_COLLECTION)
+        .doc();
 
-    let createdAt = now;
-    if (workspaceId) {
-      const existing = await this.getWorkspace(workspaceId);
-      if (existing) {
-        createdAt = existing.createdAt;
-      }
+      const now = new Date();
+      const guidelineData: ExerciseGuideline = {
+        ...guideline,
+        id: docRef.id,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await docRef.set(guidelineData);
+      logger.info(`Exercise guideline created: ${docRef.id}`);
+
+      return guidelineData;
+    } catch (error) {
+      logger.error("Error in CodePlaygroundRepository.createGuideline:", error);
+      throw error;
     }
-
-    const workspace: Omit<CodeWorkspace, "id"> = {
-      userId: workspaceData.userId,
-      lessonId: workspaceData.lessonId,
-      courseId: workspaceData.courseId,
-      code: workspaceData.code,
-      language: workspaceData.language,
-      createdAt,
-      updatedAt: now,
-    };
-
-    const docRef = workspaceId
-      ? this.firebaseStore.collection(this.COLLECTION_NAME).doc(workspaceId)
-      : this.firebaseStore.collection(this.COLLECTION_NAME).doc();
-
-    await docRef.set(workspace);
-
-    return {
-      id: docRef.id,
-      ...workspace,
-    };
   }
 
-  async getWorkspace(workspaceId: string): Promise<CodeWorkspace | null> {
-    const doc = await this.firebaseStore
-      .collection(this.COLLECTION_NAME)
-      .doc(workspaceId)
-      .get();
-
-    if (!doc.exists) {
-      return null;
-    }
-
-    const data = doc.data();
-    if (!data) return null;
-
-    return {
-      id: doc.id,
-      ...data,
-      createdAt: data.createdAt?.toDate() || new Date(),
-      updatedAt: data.updatedAt?.toDate() || new Date(),
-      lastRun: data.lastRun
-        ? {
-            ...data.lastRun,
-            timestamp: data.lastRun.timestamp?.toDate() || new Date(),
-          }
-        : undefined,
-    } as CodeWorkspace;
-  }
-
-  async getWorkspaceByUserAndLesson(
-    userId: string,
+  async getGuidelineByLessonId(
     lessonId: string,
-  ): Promise<CodeWorkspace | null> {
-    const snapshot = await this.firebaseStore
-      .collection(this.COLLECTION_NAME)
-      .where("userId", "==", userId)
-      .where("lessonId", "==", lessonId)
-      .orderBy("updatedAt", "desc")
-      .limit(1)
-      .get();
+  ): Promise<ExerciseGuideline | null> {
+    try {
+      const snapshot = await this.firebaseStore
+        .collection(this.GUIDELINES_COLLECTION)
+        .where("lessonId", "==", lessonId)
+        .limit(1)
+        .get();
 
-    if (snapshot.empty) {
-      return null;
-    }
+      if (snapshot.empty) {
+        return null;
+      }
 
-    const doc = snapshot.docs[0];
-    if (!doc) return null;
+      const doc = snapshot.docs[0];
+      if (!doc) {
+        return null;
+      }
 
-    const data = doc.data();
-
-    return {
-      id: doc.id,
-      ...data,
-      createdAt: data.createdAt?.toDate() || new Date(),
-      updatedAt: data.updatedAt?.toDate() || new Date(),
-      lastRun: data.lastRun
-        ? {
-            ...data.lastRun,
-            timestamp: data.lastRun.timestamp?.toDate() || new Date(),
-          }
-        : undefined,
-    } as CodeWorkspace;
-  }
-
-  async getWorkspacesByCourse(
-    userId: string,
-    courseId: string,
-  ): Promise<CodeWorkspace[]> {
-    const snapshot = await this.firebaseStore
-      .collection(this.COLLECTION_NAME)
-      .where("userId", "==", userId)
-      .where("courseId", "==", courseId)
-      .orderBy("updatedAt", "desc")
-      .get();
-
-    return snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
-        id: doc.id,
         ...data,
+        id: doc.id,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date(),
-        lastRun: data.lastRun
-          ? {
-              ...data.lastRun,
-              timestamp: data.lastRun.timestamp?.toDate() || new Date(),
-            }
-          : undefined,
-      } as CodeWorkspace;
-    });
+      } as ExerciseGuideline;
+    } catch (error) {
+      logger.error(
+        "Error in CodePlaygroundRepository.getGuidelineByLessonId:",
+        error,
+      );
+      throw error;
+    }
   }
 
-  async updateLastRun(
-    workspaceId: string,
-    runData: {
-      output: string;
-      error?: string;
-      executionTime: number;
-      status: "success" | "error" | "timeout";
-    },
-  ): Promise<void> {
-    await this.firebaseStore
-      .collection(this.COLLECTION_NAME)
-      .doc(workspaceId)
-      .update({
-        lastRun: {
-          ...runData,
-          timestamp: new Date(),
-        },
-        updatedAt: new Date(),
+  async getGuidelineById(id: string): Promise<ExerciseGuideline> {
+    try {
+      const doc = await this.firebaseStore
+        .collection(this.GUIDELINES_COLLECTION)
+        .doc(id)
+        .get();
+
+      if (!doc.exists) {
+        throw new AppError("Exercise guideline not found", 404);
+      }
+
+      const data = doc.data();
+      if (!data) throw new AppError("Exercise guideline not found", 404);
+
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      } as ExerciseGuideline;
+    } catch (error) {
+      logger.error(
+        "Error in CodePlaygroundRepository.getGuidelineById:",
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async getGuidelinesByCourseId(
+    courseId: string,
+  ): Promise<ExerciseGuideline[]> {
+    try {
+      const snapshot = await this.firebaseStore
+        .collection(this.GUIDELINES_COLLECTION)
+        .where("courseId", "==", courseId)
+        .orderBy("createdAt", "desc")
+        .get();
+
+      return snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+        } as ExerciseGuideline;
       });
+    } catch (error) {
+      logger.error(
+        "Error in CodePlaygroundRepository.getGuidelinesByCourseId:",
+        error,
+      );
+      throw error;
+    }
   }
 
-  async deleteWorkspace(workspaceId: string): Promise<void> {
-    await this.firebaseStore
-      .collection(this.COLLECTION_NAME)
-      .doc(workspaceId)
-      .delete();
+  async updateGuideline(
+    id: string,
+    updates: Partial<ExerciseGuideline>,
+  ): Promise<ExerciseGuideline> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.GUIDELINES_COLLECTION)
+        .doc(id);
+
+      const updateData = {
+        ...updates,
+        updatedAt: new Date(),
+      };
+
+      await docRef.update(updateData);
+
+      const updated = await this.getGuidelineById(id);
+      return updated;
+    } catch (error) {
+      logger.error("Error in CodePlaygroundRepository.updateGuideline:", error);
+      throw error;
+    }
   }
 
-  async deleteWorkspacesByLesson(
+  // ==================== EXERCISE SUBMISSIONS ====================
+
+  async createSubmission(
+    submission: Omit<
+      ExerciseSubmission,
+      "id" | "submittedAt" | "createdAt" | "updatedAt"
+    >,
+  ): Promise<ExerciseSubmission> {
+    try {
+      const docRef = this.firebaseStore
+        .collection(this.SUBMISSIONS_COLLECTION)
+        .doc();
+
+      const now = new Date();
+      const submissionData: ExerciseSubmission = {
+        ...submission,
+        id: docRef.id,
+        submittedAt: now,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await docRef.set(submissionData);
+      logger.info(`Exercise submission created: ${docRef.id}`);
+
+      return submissionData;
+    } catch (error) {
+      logger.error(
+        "Error in CodePlaygroundRepository.createSubmission:",
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async getSubmissionByUserAndLesson(
     userId: string,
     lessonId: string,
-  ): Promise<void> {
-    const snapshot = await this.firebaseStore
-      .collection(this.COLLECTION_NAME)
-      .where("userId", "==", userId)
-      .where("lessonId", "==", lessonId)
-      .get();
+  ): Promise<ExerciseSubmission | null> {
+    try {
+      const snapshot = await this.firebaseStore
+        .collection(this.SUBMISSIONS_COLLECTION)
+        .where("userId", "==", userId)
+        .where("lessonId", "==", lessonId)
+        .orderBy("submittedAt", "desc")
+        .limit(1)
+        .get();
 
-    const deletePromises = snapshot.docs.map((doc) => doc.ref.delete());
+      if (snapshot.empty) {
+        return null;
+      }
 
-    await Promise.all(deletePromises);
+      const doc = snapshot.docs[0];
+      if (!doc) {
+        return null;
+      }
+
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        submittedAt: data.submittedAt?.toDate() || new Date(),
+      } as ExerciseSubmission;
+    } catch (error) {
+      logger.error(
+        "Error in CodePlaygroundRepository.getSubmissionByUserAndLesson:",
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async getSubmissionById(id: string): Promise<ExerciseSubmission> {
+    try {
+      const doc = await this.firebaseStore
+        .collection(this.SUBMISSIONS_COLLECTION)
+        .doc(id)
+        .get();
+
+      if (!doc.exists) {
+        throw new AppError("Exercise submission not found", 404);
+      }
+
+      const data = doc.data();
+      if (!data) throw new AppError("Exercise submission not found", 404);
+
+      return {
+        ...data,
+        id: doc.id,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+        submittedAt: data.submittedAt?.toDate() || new Date(),
+      } as ExerciseSubmission;
+    } catch (error) {
+      logger.error(
+        "Error in CodePlaygroundRepository.getSubmissionById:",
+        error,
+      );
+      throw error;
+    }
   }
 }

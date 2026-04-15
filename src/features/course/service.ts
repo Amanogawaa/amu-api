@@ -4,7 +4,7 @@ import {
   buildCoursePrompt,
   type CoursePromptMode,
 } from "../../utils/prompts/course-temp";
-import { CourseRepository } from "./repository";
+import { CourseRepository, type CourseCreationResult } from "./repository";
 import type { StagedCourseData } from "../../utils/service/generation.service";
 
 import { geminiCall } from "../../utils/geminiCall";
@@ -15,6 +15,11 @@ import {
   courseSchema,
 } from "./types";
 
+/**
+ * Service layer for course management.
+ * Handles course CRUD operations, AI-powered course generation (standard and streaming),
+ * course lifecycle management (publish/unpublish, draft/undraft), and completeness validation.
+ */
 export class CourseService {
   private courseRepository: CourseRepository;
 
@@ -22,6 +27,11 @@ export class CourseService {
     this.courseRepository = courseRepository;
   }
 
+  /**
+   * Retrieves a list of courses filtered by the given query parameters.
+   * @param params - Optional filters (uid, search, level, category, language, publish, draft, pagination).
+   * @returns Array of courses matching the query.
+   */
   public async getCourses(params?: CourseQueryParams): Promise<Course[]> {
     try {
       const courses = await this.courseRepository.getCourse(params);
@@ -32,6 +42,12 @@ export class CourseService {
     }
   }
 
+  /**
+   * Retrieves a single course by its document ID (slug).
+   * @param slug - The Firestore document ID of the course.
+   * @returns The course document.
+   * @throws {AppError} 404 if the course is not found.
+   */
   public async getCourseById(slug: string): Promise<Course> {
     try {
       const course = await this.courseRepository.getCourseById(slug);
@@ -42,6 +58,13 @@ export class CourseService {
     }
   }
 
+  /**
+   * Generates a new course using Gemini AI and persists it to Firestore.
+   * Uses structured JSON output with schema enforcement to ensure correct field names.
+   * Automatically appends a timestamp suffix if a course with the same name already exists for the user.
+   * @param request - Generation parameters (topic, category, level, duration, chapters, language, uid).
+   * @returns The created course with its Firestore-generated ID.
+   */
   public async generateCourse(request: GenerateCourseRequest) {
     try {
       const promptMode: CoursePromptMode = request.promptMode ?? "system";
@@ -103,7 +126,15 @@ export class CourseService {
     }
   }
 
-  // Streaming course generation - streams AI output to user in real-time via Socket.IO
+  /**
+   * Generates a course using Gemini AI with real-time streaming.
+   * Streams raw AI output chunks to the client via the provided callback (e.g. Socket.IO),
+   * then parses the complete response, deduplicates the name, and persists to Firestore.
+   * @param request - Generation parameters (topic, category, level, duration, chapters, language, uid).
+   * @param userId - The authenticated user's ID.
+   * @param emitChunk - Callback invoked with each streamed text chunk for real-time client updates.
+   * @returns The created course with its Firestore-generated ID.
+   */
   public async generateCourseStream(
     request: GenerateCourseRequest,
     userId: string,
@@ -127,6 +158,7 @@ export class CourseService {
       let fullResponse = "";
 
       await geminiCall(userPrompt, {
+        responseSchema: courseSchema,
         temperature: 0.7,
         maxRetries: 3,
         systemPrompt,
@@ -142,9 +174,19 @@ export class CourseService {
         },
       });
 
+      console.log("Full streamed response:", fullResponse);
+
       let parsedCourse;
       try {
-        parsedCourse = JSON.parse(fullResponse);
+        let cleanedResponse = fullResponse.trim();
+        if (cleanedResponse.startsWith("```")) {
+          cleanedResponse = cleanedResponse.replace(/^```(?:json)?\s*\n?/, "");
+          cleanedResponse = cleanedResponse.replace(/\n?```\s*$/, "");
+        }
+
+        parsedCourse = JSON.parse(cleanedResponse);
+
+        console.log("Parsed course data from streamed response:", parsedCourse);
       } catch (parseError) {
         logger.error("Failed to parse streamed course response", {
           error: parseError,
@@ -189,6 +231,10 @@ export class CourseService {
     }
   }
 
+  /**
+   * Deletes a course and all its related data (chapters, lessons, capstone, enrollments).
+   * @param courseId - The Firestore document ID of the course to delete.
+   */
   public async deleteCourse(courseId: string): Promise<void> {
     try {
       await this.courseRepository.deleteCourse(courseId);
@@ -198,6 +244,12 @@ export class CourseService {
     }
   }
 
+  /**
+   * Validates whether a course has all required components for publishing.
+   * Checks for the existence of chapters, lessons, and a capstone project.
+   * @param courseId - The Firestore document ID of the course.
+   * @returns Validation result with completeness status, missing components, and detailed counts.
+   */
   public async validateCourseCompleteness(courseId: string): Promise<{
     isComplete: boolean;
     missingComponents: string[];
@@ -280,6 +332,13 @@ export class CourseService {
     }
   }
 
+  /**
+   * Publishes a course after validating its completeness.
+   * Sets `publish: true` and `draft: false`. Fails if chapters, lessons, or capstone are missing.
+   * @param courseId - The Firestore document ID of the course.
+   * @returns The updated course document.
+   * @throws {AppError} 400 if the course is incomplete.
+   */
   public async publishCourse(courseId: string): Promise<Course> {
     try {
       const validation = await this.validateCourseCompleteness(courseId);
@@ -305,6 +364,11 @@ export class CourseService {
     }
   }
 
+  /**
+   * Unpublishes a course, setting `publish: false` while keeping draft status unchanged.
+   * @param courseId - The Firestore document ID of the course.
+   * @returns The updated course document.
+   */
   public async unpublishCourse(courseId: string): Promise<Course> {
     try {
       await this.courseRepository.updateCourse(courseId, { publish: false });
@@ -315,6 +379,12 @@ export class CourseService {
     }
   }
 
+  /**
+   * Moves a course back to draft status, also unpublishing it.
+   * Sets `draft: true` and `publish: false`.
+   * @param courseId - The Firestore document ID of the course.
+   * @returns The updated course document.
+   */
   public async draftCourse(courseId: string): Promise<Course> {
     try {
       await this.courseRepository.updateCourse(courseId, {
@@ -328,6 +398,12 @@ export class CourseService {
     }
   }
 
+  /**
+   * Removes draft status from a course without publishing it.
+   * Sets `draft: false` while keeping `publish` unchanged.
+   * @param courseId - The Firestore document ID of the course.
+   * @returns The updated course document.
+   */
   public async undraftCourse(courseId: string): Promise<Course> {
     try {
       await this.courseRepository.updateCourse(courseId, { draft: false });
@@ -338,6 +414,14 @@ export class CourseService {
     }
   }
 
+  /**
+   * Generates course metadata via Gemini AI without persisting it.
+   * Used as the first step in a staged generation pipeline (e.g. generate course → chapters → lessons → batch commit).
+   * Doesnt support streaming
+   * Deduplicates the course name if one already exists for the user.
+   * @param request - Generation parameters (topic, category, level, duration, chapters, language, uid).
+   * @returns The generated course data (without an ID) ready for staging.
+   */
   public async generateCourseData(
     request: GenerateCourseRequest,
   ): Promise<Omit<Course, "id">> {
@@ -398,9 +482,108 @@ export class CourseService {
     }
   }
 
+  /**
+   * Streaming variant of generateCourseData.
+   * Pipes raw Gemini tokens to `onChunk` for real-time client display,
+   * then parses the full response, deduplicates the name, and returns staged course data.
+   * @param request - Generation parameters.
+   * @param onChunk - Callback invoked with each streamed token.
+   * @returns The generated course data (without an ID) ready for staging.
+   */
+  public async generateCourseDataStreaming(
+    request: GenerateCourseRequest,
+    onChunk: (chunk: string) => void,
+  ): Promise<Omit<Course, "id">> {
+    try {
+      const promptMode: CoursePromptMode = request.promptMode ?? "system";
+      const { userPrompt, systemPrompt } = buildCoursePrompt(
+        {
+          category: request.category,
+          topic: request.topic,
+          level: request.level,
+          duration: request.duration,
+          noOfChapters: request.noOfChapters,
+          language: request.language,
+          userInstructions: request.userInstructions ?? "",
+        },
+        promptMode,
+      );
+
+      let fullResponse = "";
+      await geminiCall(userPrompt, {
+        responseSchema: courseSchema,
+        temperature: 0.7,
+        maxRetries: 3,
+        systemPrompt,
+        stream: true,
+        onChunk: (chunk: string) => {
+          fullResponse += chunk;
+          onChunk(chunk);
+        },
+        benchmarkTag: `course:${promptMode}:stream`,
+        metadata: {
+          topic: request.topic,
+          level: request.level,
+        },
+      });
+
+      let parsed: any;
+      try {
+        let cleaned = fullResponse.trim();
+        if (cleaned.startsWith("```")) {
+          cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "");
+          cleaned = cleaned.replace(/\n?```\s*$/, "");
+        }
+        parsed = JSON.parse(cleaned);
+      } catch (parseError) {
+        logger.error("Failed to parse streamed course response", {
+          parseError,
+        });
+        throw new Error("Failed to parse course data from streamed response");
+      }
+
+      logger.info("Course data generated via streaming (staged)", {
+        mode: promptMode,
+        topic: request.topic,
+        uid: request.uid,
+        name: parsed?.name,
+      });
+
+      const courseData: Omit<Course, "id"> = {
+        ...parsed,
+        uid: request.uid,
+        publish: false,
+        draft: true,
+      };
+
+      const nameExist = await this.courseRepository.courseNameExists(
+        courseData.name,
+        courseData.uid,
+      );
+
+      if (nameExist) {
+        courseData.name = `${courseData.name} (${Date.now()})`;
+      }
+
+      return courseData;
+    } catch (error) {
+      logger.error(
+        "Error in CourseService.generateCourseDataStreaming:",
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Atomically persists a fully staged course along with its chapters and lessons.
+   * Uses Firestore batch writes to ensure all-or-nothing semantics.
+   * @param staged - The complete staged data containing the course, chapters, and their lessons.
+   * @returns The created course with its Firestore-generated ID.
+   */
   public async createCourseWithRelations(
     staged: StagedCourseData,
-  ): Promise<Course> {
+  ): Promise<CourseCreationResult> {
     try {
       return await this.courseRepository.createCourseWithRelations(staged);
     } catch (error) {

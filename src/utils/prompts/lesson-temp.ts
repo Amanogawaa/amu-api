@@ -41,10 +41,10 @@ Return valid JSON only:
     {
       "lessonOrder": 1,
       "lessonName": "string",
-      "type": "video | article | quiz | exercise",
+      "type": "video | article | exercise",
       "duration": "Xm",
       "lessonDescription": "2-3 sentences",
-      "content": "markdown for article, null for video/quiz",
+      "content": "markdown for article, null for video",
       "videoSearchQuery": "string for video only, null otherwise",
       "resources": [
         {"title": "string", "url": "string", "type": "documentation | article | tool | video"}
@@ -71,11 +71,11 @@ LESSON STRUCTURE GUIDELINES (be flexible, adapt to chapter needs):
   * Use QUIZ (3-5m) after every 1-2 lessons to test understanding
   * **Use EXERCISE (10-20m) for hands-on coding challenges** - essential for programming topics!
 - Recommended patterns:
-  * Short chapters (30m-1h): 4-6 lessons (video + article + exercise + quiz)
-  * Medium chapters (1-2h): 6-10 lessons (video + 2 articles + exercise + quiz + article + exercise + quiz)
-  * Long chapters (2-3h): 8-15 lessons (2 videos + 2 articles + exercise + quiz + 2 articles + exercise + quiz + exercise)
+  * Short chapters (30m-1h): 3-5 lessons (video + article + exercise)
+  * Medium chapters (1-2h): 5-8 lessons (video + 2 articles + 2 exercises)
+  * Long chapters (2-3h): 7-12 lessons (2 videos + 2 articles + 2-3 exercises)
 - Include at least 1 EXERCISE per chapter for programming courses
-- Aim for: 30-40% quiz content, 20-30% exercise content in total lesson count
+- Aim for: 30-40% exercise content in total lesson count
 
 Total lesson durations must equal ${args.estimatedDuration} (±5m).
 
@@ -140,14 +140,10 @@ Output: expected output
 - Tips without giving away solution
 
 - VideoSearchQuery: null
-- playgroundEnvironment: REQUIRED! Must include:
-  * type: "vanilla" | "frontend" | "backend"
-  * executionEngine: "piston" (vanilla) | "sandpack" (frontend)
-  * config.starterCode: Function signature or component template
-  * Example: {"type":"vanilla","framework":null,"dependencies":[],"supportsExecution":true,"executionEngine":"piston","config":{"starterCode":"def solve(n):\n    # Your code here\n    pass"}}
+- guidelineId: null (will be auto-populated after lesson creation)
 - Description: "Practice {concept} by building {task}"
-- Resources: Links to relevant docs for the challenge
 - Learning outcome: "Implement {concept} to solve {problem}"
+- Note: Exercise guidelines will be auto-generated with comprehensive instructions on editor setup, testing strategies, and common mistakes
 
 QUIZ LESSON (interspersed throughout):
 - Duration: 3-5m
@@ -158,30 +154,23 @@ QUIZ LESSON (interspersed throughout):
 - Place AFTER every 1-2 content lessons for immediate reinforcement
 - Example: After lessons 2-3, after lessons 5-6, after lessons 8-9
 
-PLAYGROUND ENVIRONMENT (CRITICAL - analyze code in lesson):
-- Detect appropriate playground based on lesson code examples:
-  * **vanilla**: Single-file code (Python DSA, JS algorithms, Java basics) → {"type":"vanilla","framework":null,"dependencies":[],"supportsExecution":true,"executionEngine":"piston"}
-  * **frontend**: React/Vue/Angular components with JSX/templates → {"type":"frontend","framework":"react","dependencies":["react","react-dom"],"supportsExecution":true,"executionEngine":"sandpack","config":{"template":"react"}}
-  * **backend**: Django/FastAPI/Flask requiring framework setup → {"type":"backend","framework":"django","dependencies":["django"],"supportsExecution":false,"executionEngine":"none","config":{"files":{"views.py":"","models.py":""}}}
-  * **none**: No code examples (video/quiz) → playgroundEnvironment=null
-- For EXERCISE lessons, MUST include config.starterCode with function/class template
-- Examples:
-  * "Python Binary Search" → vanilla/piston with starterCode="def binary_search(arr, target):\n    pass"
-  * "React Hooks Tutorial" → frontend/sandpack/react
-  * "FastAPI REST API" → backend/none/fastapi (read-only)
-  * Quiz lesson → null
+EXERCISE GUIDELINES (AUTO-GENERATED):
+- When lesson type is "exercise", an exercise guideline is automatically generated after lesson creation.
+- Guidelines include: problem statement, editor options (VS Code, Replit, GitHub Codespaces), solution approach, testing strategies, common mistakes, best practices, and resources.
+- Set guidelineId=null in lesson JSON—it will be populated after lesson creation during course generation.
+- No need to include detailed playground setup in lesson—it's handled by the auto-generated guideline.
 
 RULES:
 - lessonOrder: Sequential (1, 2, 3, 4, 5, ...)
 - Only article and exercise types have markdown content
-- Video/quiz types: content must be null
-- Exercise type: content has problem + hints, playgroundEnvironment.config.starterCode has template
+- Video type: content must be null
+- Exercise type: content has problem + hints, guidelineId=null (auto-populated after creation)
 - Each lesson needs 1 specific learning outcome using action verbs
 - Prerequisites: Build on previous lessons logically
 - Intersperse quizzes throughout - don't put all at the end
 - **For programming courses: Include exercise lessons for hands-on practice**
 - Each quiz tests only the immediately preceding 1-2 lessons
-- **MUST include playgroundEnvironment** for lessons with code (articles/exercises), null for video/quiz
+- Exercise lessons will auto-generate comprehensive guidelines with editor setup, testing strategies, and best practices
 
 Level adjustments:
 - Beginner: More examples, step-by-step, simpler language

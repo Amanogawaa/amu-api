@@ -1,5 +1,6 @@
 import { Router } from "express";
 import type { QuizController } from "./controller";
+import { validateGenerateQuiz, validateSubmitQuiz } from "./validation";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 
 export class QuizRoute {
@@ -50,9 +51,15 @@ export class QuizRoute {
      *         description: Quiz generated successfully
      *       400:
      *         description: Invalid request
+     *       401:
+     *         description: Unauthorized
+     *     security:
+     *       - bearerAuth: []
      */
     this.router.post(
-      "/generate",
+      "/quiz/generate",
+      authMiddleware,
+      validateGenerateQuiz,
       this.controller.generateQuiz.bind(this.controller),
     );
 
@@ -129,6 +136,7 @@ export class QuizRoute {
     this.router.post(
       "/quizzes/:quizId/submit",
       authMiddleware,
+      validateSubmitQuiz,
       this.controller.submitQuiz.bind(this.controller),
     );
 

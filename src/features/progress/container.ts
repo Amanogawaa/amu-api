@@ -15,14 +15,12 @@ export class ProgressContainer {
 
   constructor(
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
-    quizService?: QuizService,
     lessonService?: LessonService,
     leaderboardsService?: LeaderboardsService,
   ) {
     this.repository = new ProgressRepository(firestore);
     this.service = new ProgressService(
       this.repository,
-      quizService,
       lessonService,
       leaderboardsService,
     );
