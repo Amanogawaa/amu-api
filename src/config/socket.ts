@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { Server as SocketIOServer } from "socket.io";
 import type { Server as HTTPServer } from "http";
-import { logger } from "../utils/loggers";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
   SocketData,
-} from "../utils/socket/socket.types";
+} from "core/socket/socket.types";
+import { logger } from "core/utils/loggers";
 
 export interface SocketConfig {
   cors: {

@@ -1,5 +1,5 @@
 import type { Socket } from "socket.io";
-import { logger } from "../utils/loggers";
+import { logger } from "../core/utils/loggers";
 import { firebaseAuth } from "../config/firebase";
 
 export interface AuthenticatedSocket extends Socket {

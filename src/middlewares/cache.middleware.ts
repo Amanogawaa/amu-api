@@ -1,5 +1,5 @@
+import { logger } from "core/utils/loggers";
 import type { Request, Response, NextFunction } from "express";
-import { logger } from "../utils/loggers";
 
 interface CacheConfig {
   maxAge: number;

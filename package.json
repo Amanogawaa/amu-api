@@ -4,7 +4,6 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon",
-    "start": "bun run src/server.ts",
     "eslint-check-only": "bunx eslint .",
     "eslint-fix": "bunx eslint . --fix",
     "prettier": "bunx prettier --write ."

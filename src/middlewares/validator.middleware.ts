@@ -1,23 +1,155 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { geminiCall } from "@utils/geminiCall";
-import { logger } from "@utils/loggers";
 import type { NextFunction, Request, Response } from "express";
 import type { AuthenticatedRequest } from "./auth.middleware";
+
+import { CourseRepository } from "modules/course";
+import { geminiCall } from "core/ai/geminiCall";
 import {
-  emitValidationProgress,
   createGenerationJobId,
-} from "@utils/helper/generation.helpers";
-import { CourseRepository } from "@features/course";
+  emitValidationProgress,
+} from "core/helper/generation.helpers";
 import {
   SIMILARITY_CONFIG,
   isDuplicateCourse,
-} from "@utils/helper/similarity.helpers";
+} from "core/helper/similarity.helpers";
+import { logger } from "core/utils/loggers";
 
 interface ValidationResult {
   isValid: boolean;
   isProgramming: boolean;
   isAppropriate: boolean;
   reason?: string;
+}
+
+const VALIDATION_CACHE_TTL_MS = 10 * 60 * 1000;
+const VALIDATION_TIMEOUT_MS = 8_000;
+const validationCache = new Map<
+  string,
+  { result: ValidationResult; expiresAt: number }
+>();
+
+const PROGRAMMING_KEYWORDS = [
+  "programming",
+  "coding",
+  "software",
+  "developer",
+  "javascript",
+  "typescript",
+  "python",
+  "java",
+  "react",
+  "node",
+  "api",
+  "database",
+  "sql",
+  "docker",
+  "devops",
+  "machine learning",
+  "ai",
+  "web development",
+];
+
+const NON_PROGRAMMING_KEYWORDS = [
+  "cooking",
+  "recipe",
+  "sports",
+  "history",
+  "politics",
+  "fitness",
+  "yoga",
+  "travel",
+  "fashion",
+  "gardening",
+];
+
+const HARMFUL_KEYWORDS = [
+  "ransomware",
+  "malware",
+  "ddos",
+  "credential stealing",
+  "phishing",
+  "data theft",
+  "virus",
+];
+
+function normalizeValidationInput(input: string): string {
+  return input.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function getCachedValidation(input: string): ValidationResult | null {
+  const key = normalizeValidationInput(input);
+  const cached = validationCache.get(key);
+  if (!cached) return null;
+  if (cached.expiresAt <= Date.now()) {
+    validationCache.delete(key);
+    return null;
+  }
+  return cached.result;
+}
+
+function setCachedValidation(input: string, result: ValidationResult): void {
+  const key = normalizeValidationInput(input);
+  validationCache.set(key, {
+    result,
+    expiresAt: Date.now() + VALIDATION_CACHE_TTL_MS,
+  });
+}
+
+function runFastLocalValidation(input: string): ValidationResult | null {
+  const normalized = normalizeValidationInput(input);
+  if (!normalized) {
+    return {
+      isValid: false,
+      isProgramming: false,
+      isAppropriate: false,
+      reason: "Topic is required",
+    };
+  }
+
+  if (normalized.length < 3 || normalized.length > 800) {
+    return {
+      isValid: false,
+      isProgramming: false,
+      isAppropriate: false,
+      reason: "Topic length is out of allowed range",
+    };
+  }
+
+  if (HARMFUL_KEYWORDS.some((keyword) => normalized.includes(keyword))) {
+    return {
+      isValid: false,
+      isProgramming: false,
+      isAppropriate: false,
+      reason: "Request contains harmful or malicious intent",
+    };
+  }
+
+  const hasProgrammingKeyword = PROGRAMMING_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword),
+  );
+  const hasNonProgrammingKeyword = NON_PROGRAMMING_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword),
+  );
+
+  if (hasProgrammingKeyword && !hasNonProgrammingKeyword) {
+    return {
+      isValid: true,
+      isProgramming: true,
+      isAppropriate: true,
+      reason: "Passed local programming relevance check",
+    };
+  }
+
+  if (hasNonProgrammingKeyword && !hasProgrammingKeyword) {
+    return {
+      isValid: false,
+      isProgramming: false,
+      isAppropriate: true,
+      reason: "Request is not programming related",
+    };
+  }
+
+  return null;
 }
 
 const validationResultSchema = {
@@ -33,6 +165,17 @@ const validationResultSchema = {
 async function validateContentAndTopic(
   input: string,
 ): Promise<ValidationResult> {
+  const cached = getCachedValidation(input);
+  if (cached) {
+    return cached;
+  }
+
+  const localValidation = runFastLocalValidation(input);
+  if (localValidation) {
+    setCachedValidation(input, localValidation);
+    return localValidation;
+  }
+
   const prompt = `
 You are a content validator for an educational programming course platform.
 
@@ -67,12 +210,20 @@ Now validate:
 "${input}"
 `;
   try {
-    const result = await geminiCall(prompt, {
-      stream: false,
-      responseSchema: validationResultSchema,
-      temperature: 0.7,
-      maxRetries: 3,
-    });
+    const result = await Promise.race([
+      geminiCall(prompt, {
+        stream: false,
+        responseSchema: validationResultSchema,
+        temperature: 0.2,
+        maxRetries: 3,
+      }),
+      new Promise<never>((_, reject) => {
+        setTimeout(
+          () => reject(new Error("Validation service timeout")),
+          VALIDATION_TIMEOUT_MS,
+        );
+      }),
+    ]);
 
     const isProgramming =
       result.isProgramming === true || result.is_programming === "true";
@@ -82,20 +233,24 @@ Now validate:
 
     logger.log("Content validation JSON:", result);
 
-    return {
+    const validationResult = {
       isValid,
       isProgramming,
       isAppropriate,
       reason: result.reason,
     };
+    setCachedValidation(input, validationResult);
+    return validationResult;
   } catch (error) {
     logger.error("Content validation error:", error);
-    return {
+    const fallback = {
       isValid: false,
       isProgramming: false,
       isAppropriate: false,
       reason: "Validation failed",
     };
+    setCachedValidation(input, fallback);
+    return fallback;
   }
 }
 

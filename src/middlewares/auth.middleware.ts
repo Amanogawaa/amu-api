@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { AppError } from "../utils/errors";
-import { logger } from "../utils/loggers";
 import { config } from "../config/environment";
 import { firebaseAuth } from "../config/firebase";
+import { AppError } from "core/utils/errors";
+import { logger } from "core/utils/loggers";
 
 export interface AuthenticatedRequest extends Request {
   user?: {

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
-import { AppError, ValidationError } from "../utils/errors";
-import { logger } from "../utils/loggers";
 import { config } from "../config/environment";
+import { AppError, ValidationError } from "core/utils/errors";
+import { logger } from "core/utils/loggers";
 
 interface ErrorResponse {
   error: {

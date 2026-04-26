@@ -1,8 +1,8 @@
 import type { NextFunction, Response } from "express";
-import { logger } from "../utils/loggers";
 import { firebaseFirestore } from "../config/firebase";
-import { AppError } from "../utils/errors";
 import type { AuthenticatedRequest } from "./auth.middleware";
+import { AppError } from "core/utils/errors";
+import { logger } from "core/utils/loggers";
 
 export const enrollmentMiddleware = async (
   req: AuthenticatedRequest,

@@ -69,7 +69,7 @@ All AI calls use [utils/geminiCall.ts](src/utils/geminiCall.ts) with **Bottlenec
 ```typescript
 const result = await geminiCall(userPrompt, {
   responseSchema: courseSchema, // Zod schema for structured output
-  temperature: 0.7,
+  temperature: 0.4,
   maxRetries: 3,
   systemPrompt, // Optional system instructions
   benchmarkTag: "course:system", // For logging/monitoring
@@ -153,7 +153,7 @@ this.router.post(
 const { userPrompt, systemPrompt } = buildCoursePrompt(params, "system");
 const result = await geminiCall(userPrompt, {
   responseSchema: courseSchema,
-  temperature: 0.7,
+  temperature: 0.4,
   maxRetries: 3,
   systemPrompt,
   benchmarkTag: "course:system",

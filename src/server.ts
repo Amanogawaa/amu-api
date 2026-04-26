@@ -1,6 +1,6 @@
 import app from "./app";
 import { config } from "./config/environment";
-import { logger } from "./utils/loggers";
+import { logger } from "./core/utils/loggers";
 
 async function startServer() {
   try {

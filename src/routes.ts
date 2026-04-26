@@ -1,27 +1,26 @@
 import { Router } from "express";
-import { AuthContainer } from "./features/auth/container";
-import type { ChapterContainer } from "./features/chapter/container";
-import type { CodePlaygroundContainer } from "./features/code-playground/container";
-import type { CommentsContainer } from "./features/comments/container";
-import { CourseContainer } from "./features/course/container";
-import type { EnrollmentContainer } from "./features/enrollment/container";
-import type { LessonContainer } from "./features/lesson/container";
-import type { LikesContainer } from "./features/likes/container";
-import type { ProgressContainer } from "./features/progress/container";
-import type { QuizContainer } from "./features/quiz/container";
-import socketTestRoutes from "./features/socket/route";
-import type { UserContainer } from "./features/user/container";
-import type { CapstoneContainer } from "./features/capstone/container";
-import type { GitHubContainer } from "./features/github/container";
-import type { LessonAssistantContainer } from "./features/lesson-assistant/container";
-import type { RecommendationContainer } from "./features/recommendation/container";
-import type { LeaderboardsContainer } from "./features/leaderboards/container";
 import {
   basicHealthCheck,
   detailedHealthCheck,
-  readinessCheck,
   livenessCheck,
-} from "./utils/health";
+  readinessCheck,
+} from "./core/utils/health";
+import { AuthContainer } from "./modules/auth/container";
+import type { CapstoneContainer } from "./modules/capstone/container";
+import type { ChapterContainer } from "./modules/chapter/container";
+import type { CodePlaygroundContainer } from "./modules/code-playground/container";
+import type { CommentsContainer } from "./modules/comments/container";
+import { CourseContainer } from "./modules/course/container";
+import type { EnrollmentContainer } from "./modules/enrollment/container";
+import type { GitHubContainer } from "./modules/github/container";
+import type { LeaderboardsContainer } from "./modules/leaderboards/container";
+import type { LessonAssistantContainer } from "./modules/lesson-assistant/container";
+import type { LessonContainer } from "./modules/lesson/container";
+import type { LikesContainer } from "./modules/likes/container";
+import type { ProgressContainer } from "./modules/progress/container";
+import type { RecommendationContainer } from "./modules/recommendation/container";
+import socketTestRoutes from "./modules/socket/route";
+import type { UserContainer } from "./modules/user/container";
 
 export class AppRoutes {
   private router: Router;
