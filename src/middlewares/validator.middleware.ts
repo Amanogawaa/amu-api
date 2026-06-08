@@ -13,90 +13,232 @@ import {
   isDuplicateCourse,
 } from "@utils/helper/similarity.helpers";
 
+const PROGRAMMING_KEYWORDS = [
+  "python",
+  "javascript",
+  "typescript",
+  "react",
+  "vue",
+  "angular",
+  "node",
+  "java",
+  "c++",
+  "c#",
+  "rust",
+  "go",
+  "swift",
+  "kotlin",
+  "ruby",
+  "php",
+  "sql",
+  "mongodb",
+  "docker",
+  "kubernetes",
+  "aws",
+  "azure",
+  "git",
+  "html",
+  "css",
+  "api",
+  "rest",
+  "graphql",
+  "webpack",
+  "vite",
+  "machine learning",
+  "deep learning",
+  "ai",
+  "data science",
+  "tensorflow",
+  "pytorch",
+  "pandas",
+  "numpy",
+  "devops",
+  "cicd",
+  "linux",
+  "bash",
+  "algorithm",
+  "data structure",
+  "oop",
+  "functional programming",
+  "web development",
+  "mobile development",
+  "game development",
+  "flutter",
+  "django",
+  "flask",
+  "express",
+  "nextjs",
+  "nuxt",
+  "spring",
+  "laravel",
+  "solidjs",
+  "ai automation",
+  "cybersecurity",
+  // ... extend as needed
+];
+const BLOCKED_KEYWORDS = [
+  "malware",
+  "ransomware",
+  "ddos",
+  "credential stealing",
+  "keylogger",
+  "phishing kit",
+  "exploit kit",
+  "botnet",
+  "trojan",
+  "hacking",
+  "how to hack",
+  "how to create malware",
+  "how to create virus",
+  // ... extend as needed
+];
+
 interface ValidationResult {
   isValid: boolean;
   isProgramming: boolean;
   isAppropriate: boolean;
   reason?: string;
+  source: "local" | "cache" | "ai";
 }
 
-const validationResultSchema = {
+// --- In-memory validation cache ---
+const validationCache = new Map<string, ValidationResult>();
+const CACHE_MAX_SIZE = 500;
+
+function getCacheKey(input: string): string {
+  return input.toLowerCase().trim();
+}
+
+function getCachedValidation(input: string): ValidationResult | null {
+  const key = getCacheKey(input);
+  const cached = validationCache.get(key);
+  if (cached) {
+    logger.info(`Validation cache hit for: "${key.slice(0, 50)}..."`);
+    return { ...cached, source: "cache" };
+  }
+  return null;
+}
+
+function setCachedValidation(input: string, result: ValidationResult): void {
+  const key = getCacheKey(input);
+  // Evict oldest entry if cache is full
+  if (validationCache.size >= CACHE_MAX_SIZE) {
+    const firstKey = validationCache.keys().next().value;
+    if (firstKey) validationCache.delete(firstKey);
+  }
+  validationCache.set(key, result);
+}
+
+// --- Local keyword-based validation (0 tokens) ---
+function localValidate(
+  input: string,
+): { result: ValidationResult } | { ambiguous: true } {
+  const lower = input.toLowerCase();
+
+  // Check blocklist first — immediate reject
+  const blockedMatch = BLOCKED_KEYWORDS.find((kw) => lower.includes(kw));
+  if (blockedMatch) {
+    logger.info(`Local validation: blocked keyword "${blockedMatch}"`);
+    return {
+      result: {
+        isValid: false,
+        isProgramming: false,
+        isAppropriate: false,
+        reason: `Contains blocked content: "${blockedMatch}"`,
+        source: "local",
+      },
+    };
+  }
+
+  // Check if any programming keyword matches — immediate accept
+  const programmingMatch = PROGRAMMING_KEYWORDS.find((kw) =>
+    lower.includes(kw),
+  );
+  if (programmingMatch) {
+    logger.info(
+      `Local validation: programming keyword "${programmingMatch}" matched`,
+    );
+    return {
+      result: {
+        isValid: true,
+        isProgramming: true,
+        isAppropriate: true,
+        reason: `Matched programming keyword: "${programmingMatch}"`,
+        source: "local",
+      },
+    };
+  }
+
+  // No keyword matched either list — ambiguous, needs AI
+  logger.info("Local validation: ambiguous input, falling back to AI");
+  return { ambiguous: true };
+}
+
+// --- Compact AI validation fallback (minimal tokens) ---
+const compactValidationSchema = {
   type: "object",
   properties: {
-    isProgramming: { type: "boolean" },
-    isAppropriate: { type: "boolean" },
-    reason: { type: "string" },
+    p: { type: "boolean" },
+    a: { type: "boolean" },
+    r: { type: "string" },
   },
-  required: ["isProgramming", "isAppropriate"],
+  required: ["p", "a"],
 };
 
-async function validateContentAndTopic(
-  input: string,
-): Promise<ValidationResult> {
-  const prompt = `
-You are a content validator for an educational programming course platform.
+async function compactAIValidation(input: string): Promise<ValidationResult> {
+  const prompt = `Classify this course topic. Reply JSON {"p":bool,"a":bool,"r":"reason"}
+p=programming/tech related, a=appropriate(no malware/illegal/violence/adult)
+Topic: "${input}"`;
 
-Your task is to validate the user's course request on TWO criteria:
-
-1. CONTENT SAFETY - Check if the request contains inappropriate, harmful, or malicious content.
-2. TOPIC RELEVANCE - Check if the request is about programming, coding, software development, web dev, data science, AI/ML, DevOps, or any technical computing skill.
-
-REJECT if the request involves: 
-- Illegal activities (hacking into systems without permission, creating malware, ransomware, viruses)
-- Harmful code (DDoS attacks, data theft, credential stealing, unauthorized access)
-- Exploits for malicious purposes (SQL injection for data theft, XSS for attacks)
-- Violence, hate speech, discrimination, harassment
-- Sexual or adult content
-- Scams, fraud, or deceptive practices
-- Privacy violations or surveillance without consent
-- Non-programming topics (cooking, history, sports, etc.)
-
-ACCEPT legitimate educational content like:
-- Ethical hacking and cybersecurity education
-- Security testing and penetration testing (for defense)
-- Understanding vulnerabilities for protection
-- Secure coding practices
-- Defensive programming techniques
-- Any programming language, framework, or tech stack
-- Web development, mobile development, data science, AI/ML, DevOps, Game Development
-
-Return ONLY a JSON object with this exact format:
-{"isProgramming": true/false, "isAppropriate": true/false, "reason": "short reason"}
-
-Now validate:
-"${input}"
-`;
   try {
     const result = await geminiCall(prompt, {
       stream: false,
-      responseSchema: validationResultSchema,
-      temperature: 0.7,
-      maxRetries: 3,
+      responseSchema: compactValidationSchema,
+      temperature: 0,
+      maxRetries: 2,
     });
 
-    const isProgramming =
-      result.isProgramming === true || result.is_programming === "true";
-    const isAppropriate =
-      result.isAppropriate === true || result.is_appropriate === "true";
-    const isValid = isProgramming && isAppropriate;
+    const isProgramming = result.p === true;
+    const isAppropriate = result.a === true;
 
-    logger.log("Content validation JSON:", result);
+    logger.log("Compact AI validation result:", result);
 
     return {
-      isValid,
+      isValid: isProgramming && isAppropriate,
       isProgramming,
       isAppropriate,
-      reason: result.reason,
+      reason: result.r,
+      source: "ai",
     };
   } catch (error) {
-    logger.error("Content validation error:", error);
+    logger.error("Compact AI validation error:", error);
     return {
       isValid: false,
       isProgramming: false,
       isAppropriate: false,
-      reason: "Validation failed",
+      reason: "AI validation failed",
+      source: "ai",
     };
   }
+}
+
+// --- Hybrid validation: local → cache → compact AI ---
+async function validateInput(input: string): Promise<ValidationResult> {
+  // 1. Try local keyword validation (0 tokens, instant)
+  const local = localValidate(input);
+  if ("result" in local) {
+    setCachedValidation(input, local.result);
+    return local.result;
+  }
+
+  // 2. Check cache (0 tokens)
+  const cached = getCachedValidation(input);
+  if (cached) return cached;
+
+  // 3. Fall back to compact AI call (minimal tokens)
+  const aiResult = await compactAIValidation(input);
+  setCachedValidation(input, aiResult);
+  return aiResult;
 }
 
 export const validateCourseTopic = async (
@@ -126,7 +268,9 @@ export const validateCourseTopic = async (
       emitValidationProgress(authReq, jobId, authReq.user.uid);
     }
 
-    const validation = await validateContentAndTopic(fullText);
+    const validation = await validateInput(fullText);
+
+    logger.info(`Validation resolved via: ${validation.source}`);
 
     if (!validation.isAppropriate) {
       logger.warn(`Inappropriate content detected: ${fullText}`);
@@ -177,6 +321,8 @@ export const checkDuplicateCourse = async (
     const courseRepository = new CourseRepository();
     const existingCourses = await courseRepository.getCourse({ uid });
 
+    console.log("Existing courses", existingCourses);
+
     if (existingCourses.length === 0) {
       logger.info(
         "No existing courses found for user, skipping duplicate check",
@@ -191,6 +337,8 @@ export const checkDuplicateCourse = async (
       category,
       0.85,
     );
+
+    console.log("Duplicate check", duplicateCheck);
 
     if (duplicateCheck.isDuplicate && duplicateCheck.similarCourse) {
       const { similarCourse, score, reason } = duplicateCheck;

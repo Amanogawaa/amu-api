@@ -41,7 +41,7 @@ Return valid JSON only:
     {
       "lessonOrder": 1,
       "lessonName": "string",
-      "type": "video | article | exercise",
+      "type": "video | article | quiz | exercise",
       "duration": "Xm",
       "lessonDescription": "2-3 sentences",
       "content": "markdown for article, null for video",

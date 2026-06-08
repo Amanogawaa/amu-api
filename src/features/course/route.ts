@@ -163,8 +163,8 @@ export class CourseRoute {
       authMiddleware,
       validateCourseTopic,
       checkDuplicateCourse,
-      validateGenerateCourse,
-      this.controller.generateCourse.bind(this.controller),
+      // validateGenerateCourse,
+      // this.controller.generateCourse.bind(this.controller),
     );
 
     /**

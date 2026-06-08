@@ -15,7 +15,6 @@ import { performanceMonitor } from "./middlewares/performance.middleware";
 import { socketAuthMiddleware } from "./middlewares/socket.middleware";
 import { logger } from "./utils/loggers";
 import { SocketHandlers } from "./utils/socket/socket.handlers";
-import { FullCourseGenerationService } from "./utils/service/generation.service";
 
 import { config } from "./config/environment";
 import { AuthContainer } from "./features/auth/container";
@@ -36,6 +35,7 @@ import { UserContainer } from "./features/user/container";
 import { cacheMiddleware } from "./middlewares/cache.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
 import { AppRoutes } from "./routes";
+import { QuizContainer } from "@features/quiz/container";
 
 class App {
   public app: Application;
@@ -59,6 +59,7 @@ class App {
   private lessonAssistantContainer: LessonAssistantContainer;
   private recommendationContainer: RecommendationContainer;
   private leaderboardsContainer: LeaderboardsContainer;
+  private quizContainer: QuizContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
@@ -70,6 +71,7 @@ class App {
     commentsContainer: CommentsContainer = new CommentsContainer(),
     userContainer: UserContainer = new UserContainer(),
     codePlaygroundContainer?: CodePlaygroundContainer,
+    quizContainer: QuizContainer = new QuizContainer(),
   ) {
     this.app = express();
     this.server = http.createServer(this.app);
@@ -82,7 +84,10 @@ class App {
     this.authContainer = authContainer;
     this.chapterContainer = chapterContainer;
 
-    this.lessonContainer = lessonContainer || new LessonContainer(undefined);
+    this.quizContainer = quizContainer;
+
+    this.lessonContainer =
+      lessonContainer || new LessonContainer(undefined, quizContainer.service);
 
     this.courseContainer =
       courseContainer ||
@@ -99,19 +104,6 @@ class App {
         chapterContainer.repository,
         this.lessonContainer.repository,
       );
-
-    if (
-      this.courseContainer.fullGenerationService &&
-      this.codePlaygroundContainer.service
-    ) {
-      this.courseContainer.fullGenerationService =
-        new FullCourseGenerationService(
-          this.courseContainer.service,
-          chapterContainer.service,
-          this.lessonContainer.service,
-          this.codePlaygroundContainer.service,
-        );
-    }
 
     this.capstoneContainer = new CapstoneContainer(
       undefined,

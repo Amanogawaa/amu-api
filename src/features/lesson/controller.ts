@@ -126,6 +126,7 @@ export class LessonController {
         return;
       }
 
+      console.log("Searching videos for:", lesson.videoSearchQuery);
       const videos = await youtubeService.searchVideos(
         lesson.videoSearchQuery,
         maxResults,

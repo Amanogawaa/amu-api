@@ -6,7 +6,7 @@ import { firebaseFirestore } from "../../config/firebase";
 import { FullCourseGenerationService } from "../../utils/service/generation.service";
 import type { ChapterService } from "../chapter/service";
 import type { LessonService } from "../lesson/service";
-import type { CodePlaygroundService } from "../code-playground/service";
+
 
 export class CourseContainer {
   public readonly repository: CourseRepository;
@@ -19,7 +19,6 @@ export class CourseContainer {
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
     chapterService?: ChapterService,
     lessonService?: LessonService,
-    codePlaygroundService?: CodePlaygroundService,
   ) {
     this.repository = new CourseRepository(firestore);
     this.service = new CourseService(this.repository);
@@ -29,7 +28,6 @@ export class CourseContainer {
         this.service,
         chapterService,
         lessonService,
-        codePlaygroundService,
       );
     }
 

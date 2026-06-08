@@ -47,7 +47,7 @@ export class QuizService {
       logger.info("Calling Gemini API to generate quiz questions");
       const result: QuizGenerationResponse = await geminiCall(prompt, {
         responseSchema: quizSchema,
-        temperature: 0.8,
+        temperature: 0.4,
         maxRetries: 3,
         benchmarkTag: `quiz:generate`,
         metadata: {

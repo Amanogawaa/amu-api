@@ -44,6 +44,7 @@ export class YouTubeService {
         throw new Error("YouTube API key not configured");
       }
 
+      console.log(searchQuery);
       // Step 1: Search for videos
       const searchResponse = await axios.get(`${this.baseUrl}/search`, {
         params: {

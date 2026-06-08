@@ -90,13 +90,7 @@ export const quizSchema = {
           questionText: { type: "string" as const },
           questionType: {
             type: "string" as const,
-            enum: [
-              "multiple-choice",
-              "true-false",
-              "fill-in-the-blank",
-              "matching",
-              "scenario-based",
-            ],
+            enum: ["multiple-choice"],
           },
           options: {
             type: "array" as const,
@@ -109,50 +103,15 @@ export const quizSchema = {
               required: ["optionId", "optionText"],
             },
           },
-          correctAnswer: {
-            anyOf: [
-              { type: "string" as const },
-              {
-                type: "array" as const,
-                items: { type: "string" as const },
-              },
-            ],
-          },
+          correctAnswer: { type: "string" as const },
           explanation: { type: "string" as const },
           points: { type: "number" as const },
-          blanks: {
-            type: "array" as const,
-            items: {
-              type: "object" as const,
-              properties: {
-                blankId: { type: "string" as const },
-                acceptableAnswers: {
-                  type: "array" as const,
-                  items: { type: "string" as const },
-                },
-              },
-              required: ["blankId", "acceptableAnswers"],
-            },
-          },
-          matchPairs: {
-            type: "array" as const,
-            items: {
-              type: "object" as const,
-              properties: {
-                leftId: { type: "string" as const },
-                leftText: { type: "string" as const },
-                rightId: { type: "string" as const },
-                rightText: { type: "string" as const },
-              },
-              required: ["leftId", "leftText", "rightId", "rightText"],
-            },
-          },
-          scenario: { type: "string" as const },
         },
         required: [
           "questionId",
           "questionText",
           "questionType",
+          "options",
           "correctAnswer",
           "explanation",
           "points",

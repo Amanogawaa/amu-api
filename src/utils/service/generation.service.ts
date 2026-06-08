@@ -13,7 +13,7 @@ import type {
 } from "../../features/chapter/types";
 import type { Lesson } from "../../features/lesson/types";
 import type { LessonService } from "../../features/lesson/service";
-import type { CodePlaygroundService } from "../../features/code-playground/service";
+
 import type { AuthenticatedRequest } from "../../middlewares/auth.middleware";
 import {
   createGenerationJobId,
@@ -55,7 +55,6 @@ export class FullCourseGenerationService {
     private courseService: CourseService,
     private chapterService: ChapterService,
     private lessonService: LessonService,
-    private codePlaygroundService?: CodePlaygroundService,
   ) {}
 
   async generateFullCourse(
@@ -132,30 +131,6 @@ export class FullCourseGenerationService {
         context.staged,
       );
       const savedCourse = creationResult.course;
-
-      // Auto-generate exercise guidelines for exercise lessons
-      if (this.codePlaygroundService) {
-        const exerciseLessonsToGenerateGuidelinesFor: Lesson[] = [];
-
-        for (const { lessons } of creationResult.chaptersWithLessons) {
-          exerciseLessonsToGenerateGuidelinesFor.push(
-            ...lessons.filter((lesson) => lesson.type === "exercise"),
-          );
-        }
-
-        // Generate guidelines asynchronously without waiting
-        if (exerciseLessonsToGenerateGuidelinesFor.length > 0) {
-          this.generateExerciseGuidelinesAsync(
-            exerciseLessonsToGenerateGuidelinesFor,
-            jobId,
-          ).catch((error) => {
-            logger.error("Error generating exercise guidelines in background", {
-              jobId,
-              error,
-            });
-          });
-        }
-      }
 
       const result: FullCourseGenerationResult = {
         courseId: savedCourse.id,
@@ -862,6 +837,22 @@ export class FullCourseGenerationService {
       );
       const savedCourse = creationResult.course;
 
+      // Auto-generate quizzes in the background
+      for (const { chapterId, lessons } of creationResult.chaptersWithLessons) {
+        const quizLessons = lessons.filter((lesson) => lesson.type === "quiz");
+        if (quizLessons.length > 0) {
+          this.lessonService
+            .autoGenerateQuizzes(lessons, chapterId)
+            .catch((error) => {
+              logger.error("Error generating quizzes in background", {
+                jobId,
+                chapterId: chapterId,
+                error,
+              });
+            });
+        }
+      }
+
       // STEP 5: Success!
       const result: FullCourseGenerationResult = {
         courseId: savedCourse.id,
@@ -1199,6 +1190,22 @@ export class FullCourseGenerationService {
       );
       const savedCourse = creationResult.course;
 
+      // Auto-generate quizzes in the background
+      for (const { chapterId, lessons } of creationResult.chaptersWithLessons) {
+        const quizLessons = lessons.filter((lesson) => lesson.type === "quiz");
+        if (quizLessons.length > 0) {
+          this.lessonService
+            .autoGenerateQuizzes(lessons, chapterId)
+            .catch((error) => {
+              logger.error("Error generating quizzes in background", {
+                jobId,
+                chapterId: chapterId,
+                error,
+              });
+            });
+        }
+      }
+
       // STEP 5: Success!
       const result: FullCourseGenerationResult = {
         courseId: savedCourse.id,
@@ -1376,62 +1383,5 @@ export class FullCourseGenerationService {
       lessonsRequest,
       onChunk,
     );
-  }
-
-  /**
-   * Background task: Generate exercise guidelines asynchronously
-   * Runs after course is saved to avoid blocking the main response
-   */
-  private async generateExerciseGuidelinesAsync(
-    exerciseLessons: Lesson[],
-    jobId: string,
-  ): Promise<void> {
-    try {
-      logger.info("Starting background exercise guideline generation", {
-        jobId,
-        lessonsCount: exerciseLessons.length,
-      });
-
-      // Generate guidelines in parallel batches
-      const batchSize = 3; // Process 3 at a time to avoid overwhelming Gemini
-      for (let i = 0; i < exerciseLessons.length; i += batchSize) {
-        const batch = exerciseLessons.slice(i, i + batchSize);
-
-        await Promise.all(
-          batch.map((lesson) =>
-            this.codePlaygroundService!.generateGuideline(lesson.id).catch(
-              (error) => {
-                logger.warn(
-                  "Failed to generate guideline for exercise lesson in background",
-                  {
-                    jobId,
-                    lessonId: lesson.id,
-                    lessonName: lesson.lessonName,
-                    error: error.message,
-                  },
-                );
-                // Don't throw - continue with other lessons
-              },
-            ),
-          ),
-        );
-
-        // Small delay between batches to manage API rate limits
-        if (i + batchSize < exerciseLessons.length) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-      }
-
-      logger.info("Background exercise guideline generation completed", {
-        jobId,
-        lessonsCount: exerciseLessons.length,
-      });
-    } catch (error: any) {
-      logger.error("Unexpected error in background guideline generation", {
-        jobId,
-        error: error.message,
-      });
-      // Don't throw - this is a background task, should not interrupt main flow
-    }
   }
 }

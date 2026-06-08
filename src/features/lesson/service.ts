@@ -17,9 +17,9 @@ import type { QuizService } from "../quiz/service";
 
 export class LessonService {
   private lessonRepository: LessonRepository;
-  private quizService?: QuizService;
+  private quizService: QuizService;
 
-  constructor(lessonRepository: LessonRepository, quizService?: QuizService) {
+  constructor(lessonRepository: LessonRepository, quizService: QuizService) {
     this.lessonRepository = lessonRepository;
     this.quizService = quizService;
   }
@@ -297,7 +297,7 @@ export class LessonService {
     logger.info("Completed auto-fetch transcripts");
   }
 
-  private async autoGenerateQuizzes(
+  public async autoGenerateQuizzes(
     lessons: Lesson[],
     chapterId: string,
   ): Promise<void> {

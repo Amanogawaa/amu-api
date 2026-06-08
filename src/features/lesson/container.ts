@@ -13,7 +13,7 @@ export class LessonContainer {
 
   constructor(
     firestore: FirebaseFirestore.Firestore = firebaseFirestore,
-    quizService?: QuizService,
+    quizService: QuizService,
   ) {
     this.repository = new LessonRepository(firestore);
     this.service = new LessonService(this.repository, quizService);
