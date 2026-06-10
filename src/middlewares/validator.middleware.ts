@@ -80,6 +80,7 @@ const BLOCKED_KEYWORDS = [
   "malware",
   "ransomware",
   "ddos",
+  "virus",
   "credential stealing",
   "keylogger",
   "phishing kit",
@@ -129,13 +130,11 @@ function setCachedValidation(input: string, result: ValidationResult): void {
   validationCache.set(key, result);
 }
 
-// --- Local keyword-based validation (0 tokens) ---
 function localValidate(
   input: string,
 ): { result: ValidationResult } | { ambiguous: true } {
   const lower = input.toLowerCase();
 
-  // Check blocklist first — immediate reject
   const blockedMatch = BLOCKED_KEYWORDS.find((kw) => lower.includes(kw));
   if (blockedMatch) {
     logger.info(`Local validation: blocked keyword "${blockedMatch}"`);
@@ -150,7 +149,6 @@ function localValidate(
     };
   }
 
-  // Check if any programming keyword matches — immediate accept
   const programmingMatch = PROGRAMMING_KEYWORDS.find((kw) =>
     lower.includes(kw),
   );
@@ -169,7 +167,6 @@ function localValidate(
     };
   }
 
-  // No keyword matched either list — ambiguous, needs AI
   logger.info("Local validation: ambiguous input, falling back to AI");
   return { ambiguous: true };
 }

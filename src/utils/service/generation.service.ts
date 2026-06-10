@@ -950,7 +950,7 @@ export class FullCourseGenerationService {
 
     const result = await geminiCall(userPrompt, {
       responseSchema: singleChapterSchema,
-      temperature: 0.7,
+      temperature: 0.4,
       maxRetries: 3,
       systemPrompt,
       benchmarkTag: `chapter-single-staged:${promptMode}`,
@@ -1310,7 +1310,7 @@ export class FullCourseGenerationService {
     let fullResponse = "";
     await geminiCall(userPrompt, {
       responseSchema: singleChapterSchema,
-      temperature: 0.7,
+      temperature: 0.4,
       maxRetries: 3,
       systemPrompt,
       stream: true,

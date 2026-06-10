@@ -75,7 +75,7 @@ export class CodePlaygroundService {
       logger.info("Generating exercise guideline with AI", { lessonId });
 
       const result = await geminiCall(prompt, {
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
       });
 

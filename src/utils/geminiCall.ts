@@ -3,6 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 import Bottleneck from "bottleneck";
 import { RATE_LIMIT_CONFIG } from "../config/rateLimit";
 import { logger } from "./loggers";
+import { groqCall } from "./groqCall";
 
 interface GeminiConfig {
   responseSchema?: any;
@@ -135,7 +136,9 @@ const makeGeminiCall = async (
     let timeoutHandle: NodeJS.Timeout | undefined;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutHandle = setTimeout(() => {
-        reject(new Error(`Gemini request timed out after ${timeoutMs}ms (${label})`));
+        reject(
+          new Error(`Gemini request timed out after ${timeoutMs}ms (${label})`),
+        );
       }, timeoutMs);
     });
 
@@ -246,6 +249,18 @@ export const geminiCall = async (
       error: error.message,
       stack: error.stack,
     });
-    throw error;
+    logger.warn("Initiating fallback to Groq model...");
+    try {
+      const groqResult = await groqCall(prompt, config);
+      return groqResult;
+    } catch (fallbackError: any) {
+      logger.error("Groq fallback also failed:", {
+        error: fallbackError.message,
+        stack: fallbackError.stack,
+      });
+      throw new Error(
+        `Primary and fallback AI models failed. Primary error: ${error.message}`,
+      );
+    }
   }
 };

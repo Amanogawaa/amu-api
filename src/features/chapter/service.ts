@@ -74,7 +74,7 @@ export class ChapterService {
 
       const result = await geminiCall(userPrompt, {
         responseSchema: chaptersSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
         systemPrompt,
         benchmarkTag: `chapters:${promptMode}`,
@@ -135,7 +135,7 @@ export class ChapterService {
 
       const result = await geminiCall(userPrompt, {
         responseSchema: chaptersSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
         systemPrompt,
         benchmarkTag: `chapters:${promptMode}`,
@@ -196,7 +196,7 @@ export class ChapterService {
 
       const result = await geminiCall(userPrompt, {
         responseSchema: singleChapterSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
         systemPrompt,
         benchmarkTag: `chapter-single:${promptMode}`,

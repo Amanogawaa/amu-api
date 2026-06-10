@@ -166,7 +166,7 @@ The API uses **Google Gemini AI** with structured prompts and schema validation:
 const { userPrompt, systemPrompt } = buildCoursePrompt(params, "system");
 const result = await geminiCall(userPrompt, {
   responseSchema: courseSchema, // Zod schema for type safety
-  temperature: 0.7,
+  temperature: 0.4,
   maxRetries: 3,
   systemPrompt,
   benchmarkTag: "course:system",

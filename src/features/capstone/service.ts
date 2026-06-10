@@ -66,7 +66,7 @@ export class CapstoneService {
 
       const result = await geminiCall(prompt, {
         responseSchema: capstoneSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
       });
 

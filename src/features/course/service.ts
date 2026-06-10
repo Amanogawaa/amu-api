@@ -83,7 +83,7 @@ export class CourseService {
 
       const result = await geminiCall(userPrompt, {
         responseSchema: courseSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
         systemPrompt,
         benchmarkTag: `course:${promptMode}`,
@@ -159,7 +159,7 @@ export class CourseService {
 
       await geminiCall(userPrompt, {
         responseSchema: courseSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
         systemPrompt,
         stream: true,
@@ -442,7 +442,7 @@ export class CourseService {
 
       const result = await geminiCall(userPrompt, {
         responseSchema: courseSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
         systemPrompt,
         benchmarkTag: `course:${promptMode}`,
@@ -512,7 +512,7 @@ export class CourseService {
       let fullResponse = "";
       await geminiCall(userPrompt, {
         responseSchema: courseSchema,
-        temperature: 0.7,
+        temperature: 0.4,
         maxRetries: 3,
         systemPrompt,
         stream: true,

@@ -143,7 +143,7 @@ export class LessonAssistantService {
       const response = await geminiCall(userPrompt, {
         stream: false,
         systemPrompt,
-        temperature: 0.7,
+        temperature: 0.4,
         benchmarkTag: "assistant:question",
         metadata: {
           lessonId: chat.lessonId,
@@ -228,7 +228,7 @@ export class LessonAssistantService {
       const fullResponse = await geminiCall(userPrompt, {
         stream: true,
         systemPrompt,
-        temperature: 0.7,
+        temperature: 0.4,
         benchmarkTag: "assistant:streaming",
         metadata: {
           lessonId: chat.lessonId,
