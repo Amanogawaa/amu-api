@@ -5,6 +5,7 @@ import { geminiCall } from "../../utils/geminiCall";
 import { generateExerciseGuidelinePrompt } from "../../utils/prompts/exercise-guideline-temp";
 import { CodePlaygroundRepository } from "./repository";
 import type { ExerciseGuideline } from "./types";
+import { exerciseGuidelineSchema } from "./types";
 
 export class CodePlaygroundService {
   private repository: CodePlaygroundRepository;
@@ -75,6 +76,7 @@ export class CodePlaygroundService {
       logger.info("Generating exercise guideline with AI", { lessonId });
 
       const result = await geminiCall(prompt, {
+        responseSchema: exerciseGuidelineSchema,
         temperature: 0.4,
         maxRetries: 3,
       });

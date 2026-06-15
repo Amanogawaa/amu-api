@@ -72,6 +72,137 @@ export interface ExerciseGuideline {
   updatedAt: Date;
 }
 
+export const exerciseGuidelineSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    lessonId: { type: "string" },
+    courseId: { type: "string" },
+    title: { type: "string" },
+    description: { type: "string" },
+    objectives: { type: "array", items: { type: "string" } },
+    gettingStarted: {
+      type: "object",
+      properties: {
+        editorOptions: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              description: { type: "string" },
+              url: { type: "string" },
+              difficulty: { type: "string", enum: ["beginner", "intermediate", "advanced"] },
+              pros: { type: "array", items: { type: "string" } },
+              cons: { type: "array", items: { type: "string" } }
+            },
+            required: ["name", "description", "url", "difficulty", "pros", "cons"]
+          }
+        },
+        environmentSetup: { type: "array", items: { type: "string" } },
+        recommendedApproach: { type: "string" }
+      },
+      required: ["editorOptions", "environmentSetup", "recommendedApproach"]
+    },
+    problemStatement: {
+      type: "object",
+      properties: {
+        description: { type: "string" },
+        constraints: { type: "array", items: { type: "string" } },
+        acceptanceCriteria: { type: "array", items: { type: "string" } }
+      },
+      required: ["description", "constraints", "acceptanceCriteria"]
+    },
+    technicalRequirements: {
+      type: "object",
+      properties: {
+        languages: { type: "array", items: { type: "string" } },
+        frameworks: { type: "array", items: { type: "string" } },
+        tools: { type: "array", items: { type: "string" } },
+        runtime: { type: "string" }
+      },
+      required: ["languages", "tools"]
+    },
+    solutionApproach: {
+      type: "object",
+      properties: {
+        steps: { type: "array", items: { type: "string" } },
+        pseudocode: { type: "string" },
+        keyAlgorithms: { type: "array", items: { type: "string" } }
+      },
+      required: ["steps"]
+    },
+    projectStructure: {
+      type: "object",
+      properties: {
+        description: { type: "string" },
+        fileStructure: { type: "object", additionalProperties: { type: "string" } }
+      },
+      required: ["description", "fileStructure"]
+    },
+    testingGuidelines: {
+      type: "object",
+      properties: {
+        whatToTest: { type: "array", items: { type: "string" } },
+        sampleTestCases: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              input: { type: "string" },
+              expectedOutput: { type: "string" }
+            },
+            required: ["input", "expectedOutput"]
+          }
+        },
+        testingTools: { type: "array", items: { type: "string" } },
+        bestPractices: { type: "array", items: { type: "string" } }
+      },
+      required: ["whatToTest", "testingTools", "bestPractices"]
+    },
+    commonMistakes: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          mistake: { type: "string" },
+          correction: { type: "string" },
+          prevention: { type: "string" }
+        },
+        required: ["mistake", "correction", "prevention"]
+      }
+    },
+    bestPractices: { type: "array", items: { type: "string" } },
+    resources: { type: "array", items: { type: "string" } },
+    examples: {
+      type: "object",
+      properties: {
+        description: { type: "string" },
+        links: { type: "array", items: { type: "string" } }
+      },
+      required: ["description", "links"]
+    },
+    estimatedTime: { type: "string" },
+    difficulty: { type: "string", enum: ["beginner", "intermediate", "advanced"] },
+    submissionGuidelines: {
+      type: "object",
+      properties: {
+        format: { type: "string" },
+        requiredFiles: { type: "array", items: { type: "string" } },
+        instructions: { type: "array", items: { type: "string" } }
+      },
+      required: ["format", "requiredFiles", "instructions"]
+    }
+  },
+  required: [
+    "id", "lessonId", "courseId", "title", "description", "objectives",
+    "gettingStarted", "problemStatement", "technicalRequirements",
+    "solutionApproach", "projectStructure", "testingGuidelines",
+    "commonMistakes", "bestPractices", "resources", "examples",
+    "estimatedTime", "difficulty", "submissionGuidelines"
+  ]
+};
+
 export interface SaveExerciseRequest {
   lessonId: string;
   courseId: string;

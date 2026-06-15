@@ -69,7 +69,7 @@ export class CapstoneRoute {
      *         description: Guideline already exists for this course
      */
     this.router.post(
-      "/guidelines/generate/:courseId",
+      "/capstone-guidelines/generate/:courseId",
       authMiddleware,
       this.controller.generateGuideline,
     );
@@ -94,7 +94,7 @@ export class CapstoneRoute {
      *         description: Guideline not found
      */
     this.router.get(
-      "/guidelines/course/:courseId",
+      "/capstone-guidelines/course/:courseId",
       this.controller.getGuidelineByCourseId,
     );
 

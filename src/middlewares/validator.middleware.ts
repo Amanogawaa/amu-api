@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { geminiCall } from "@utils/geminiCall";
+import { groqCall } from "@utils/groqCall";
 import { logger } from "@utils/loggers";
 import type { NextFunction, Request, Response } from "express";
 import type { AuthenticatedRequest } from "./auth.middleware";
@@ -76,7 +77,7 @@ const PROGRAMMING_KEYWORDS = [
   "cybersecurity",
   // ... extend as needed
 ];
-const BLOCKED_KEYWORDS = [
+const SENSITIVE_KEYWORDS = [
   "malware",
   "ransomware",
   "ddos",
@@ -135,18 +136,10 @@ function localValidate(
 ): { result: ValidationResult } | { ambiguous: true } {
   const lower = input.toLowerCase();
 
-  const blockedMatch = BLOCKED_KEYWORDS.find((kw) => lower.includes(kw));
-  if (blockedMatch) {
-    logger.info(`Local validation: blocked keyword "${blockedMatch}"`);
-    return {
-      result: {
-        isValid: false,
-        isProgramming: false,
-        isAppropriate: false,
-        reason: `Contains blocked content: "${blockedMatch}"`,
-        source: "local",
-      },
-    };
+  const sensitiveMatch = SENSITIVE_KEYWORDS.find((kw) => lower.includes(kw));
+  if (sensitiveMatch) {
+    logger.info(`Local validation: sensitive keyword "${sensitiveMatch}" detected. Forcing AI check.`);
+    return { ambiguous: true };
   }
 
   const programmingMatch = PROGRAMMING_KEYWORDS.find((kw) =>
@@ -183,12 +176,21 @@ const compactValidationSchema = {
 };
 
 async function compactAIValidation(input: string): Promise<ValidationResult> {
-  const prompt = `Classify this course topic. Reply JSON {"p":bool,"a":bool,"r":"reason"}
-p=programming/tech related, a=appropriate(no malware/illegal/violence/adult)
+  const prompt = `Classify this course topic request. Reply with JSON {"p":bool,"a":bool,"r":"reason"}
+p = programming/tech related.
+a = appropriate and safe.
+r = brief reason for your decision.
+
+CRITICAL POLICY ON CYBERSECURITY:
+- Educational, defensive, and academic topics ARE APPROPRIATE (e.g., "malware analysis", "ethical hacking", "understanding how ransomware works", "cybersecurity").
+- Offensive, malicious, or illegal intents ARE INAPPROPRIATE (e.g., "how to write ransomware to attack a server", "how to hack my ex's account", "creating a virus").
+
+Analyze the INTENT of the user. If they are learning for defense/academic purposes, it is appropriate.
+
 Topic: "${input}"`;
 
   try {
-    const result = await geminiCall(prompt, {
+    const result = await groqCall(prompt, {
       stream: false,
       responseSchema: compactValidationSchema,
       temperature: 0,

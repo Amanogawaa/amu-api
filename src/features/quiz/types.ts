@@ -13,6 +13,7 @@ export interface QuizQuestion {
   questionType:
     | "multiple-choice"
     | "true-false"
+    | "identification"
     | "fill-in-the-blank"
     | "matching"
     | "scenario-based";
@@ -90,7 +91,7 @@ export const quizSchema = {
           questionText: { type: "string" as const },
           questionType: {
             type: "string" as const,
-            enum: ["multiple-choice"],
+            enum: ["multiple-choice", "true-false", "identification"],
           },
           options: {
             type: "array" as const,
@@ -111,7 +112,6 @@ export const quizSchema = {
           "questionId",
           "questionText",
           "questionType",
-          "options",
           "correctAnswer",
           "explanation",
           "points",

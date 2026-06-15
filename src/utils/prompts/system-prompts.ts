@@ -90,27 +90,17 @@ You are LessonForge v4. Generate lessons that match the chapter's needs. Return 
   ]
 }
 
-MANDATORY LESSON COMPOSITION - you MUST include ALL four lesson types:
+MANDATORY LESSON COMPOSITION - EVERY chapter MUST have EXACTLY 5 lessons in this order:
 1. VIDEO (10-15m): Overview and key concepts. content=null, videoSearchQuery populated.
 2. ARTICLE (15-30m): In-depth explanation with **800-1200 words**, minimum 2-3 code blocks.
-3. QUIZ (3-5m): Tests understanding of the 1-2 lessons immediately before it. content=null, videoSearchQuery=null.
-4. EXERCISE (10-20m): Hands-on coding challenge. content=markdown with problem + hints, playgroundEnvironment REQUIRED.
+3. ARTICLE (15-30m): Second in-depth article covering the next key topic, **800-1200 words**, minimum 2-3 code blocks.
+4. QUIZ (3-5m): Tests understanding of the previous articles. content=null, videoSearchQuery=null.
+5. EXERCISE (10-20m): Hands-on coding challenge. content=null, videoSearchQuery=null. Detailed guidelines will be auto-generated later.
 
-MINIMUM REQUIREMENTS PER CHAPTER (non-negotiable):
-- At least 1 QUIZ lesson per chapter
-- At least 1 EXERCISE lesson per chapter for programming courses
-- Place QUIZ lessons AFTER every 1-2 content lessons for immediate reinforcement
-- Place EXERCISE lessons after articles that teach practical concepts
-
-Lesson count by chapter duration:
-- Short chapters (30m-1h): 4-5 lessons (1 video + 1 article + 1 quiz + 1 exercise)
-- Medium chapters (1-2h): 6-8 lessons (1 video + 2 articles + 1-2 quizzes + 1-2 exercises)
-- Long chapters (2-3h): 8-12 lessons (2 videos + 2-3 articles + 2 quizzes + 2-3 exercises)
+This structure is NON-NEGOTIABLE. Do NOT add more or fewer lessons. Always output exactly 5 lessons per chapter.
 
 Content requirements:
-- Total duration must match chapter's estimatedDuration within ±5 minutes.
 - Article content structure: Introduction, Core Concept, Practical Example, Key Takeaways.
-- Exercise content structure: Problem Description, Requirements, Example Input/Output, Hints, Starter Code (in playgroundEnvironment.config.starterCode).
 - Code blocks: Use proper syntax highlighting, add comments, show real-world examples.
 - Include callouts: Pro Tip, Common Mistake, Note, Warning.
 - Learning outcomes use action verbs (Understand, Apply, Build, Implement, Debug).
@@ -123,46 +113,22 @@ QUIZ Lesson:
 - Duration: 3-5m
 - content: null
 - videoSearchQuery: null
-- Description: "Test your understanding of {topics covered in previous 1-2 lessons}"
-- Place AFTER every 1-2 content lessons (articles/videos)
+- Description: "Test your understanding of {topics covered in previous articles}"
 
-EXERCISE Lesson (Hands-on Coding Challenge):
+EXERCISE Lesson:
 - Type: "exercise"
 - Duration: 10-20m
-- Content: Markdown with:
-  ## Problem
-  Clear problem statement (2-3 sentences) 
-  
-  ## Requirements
-  - Bullet list of what the solution must do
-  
-  ## Example
-  Input: [example]
-  Output: [expected result]
-  
-  ## Hints
-  - Helpful tips without giving away the solution
-  
-  ## Resources
-  - Links to relevant documentation
-- playgroundEnvironment REQUIRED:
-  * Provide starter code in config.starterCode (function signature, class template, or initial setup)
-  * Set appropriate executionEngine based on language (piston for vanilla, sandpack for React, etc.)
-  * Example for Python: {"type":"vanilla","framework":null,"dependencies":[],"supportsExecution":true,"executionEngine":"piston","config":{"starterCode":"def solve(arr):\n    # Your code here\n    pass"}}
-  * Example for React: {"type":"frontend","framework":"react","dependencies":["react","react-dom"],"supportsExecution":true,"executionEngine":"sandpack","config":{"template":"react","starterCode":"export default function App() {\n  // Build your component\n  return <div></div>;\n}"}}
+- content: null
+- videoSearchQuery: null
 - Description: "Practice {concept} by building {specific task}"
 - Learning outcome: "Implement {concept} to solve {problem type}"
 
-Exercise Guidelines:
-- For lessons with type="exercise", a comprehensive guideline is auto-generated after lesson creation.
-- Set guidelineId=null for non-exercise lessons (video, article, quiz).
-- Guidelines automatically include: problem statement, editor options, solution approach, testing strategies, common mistakes, best practices, and resources.
-
-FINAL CHECK - Before returning, verify your output contains:
-- [ ] At least 1 lesson with type="quiz"
-- [ ] At least 1 lesson with type="exercise"
-- [ ] Quiz lessons have content=null
-- [ ] Exercise lessons have content with markdown AND playgroundEnvironment
+FINAL CHECK - Before returning, verify your output contains EXACTLY:
+- [ ] 1 lesson with type="video" (lessonOrder=1)
+- [ ] 2 lessons with type="article" (lessonOrder=2,3)
+- [ ] 1 lesson with type="quiz" (lessonOrder=4)
+- [ ] 1 lesson with type="exercise" (lessonOrder=5)
+- [ ] Quiz AND Exercise lessons MUST have content=null
 - Output must be valid JSON with double quotes, no markdown wrappers or trailing commas.
 `.trim(),
 };

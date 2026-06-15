@@ -14,14 +14,20 @@ import { backgroundJobService } from "../../utils/service/background-job.service
 import { youtubeService } from "../../utils/service/youtube.service";
 import { youtubeTranscriptService } from "../../utils/service/youtube-transcript.service";
 import type { QuizService } from "../quiz/service";
+import type { CodePlaygroundService } from "../code-playground/service";
 
 export class LessonService {
   private lessonRepository: LessonRepository;
   private quizService: QuizService;
+  private codePlaygroundService?: CodePlaygroundService;
 
   constructor(lessonRepository: LessonRepository, quizService: QuizService) {
     this.lessonRepository = lessonRepository;
     this.quizService = quizService;
+  }
+
+  public setCodePlaygroundService(service: CodePlaygroundService) {
+    this.codePlaygroundService = service;
   }
 
   private getQuizContextLimits(): {
@@ -199,6 +205,34 @@ export class LessonService {
         .get();
       const courseId = chapter.exists ? chapter.data()?.courseId : undefined;
 
+      // Programmatic fallback: Ensure an exercise exists if it's a programming course
+      let isProgramming = false;
+      if (courseId) {
+        const course = await this.lessonRepository["firebaseStore"]
+          .collection("courses")
+          .doc(courseId)
+          .get();
+        if (course.exists) {
+          const category = course.data()?.category?.toLowerCase() || "";
+          isProgramming = category.includes("programming") || category.includes("development") || category.includes("coding");
+        }
+      }
+
+      if (isProgramming && !result.lessons.some((l: any) => l.type === "exercise")) {
+        result.lessons.push({
+          lessonOrder: result.lessons.length + 1,
+          lessonName: `Practical Exercise: ${request.chapterName}`,
+          type: "exercise",
+          duration: "15m",
+          lessonDescription: `Apply the concepts learned in ${request.chapterName} through a hands-on coding challenge.`,
+          content: null,
+          videoSearchQuery: null,
+          resources: [],
+          learningOutcome: `Implement core concepts from ${request.chapterName}`,
+          prerequisites: []
+        });
+      }
+
       const createdLessons = await this.lessonRepository.createLessons(
         request.chapterId,
         result.lessons,
@@ -214,6 +248,10 @@ export class LessonService {
 
       backgroundJobService.enqueue(`lesson:${request.chapterId}:quizzes`, () =>
         this.autoGenerateQuizzes(createdLessons, request.chapterId),
+      );
+
+      backgroundJobService.enqueue(`lesson:${request.chapterId}:exercises`, () =>
+        this.autoGenerateExercises(createdLessons, request.chapterId),
       );
 
       return createdLessons;
@@ -457,6 +495,36 @@ export class LessonService {
     }
 
     logger.info("Completed auto-generation of quizzes");
+  }
+
+  public async autoGenerateExercises(
+    lessons: Lesson[],
+    chapterId: string,
+  ): Promise<void> {
+    logger.info("Starting auto-generation of exercises...", { chapterId });
+
+    if (!this.codePlaygroundService) {
+      logger.warn("CodePlaygroundService not available, skipping exercise generation");
+      return;
+    }
+
+    const exerciseLessons = lessons.filter((lesson) => lesson.type === "exercise");
+    if (exerciseLessons.length === 0) {
+      logger.info("No exercise lessons found for auto-generation", { chapterId });
+      return;
+    }
+
+    for (const exercise of exerciseLessons) {
+      try {
+        logger.info(`Generating exercise guideline for lesson: ${exercise.lessonName}`);
+        await this.codePlaygroundService.generateGuideline(exercise.id);
+        logger.info(`Successfully generated guideline for lesson ${exercise.id}`);
+      } catch (error) {
+        logger.error(`Failed to generate guideline for lesson ${exercise.id}:`, error);
+      }
+    }
+
+    logger.info("Completed auto-generation of exercises");
   }
 
   public async getLessonById(lessonId: string) {

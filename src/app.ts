@@ -36,6 +36,7 @@ import { cacheMiddleware } from "./middlewares/cache.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
 import { AppRoutes } from "./routes";
 import { QuizContainer } from "@features/quiz/container";
+import { AppAssistantContainer } from "./features/app-assistant/container";
 
 class App {
   public app: Application;
@@ -60,6 +61,7 @@ class App {
   private recommendationContainer: RecommendationContainer;
   private leaderboardsContainer: LeaderboardsContainer;
   private quizContainer: QuizContainer;
+  private appAssistantContainer: AppAssistantContainer;
 
   constructor(
     authContainer: AuthContainer = new AuthContainer(),
@@ -105,6 +107,10 @@ class App {
         this.lessonContainer.repository,
       );
 
+    this.lessonContainer.service.setCodePlaygroundService(
+      this.codePlaygroundContainer.service
+    );
+
     this.capstoneContainer = new CapstoneContainer(
       undefined,
       this.courseContainer.repository,
@@ -121,6 +127,8 @@ class App {
     this.recommendationContainer = new RecommendationContainer();
 
     this.leaderboardsContainer = new LeaderboardsContainer();
+    
+    this.appAssistantContainer = new AppAssistantContainer();
 
     this.progressContainer =
       progressContainer ||
@@ -302,6 +310,8 @@ class App {
       this.lessonAssistantContainer,
       this.recommendationContainer,
       this.leaderboardsContainer,
+      this.quizContainer,
+      this.appAssistantContainer
     );
 
     this.app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

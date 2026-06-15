@@ -188,6 +188,10 @@ export class QuizService {
           case "true-false":
             isCorrect = answer.selectedAnswer === question.correctAnswer;
             break;
+            
+          case "identification":
+            isCorrect = answer.selectedAnswer?.toString().toLowerCase().trim() === question.correctAnswer?.toString().toLowerCase().trim();
+            break;
 
           case "fill-in-the-blank": {
             const userAnswers = Array.isArray(answer.selectedAnswer)

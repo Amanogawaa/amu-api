@@ -16,6 +16,7 @@ import type { GitHubContainer } from "./features/github/container";
 import type { LessonAssistantContainer } from "./features/lesson-assistant/container";
 import type { RecommendationContainer } from "./features/recommendation/container";
 import type { LeaderboardsContainer } from "./features/leaderboards/container";
+import type { AppAssistantContainer } from "./features/app-assistant/container";
 import {
   basicHealthCheck,
   detailedHealthCheck,
@@ -40,6 +41,8 @@ export class AppRoutes {
   private lessonAssistantContainer: LessonAssistantContainer;
   private recommendationContainer: RecommendationContainer;
   private leaderboardsContainer: LeaderboardsContainer;
+  private quizContainer: QuizContainer;
+  private appAssistantContainer: AppAssistantContainer;
 
   constructor(
     authContainer: AuthContainer,
@@ -57,6 +60,8 @@ export class AppRoutes {
     lessonAssistantContainer: LessonAssistantContainer,
     recommendationContainer: RecommendationContainer,
     leaderboardsContainer: LeaderboardsContainer,
+    quizContainer: QuizContainer,
+    appAssistantContainer: AppAssistantContainer,
   ) {
     this.router = Router();
     this.authContainer = authContainer;
@@ -74,6 +79,8 @@ export class AppRoutes {
     this.lessonAssistantContainer = lessonAssistantContainer;
     this.recommendationContainer = recommendationContainer;
     this.leaderboardsContainer = leaderboardsContainer;
+    this.quizContainer = quizContainer;
+    this.appAssistantContainer = appAssistantContainer;
     this.initializeRoutes();
   }
 
@@ -99,6 +106,8 @@ export class AppRoutes {
     this.router.use("/", this.lessonAssistantContainer.getRouter());
     this.router.use("/", this.recommendationContainer.getRouter());
     this.router.use("/", this.leaderboardsContainer.getRouter());
+    this.router.use("/", this.quizContainer.getRouter());
+    this.router.use("/", this.appAssistantContainer.getRouter());
   }
 
   public getRouter(): Router {
